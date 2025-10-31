@@ -1,0 +1,709 @@
+----------------------------------------------------------------
+Actor main .
+----------------------------------------------------------------
+
+C package main
+C
+C import (
+C 	"fmt"
+-C 	"strings"
+C 	"strconv"
+C )
+C
+C type Kp interface {
+C 	DoIts(glob *GlobT, va []string, lno string) int
+C 	GetVar(glob *GlobT, va []string, lno string) (bool, string)
+C 	GetLineNo() string
+C 	TypeName() string
+C }
+C
+
+All Comp struct
+
+----------------------------------------------------------------
+Actor struct Comp name = Actor
+----------------------------------------------------------------
+
+D ${name:c} struct
+
+C type Kp${name:c} struct {
+C 	Kp
+C 	Me int
+C 	MyName string
+C 	Parent string
+C 	LineNo string
+C 	Comp string
+C 	Flags [] string
+
+Its parent parent_field
+Its Element val_inc
+Its Element val_inc2
+
+C 	Childs [] Kp
+C }
+C
+C func load${name:c}(act *ActT, ln string, pos int, lno string, flag []string) int {
+C 	p := pos
+C 	st := new(Kp${name:c})
+C       st.MyName = ""
+C       st.Parent = ""
+C 	st.Me = len(act.Ap${name:c})
+C 	st.LineNo = lno
+C 	st.Comp = "${name:c}";
+C 	st.Flags = flag;
+
+Its Element ele_act
+Its Element val_inc2_init
+Its parent parent_field_p
+Du index_act
+
+C 	act.Ap${name:c} = append(act.Ap${name:c}, st)
+C 	return 0
+C }
+C
+
+Break
+
+----------------------------------------------------------------
+Actor struct Comp parent = Actor
+----------------------------------------------------------------
+
+D ${name:c} struct
+
+C type Kp${name:c} struct {
+C 	Kp
+C 	Me int
+C 	MyName string
+C 	Parent string
+C 	LineNo string
+C 	Comp string
+C 	Flags [] string
+
+Its parent parent_field
+Its Element val_inc
+Its Element val_inc2
+
+-C 	Childs [] Kp
+C }
+C
+C func load${name:c}(act *ActT, ln string, pos int, lno string, flag []string) int {
+C 	p := pos
+C 	st := new(Kp${name:c})
+C       st.MyName = ""
+C       st.Parent = ""
+C 	st.Me = len(act.Ap${name:c})
+C 	st.LineNo = lno
+C 	st.Comp = "${name:c}";
+C 	st.Flags = flag;
+
+Its Element ele_act
+Its Element val_inc2_init
+Its parent parent_field_p
+
+C 	act.Ap${name:c} = append(act.Ap${name:c}, st)
+C 	return 0
+C }
+C
+
+Break
+
+----------------------------------------------------------------
+-Actor struct Comp name != Actor
+Actor struct Comp
+----------------------------------------------------------------
+
+C type Kp${name:c} struct {
+C 	Kp
+C 	Me int
+C 	MyName string
+C 	Parent string
+C 	LineNo string
+C 	Comp string
+C 	Flags [] string
+C 	Names map[string]string
+
+Its parent parent_field
+Its Element val_inc2
+Its Comp_parent from_to
+Its Element val_inc_d
+Its Comp_parent childs
+
+-C 	Childs [] Kp
+C }
+C
+C func (me Kp${name:c}) TypeName() string {
+C     return me.Comp
+C }
+C func (me Kp${name:c}) GetLineNo() string {
+C 	return me.LineNo
+C }
+C
+C func load${name:c}(act *ActT, ln string, pos int, lno string, flag []string, names map[string]string) int {
+-C 	p := pos
+C 	st := new(Kp${name:c})
+-C 	st.Names = make(map[string]string) 
+C 	st.Names = names
+C       st.MyName = ""
+C       st.Parent = ""
+C 	st.Me = len(act.Ap${name:c})
+C 	st.LineNo = lno
+C 	st.Comp = "${name:c}";
+C 	st.Flags = flag;
+C 	st.Names["kComp"] = st.Comp
+C 	st.Names["kMe"] = strconv.Itoa(st.Me)
+C 	st.Names["_lno"] = lno
+
+-Its Element ele
+Its Element val_inc2_init
+Its parent parent_field_p
+Du index
+
+C 	act.Ap${name:c} = append(act.Ap${name:c}, st)
+C 	return 0
+C }
+C
+-C 	List get_var(glob, va, lno) {
+
+C func (me Kp${name:c}) GetVar(glob *GlobT, va []string, lno string) (bool, string) {
+
+Its Element ref_var
+-Its Ref ref_var
+Its parent parent_field_var
+Its Element_comp other_var
+-Its Ref_comp other_var
+-Its Comp_parent find
+
+C 	if va[0] == "previous" { // ${._lno}
+C 		if (me.Me > 0 && len(va) > 1) {
+C 			return( glob.Dats.Ap${name:c}[ me.Me - 1 ].GetVar(glob, va[1:], lno) )
+C 		}
+C 	}
+
+C 	if len(va) > 1 {
+C 		msg := fmt.Sprintf("?%s.?:%s,%s,${name} > ${._lno}?", va[0], lno, me.LineNo)
+C 		return false, msg
+C 	}
+C 	r,ok := me.Names[va[0]]
+C 	if !ok { r = fmt.Sprintf("?%s?:%s,%s,${name} > ${._lno}?", va[0], lno, me.LineNo) }
+C 	return ok,r
+
+C }
+C
+
+C func (me Kp${name:c}) DoIts(glob *GlobT, va []string, lno string) int {
+
+Its Comp_parent from_to_doo
+Its parent parent_field_func
+-Its Ref ref_func
+Its Element ref_func
+Its Element_comp other_func
+Its Element nested
+
+-C 		if ( va[0].compareTo("Child") == 0 ) { // ${._lno}
+
+-Its Comp_parent childs_func
+
+-C 			return(0);
+-C 		}
+
+C 	        fmt.Printf("?No its %s for ${name} %s,%s > ${._lno}?", va[0], lno, me.LineNo)
+-C 		print("?No its " + va[0] + " cmd for ${name}," + line_no + "," + lno + "?");
+C 		glob.RunErrs += 1
+C 	return(0)
+C }
+C
+
+----------------------------------------------------------------
+Actor nested Element type = tree
+----------------------------------------------------------------
+
+C 		if va[0] == "${name:l}" && len(va) > 1 && me.Kparentp >= 0 { // ${._lno}
+C 			pos := 0
+C 			v, ok := me.Names["${name:l}"]
+C 			if ok {
+C 				pos, _ = strconv.Atoi(v)
+C 			}
+C 			if va[1] == "down" && pos > 0 {
+C 				pst := glob.Dats.Ap${.struct.parent.name:c}[me.Kparentp]
+C 				isin := false
+C 				for _, st := range pst.Its${.struct.name:c} {
+C 					if st.Me == me.Me {
+C 						isin = true
+C 						continue
+C 					}
+C 					if !isin {
+C 						continue
+C 					}
+C 					pos2 := 0
+C 					v2, ok2 := st.Names["${name:l}"]
+C 					if ok2 {
+C 						pos2, _ = strconv.Atoi(v2)
+C 					}
+C 					if pos2 == 0 {
+C 						continue
+C 					}
+C 					if pos2 == (pos - 1) {
+C 						break
+C 					}
+C 					if pos2 == pos {
+C 						if len(va) > 2 {
+C 							return st.DoIts(glob, va[2:], lno)
+C 						}
+C 						return GoAct(glob, st)
+C 					}
+C 				}
+C 				return 0
+C 			}
+C 			if va[1] == "up" && pos > 0 {
+C 				pst := glob.Dats.Ap${.struct.parent.name:c}[me.Kparentp]
+C 				isin := false
+C 				prev := 0
+C 				for _, st := range pst.Its${.struct.name:c} {
+C 					pos2 := 0
+C 					v2, ok2 := st.Names["${name:l}"]
+C 					if ok2 {
+C 						pos2, _ = strconv.Atoi(v2)
+C 					}
+C 					if pos2 == 0 {
+C 						continue
+C 					}
+C 					if pos2 == pos && st.Me != me.Me {
+C 						prev = st.Me
+C 						isin = true
+C 						continue
+C 					}
+C 					if pos2 == (pos - 1) {
+C 						isin = false
+C 					}
+C 					if st.Me == me.Me && isin {
+C 						if len(va) > 2 {
+C 							return glob.Dats.Ap${.struct.name:c}[prev].DoIts(glob, va[2:], lno)
+C 						}
+C 						return GoAct(glob, glob.Dats.Ap${.struct.name:c}[prev])
+C 					}
+C 				}
+C 				return 0
+C 			}
+C 			if va[1] == "left" && pos > 0 {
+C 				pst := glob.Dats.Ap${.struct.parent.name:c}[me.Kparentp]
+C 				isin := false
+C 				prev := 0
+C 				for _, st := range pst.Its${.struct.name:c} {
+C 					pos2 := 0
+C 					v2, ok2 := st.Names["${name:l}"]
+C 					if ok2 {
+C 						pos2, _ = strconv.Atoi(v2)
+C 					}
+C 					if pos2 == 0 {
+C 						continue
+C 					}
+C 					if pos2 == (pos - 1) {
+C 						prev = st.Me
+C 						isin = true
+C 						continue
+C 					}
+C 					if st.Me == me.Me && isin {
+C 						if len(va) > 2 {
+C 							return glob.Dats.Ap${.struct.name:c}[prev].DoIts(glob, va[2:], lno)
+C 						}
+C 						return GoAct(glob, glob.Dats.Ap${.struct.name:c}[prev])
+C 					}
+C 				}
+C 				return 0
+C 			}
+C 			if va[1] == "right" && pos > 0 {
+C 				pst := glob.Dats.Ap${.struct.parent.name:c}[me.Kparentp]
+C 				isin := false
+C 				for _, st := range pst.Its${.struct.name:c} {
+C 					if st.Me == me.Me {
+C 						isin = true
+C 						continue
+C 					}
+C 					if !isin {
+C 						continue
+C 					}
+C 					pos2 := 0
+C 					v2, ok2 := st.Names["${name:l}"]
+C 					if ok2 {
+C 						pos2, _ = strconv.Atoi(v2)
+C 					}
+C 					if pos2 == 0 {
+C 						continue
+C 					}
+C 					if pos2 <= pos {
+C 						break
+C 					}
+C 					if pos2 == (pos + 1) {
+C 						if len(va) > 2 {
+C 							ret := st.DoIts(glob, va[2:], lno)
+C 							if ret != 0 {
+C 								return ret
+C 							}
+C 							continue
+C 						}
+C 						ret := GoAct(glob, st)
+C 						if ret != 0 {
+C 							return ret
+C 						}
+C 					}
+C 				}
+C 				return 0
+C 			}
+C 		}
+
+----------------------------------------------------------------
+Actor childs_func Comp name != Actor
+----------------------------------------------------------------
+
+C 			for (var st in childs) {
+C 				if (va.length > 1) {
+C 					var ret = st.do_its(glob, va.sublist(1), lno);
+C 					if (ret != 0) {
+C 						return(ret);
+C 					}
+C 					continue;
+C 				}
+C 				var ret = go_act(glob, st);
+C 				if (ret != 0) {
+C 					return(ret);
+C 				}
+C 			}
+
+Break loop
+
+----------------------------------------------------------------
+Actor parent_field_p Comp name = Actor
+----------------------------------------------------------------
+
+C 	st.Kparentp = len(act.Ap${name:c})-1;
+C 	if (st.Kparentp < 0 ) { 
+C 		print(lno + " ${.struct.name:c} has no ${name:c} parent\n") ;
+C 		return 1
+C 	}
+C 	act.Ap${name:c}[ len( act.Ap${name:c} )-1 ].Childs = append(act.Ap${name:c}[ len( act.Ap${name:c} )-1 ].Childs, st)
+
+----------------------------------------------------------------
+Actor parent_field_p Comp name != Actor
+----------------------------------------------------------------
+
+
+C 	st.Kparentp = len( act.Ap${name:c} ) - 1;
+C 	st.Names["kParentp"] = strconv.Itoa(st.Kparentp)
+
+C 	if (st.Kparentp < 0 ) { 
+C 		print(lno + " ${.struct.name:c} has no ${name:c} parent\n") ;
+C 		return 1
+C 	}
+C 	st.Parent = act.Ap${name:c}[st.Kparentp].MyName
+C 	par,ok := st.Names["parent"]
+C 	if ok && par != st.Parent {
+C 		print(lno + " ${.struct.name:c} under wrong parent " + st.Parent + ", " +  par + "\n") ;
+C 	}
+C 	act.Ap${name:c}[ len( act.Ap${name:c} )-1 ].Childs = append(act.Ap${name:c}[ len( act.Ap${name:c} )-1 ].Childs, st)
+C 	act.Ap${name:c}[ len( act.Ap${name:c} )-1 ].Its${.struct.name:c} = append(act.Ap${name:c}[ len( act.Ap${name:c} )-1 ].Its${.struct.name:c}, st)	// ${._lno}
+
+----------------------------------------------------------------
+Actor index Comp find = Find
+----------------------------------------------------------------
+
+Its Element index_name
+
+----------------------------------------------------------------
+Actor index_name Element type = key
+Actor index_name Element name |= name
+----------------------------------------------------------------
+
+-C 	name,_ := st.Names["name"]
+C 	name,_ := st.Names["${name}"]
+C 	act.index["${.index.name:c}_" + name] = st.Me;
+C 	st.MyName = name
+
+Break loop
+
+----------------------------------------------------------------
+Actor index_act Comp find = Find
+----------------------------------------------------------------
+
+Its Element index_act_name
+
+----------------------------------------------------------------
+Actor index_act_name Element type = key
+Actor index_act_name Element name |= name
+----------------------------------------------------------------
+
+C 	act.index["${.index_act.name:c}_" + st.Kname] = st.Me;
+
+Break loop
+
+----------------------------------------------------------------
+Actor index Comp find = FindIn
+----------------------------------------------------------------
+
+Its Element index_name_in
+
+----------------------------------------------------------------
+Actor index_name_in Element type = key
+Actor index_name_in Element name |= name
+----------------------------------------------------------------
+
+C 	name,_ := st.Names["${name}"]
+C 	s := strconv.Itoa(st.Kparentp) + "_${.index.name:c}_" + name	// ${._lno}
+C 	act.index[s] = st.Me;
+C 	st.MyName = name
+
+Break loop
+
+----------------------------------------------------------------
+Actor ele_act . type in key,word,ref,link,ref_child,tree
+-Actor ele_act . mw in C1,R1,F1,L1 note: ref_copy not here, no input field
+----------------------------------------------------------------
+
+C 	p,st.K${name:l} = getw(ln,p)
+
+----------------------------------------------------------------
+Actor ele_act . type = text
+-Actor ele_act . mw = V1
+----------------------------------------------------------------
+
+C 	p,st.K${name:l} = getws(ln,p)
+
+----------------------------------------------------------------
+Actor ele . type in key,word,ref,link,ref_child,type_of,tree
+-note: up_copy,ref_copy not here, no input field
+----------------------------------------------------------------
+
+C 	p,st.Names["${name:l}"] = getw(ln,p)
+
+----------------------------------------------------------------
+Actor ele . type = text
+----------------------------------------------------------------
+
+C 	p,st.Names["${name:l}"] = getws(ln,p)
+
+
+----------------------------------------------------------------
+Actor childs Comp
+----------------------------------------------------------------
+
+-C 	List <Kp> childs = [];
+C 	Childs [] Kp
+
+Break loop
+
+----------------------------------------------------------------
+Actor find Comp find = FindIn
+----------------------------------------------------------------
+
+Its Element ele_name_in
+
+----------------------------------------------------------------
+Actor ele_name_in . type = key
+Actor ele_name_in . name != name
+----------------------------------------------------------------
+
+C 		if (va[0].compareTo("${.find.name:c}") == 0 && va.length > 2) { // ${._lno}
+C 			var en = glob.dats.index[me.toString() + "_${.find.name:c}_" + va[1] ];
+C 			if(en != null) {
+C 				return (glob.dats.ap_${.find.name:l}[en].get_var(glob, va.sublist(2), lno));
+C 			}
+C 			return( [false, "?" + va[0] + "=" + va[1] + "?" + line_no + "," + lno + "?"] );
+C 		}
+
+----------------------------------------------------------------
+Actor find Comp find != FindIn
+----------------------------------------------------------------
+
+C 		if (va[0].compareTo("${name:c}") == 0 && va.length > 2 && its${name:l}.length > 0) { // ${._lno}
+C 			return (its${name:l}[0].get_var(glob, va.sublist(1), lno));
+C 		}
+
+----------------------------------------------------------------
+Actor ref_func Element type in ref,link,up_copy,ref_copy,ref_child
+-Actor ref_func Ref
+----------------------------------------------------------------
+
+C 	if va[0] == "${name:l}" {
+C 		if me.K${name:l}p >= 0 {
+C 			st := glob.Dats.Ap${comp.name:c}[ me.K${name:l}p ]
+C 			if len(va) > 1 {
+C 				return( st.DoIts(glob, va[1:], lno) )
+C 			}
+C 			return( GoAct(glob, st) )
+C 		}
+C 		return(0)
+C 	}
+
+----------------------------------------------------------------
+Actor ref_func Element type = type_of
+----------------------------------------------------------------
+
+C 	if va[0] == "${name:l}" {
+C 		if me.K${name:l}p >= 0 {
+C 			st := me.Childs[ me.K${name:l}p ]
+C 			if len(va) > 1 {
+C 				return( st.DoIts(glob, va[1:], lno) )
+C 			}
+C 			return( GoAct(glob, st) )
+C 		}
+C 		return(0)
+C 	}
+
+
+
+----------------------------------------------------------------
+Actor parent_field_func Comp
+----------------------------------------------------------------
+
+C 	if va[0] == "parent" { // ${._lno}
+C 		if me.Kparentp >= 0 {
+C 			st := glob.Dats.Ap${name:c}[ me.Kparentp ]
+C 			if len(va) > 1 {
+C 				return( st.DoIts(glob, va[1:], lno) )
+C 			}
+C 			return( GoAct(glob, st) )
+C 		}
+C 		return(0)
+C 	}
+
+----------------------------------------------------------------
+Actor parent_field_var Comp
+----------------------------------------------------------------
+
+C 	if (va[0] == "parent") { // ${._lno}
+C 		if (me.Kparentp >= 0 && len(va) > 1) {
+C 			return( glob.Dats.Ap${name:c}[ me.Kparentp ].GetVar(glob, va[1:], lno) );
+C 		}
+C 	}
+
+----------------------------------------------------------------
+Actor other_func Element type in ref,link,up_copy,ref_child,ref_copy
+-Actor other_func Ref
+----------------------------------------------------------------
+
+C 	if (va[0] == "${parent.name:c}_${name:l}") { // ${._lno}
+-		for _, st := range me.ItsJoin {
+C 		for _, st := range glob.Dats.Ap${parent.name:c} {
+C 			if (st.K${name:l}p == me.Me) {
+C 				if len(va) > 1 {
+C 					ret := st.DoIts(glob, va[1:], lno)
+C 					if (ret != 0) {
+C 						return(ret)
+C 					}
+C 					continue
+C 				}
+C 				ret := GoAct(glob, st)
+C 				if (ret != 0) {
+C 					return(ret)
+C 				}
+C 			}
+C 		}
+C 		return(0)
+C 	}
+
+
+
+----------------------------------------------------------------
+Actor ref_var Element type in ref,link,up_copy,ref_copy,ref_child
+----------------------------------------------------------------
+
+C 	if va[0] == "${name:l}" { // ${._lno}
+C 		if (me.K${name:l}p >= 0 && len(va) > 1) {
+C 			return( glob.Dats.Ap${comp.name:c}[ me.K${name:l}p ].GetVar(glob, va[1:], lno) )
+C 		}
+C 	}
+
+----------------------------------------------------------------
+Actor ref_var Element type = type_of
+----------------------------------------------------------------
+
+C 	if va[0] == "${name:l}" { // ${._lno}
+C 		if (me.K${name:l}p >= 0 && len(va) > 1) {
+C 			return( me.Childs[ me.K${name:l}p ].GetVar(glob, va[1:], lno) )
+C 		}
+C 	}
+
+
+----------------------------------------------------------------
+Actor star Star
+----------------------------------------------------------------
+
+D 	* ${doc}
+
+----------------------------------------------------------------
+Actor val_inc_d Element
+----------------------------------------------------------------
+
+D 	${name:l} * ${doc}
+
+----------------------------------------------------------------
+Actor val_inc Element type in key,word,text,type_of,ref,link,up_copy,ref_copy,ref_child,tree
+-Actor val_inc Element mw in C1,CS,V1,R1,F1,L1,M1
+----------------------------------------------------------------
+
+C 	K${name:l} string
+
+----------------------------------------------------------------
+Actor val_inc2 Element type in ref,link,up_copy,ref_copy,ref_child,type_of
+-Actor val_inc2 Element mw in R1,F1,L1,M1,Q1,U0,RS,FS,LS,MS,QS
+----------------------------------------------------------------
+
+C 	K${name:l}p int
+
+----------------------------------------------------------------
+Actor val_inc2_init Element type in ref,link,up_copy,ref_copy,ref_child,type_of
+-Actor val_inc2_init Element mw in R1,F1,L1,M1,Q1,U0,RS,FS,LS,MS,QS
+----------------------------------------------------------------
+
+C 	st.K${name:l}p = -1
+
+----------------------------------------------------------------
+Actor parent_field Comp
+----------------------------------------------------------------
+
+C 	Kparentp int
+
+----------------------------------------------------------------
+Actor from_to Comp
+----------------------------------------------------------------
+
+
+C 	Its${name:c} [] *Kp${name:c} 
+
+----------------------------------------------------------------
+Actor from_to_doo Comp
+----------------------------------------------------------------
+
+C 	if va[0] == "${name:c}" { // ${._lno}
+C 		for _, st := range me.Its${name:c} {
+C 			if len(va) > 1 {
+C 				ret := st.DoIts(glob, va[1:], lno)
+C 				if (ret != 0) {
+C 					return(ret)
+C 				}
+C 				continue
+C 			}
+C 			ret := GoAct(glob, st)
+C 			if (ret != 0) {
+C 				return(ret)
+C 			}
+C 		}
+C 		return(0)
+C 	}
+
+----------------------------------------------------------------
+Actor other_var Element type in ref,link,up_copy,ref_copy,ref_link
+-Actor other_var Ref
+----------------------------------------------------------------
+
+C 	if (va[0] == "${parent.name:c}_${name:l}" && len(va) > 1) { // ${._lno}
+C 		for _, st := range glob.Dats.Ap${parent.name:c} {
+C 			if (st.K${name:l}p == me.Me) {
+C 				return (st.GetVar(glob, va[1:], lno) )
+C 			}
+C 		}
+C 	}
+
+
+
+
+

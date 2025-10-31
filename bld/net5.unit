@@ -1,0 +1,1153 @@
+// ================================================================
+// DOMAIN KNOWLEDGE COMPONENTS (Expert-defined HOW)
+// ================================================================
+
+Comp Domain parent . Find
+----------------------------------------------------------------
+* Domain knowledge repository for ML operations
+----------------------------------------------------------------
+
+	Element name    key   . + Domain name
+	Element desc    text  . * Domain description
+	Element version word  . + Schema version of this domain knowledge (e.g., 2.0.0)
+
+Comp Kernel parent . Find
+----------------------------------------------------------------
+* Kernel implementation knowledge
+----------------------------------------------------------------
+
+	Element kernel        key   . + Kernel identifier (unique name)
+	Element backend       word  . + Target hardware (cuda, hip, metal, vulkan)
+	Element desc          text  . * Kernel description
+	Element signature     text  . + Kernel signature
+	Element body          text  . + Template for kernel implementation
+	Element stochastic    word  . * true/false for stochastic operations
+	Element dynamic_dims  word  . * true/false for dynamic dimensions support
+	
+Comp KernelParam parent Kernel FindIn
+----------------------------------------------------------------
+* Defines the explicit signature and calculation for a kernel parameter
+----------------------------------------------------------------
+
+	Element param          key   . + Parameter name (M, N, K, stride, etc)
+	Element type           word  . + C data type (float*, int, etc)
+	Element calculation    text  . + How to calculate from tensor shapes
+	Element dynamic        word  . * true/false for runtime calculation
+
+Comp KernelOp parent Kernel FindIn
+----------------------------------------------------------------
+* Operation dispatch knowledge
+* Provides dimension calculations and launch config
+----------------------------------------------------------------
+
+	Element op                     key   . + Operation primitive name
+	Element desc                   text  . * Operation description
+	Element input_rank             word  . * Expected input rank
+	Element output_rank            word  . * Expected output rank
+	Element dimension_calc         text  . + Code to calculate dimensions
+	Element block_size             word  . + Threads per block
+	Element grid_calc              text  . + Grid size calculation formula
+
+Comp Optimization parent . Find
+----------------------------------------------------------------
+* Target-specific optimization strategies
+----------------------------------------------------------------
+
+	Element target            key  .        + Target device
+	Element flags             ref  FlagRule + Optimization flags
+	Element transform_rules   text .        + Transformation rules to apply
+	Element fusion_patterns   text .        + Which ops to fuse
+
+Comp ScheduleOp parent . Find
+----------------------------------------------------------------
+* Schedule-level optimization knowledge
+----------------------------------------------------------------
+
+	Element schedule_op      key    . + Name
+	Element layer            word   . + Layer name pattern
+	Element op               word   . + Op name pattern
+	Element optimized_call   text   . + Optimized invocation code
+
+Comp MemLayout parent . Find
+----------------------------------------------------------------
+* Target-specific memory layout templates
+----------------------------------------------------------------
+
+	Element target           key   . + Target device
+	Element dtype            word  . + Data type
+	Element layout           word  . + Layout name (nchw, nhwc, etc)
+	Element alignment        word  . + Alignment requirement (bytes)
+
+Comp Fusion parent . Find
+----------------------------------------------------------------
+* Operation fusion patterns and rules
+----------------------------------------------------------------
+
+	Element fusion           key   . + Fusion pattern name
+	Element pattern          text  . + Operation sequence pattern
+	Element fused_kernel     word  . + Name of fused kernel
+
+// ================================================================
+// USER ML SPECIFICATION COMPONENTS (User-defined WHAT)
+// ================================================================
+
+Comp Model parent . Find
+----------------------------------------------------------------
+* User-specified ML model definition
+----------------------------------------------------------------
+
+	Element model key  . + Model name
+	Element desc  text . * Model description
+	Element type  word . * static, dynamic, searchable, meta
+
+// ================================================================
+// REUSABLE BLOCK SYSTEM
+// ================================================================
+
+Comp Block parent . Find
+----------------------------------------------------------------
+* Reusable, parameterizable block of layers/operations
+* Can be instantiated multiple times with different parameters
+----------------------------------------------------------------
+
+	Element block       key        .          + Block identifier (e.g., resnet_block, transformer_block)
+	Element block_type  word       .          + Type: sequential, parallel, residual, attention
+	Element model       ref        Model      + Model
+	Element layers      ref_child  Layer      * Layers contained in this block
+	Element parameters  ref_child  BlockParam * Parameterizable aspects
+	Element desc        text       .          * Block description
+
+Comp BlockParam parent Block FindIn
+----------------------------------------------------------------
+* Parameterizable aspect of a reusable block
+----------------------------------------------------------------
+
+	Element param       key   .  + Parameter name (e.g., num_filters, hidden_dim)
+	Element param_type  word  .  + int, float, tensor_shape, layer_count
+	Element default     word  .  * Default value
+	Element desc        text  .  * Parameter description
+
+Comp BlockInstance parent Layer FindIn
+----------------------------------------------------------------
+* Instantiation of a reusable block with specific parameters
+----------------------------------------------------------------
+
+	Element instance     key       .           + Instance identifier
+	Element block        ref       Block       + Reference to block definition
+	Element param_values ref_child ParamValue  * Parameter value overrides
+	Element repeat       word      .           * Number of times to repeat (for stacked blocks)
+	Element desc         text      .           * Instance description
+
+Comp ParamValue parent BlockInstance FindIn
+----------------------------------------------------------------
+* Concrete parameter value for block instantiation
+----------------------------------------------------------------
+
+	Element param       key   .  + Parameter name (must match BlockParam)
+	Element value       word  .  + Concrete value
+	Element desc        text  .  * Description
+
+Comp Tensor parent Model FindIn
+----------------------------------------------------------------
+* User tensor specification - supports both static and dynamic shapes
+----------------------------------------------------------------
+
+	Element tensor      key  .         + Tensor identifier
+	Element shape       word .         + Logical shape (batch,height,width,channels)
+	Element shape_type  word .         * static (default), dynamic, or symbolic
+	Element dyn_dims    word .         * Comma-separated indices of dynamic dimensions (e.g., "0,1")
+	Element layout      word .         + Memory layout (nhwc, nchw, csr, coo, jagged, etc)
+	Element dtype       ref  DtypeRule + Data type (linked to Rule)
+	Element desc        text .         * Tensor description
+	Element symbolic    word .         * Symbolic shape expression
+
+Comp Layer parent Model FindIn
+----------------------------------------------------------------
+* User-defined layer specification
+----------------------------------------------------------------
+
+	Element layer   key  . + Layer identifier
+	Element type    word . + Layer type (conv, dense, pool, residual, etc)
+	Element desc    text . * Layer description
+	Element dynamic word . * true/false for dynamic structure
+
+// ================================================================
+// BASE OPERATION COMPONENT (Shared Fields)
+// ================================================================
+
+Comp Op parent Layer FindIn
+----------------------------------------------------------------
+* Base operation specification - all operations inherit from this
+* Contains only shared/common fields
+----------------------------------------------------------------
+
+	Element op         key       .          + Operation name
+	Element op_type    type_of   Op         * Type of Op (e.g., "AttentionOp")
+	Element op_rule    word      .          + Operation category (see OpTypeRule)
+	Element desc       text      .          * Operation description
+	Element stochastic word      .          * true/false for stochastic operations
+	Element dynamic    word      .          * true/false for dynamic execution
+	Element kernel     ref       Kernel     * Kernel reference
+	Element kernel_op  ref_child KernelOp   * KernelOp from domain knowledge
+
+----------------------------------------------------------------
+Comp Arg parent Op FindIn
+----------------------------------------------------------------
+* Kernel arguments for operation invocation.
+* Specifies tensors and parameters passed to kernel.
+----------------------------------------------------------------
+
+	Element arg       key        .      + Argument name
+	Element role      word       .      + input, output, param
+	Element model     up_copy    Model  + Navigate up to parent Model
+	Element tensor    ref_child  Tensor + Tensor reference in Model
+	Element dtype     word       .      * Data type (override if needed)
+	Element desc      text       .      * Argument description
+
+
+// ================================================================
+// ATTENTION OPERATIONS
+// ================================================================
+
+Comp AttentionOp parent Op FindIn
+----------------------------------------------------------------
+* Attention mechanism with dynamic sequence handling
+* Args: query, key, value (required), mask (optional)
+----------------------------------------------------------------
+
+	Element attn_op       key   . + Attention Operation name
+	Element attn_type     word  . + self, cross, multi_head, sparse
+	Element num_heads     word  . * Number of attention heads
+	Element head_dim      word  . * Dimension per head
+	Element causal        word  . * true/false for causal masking
+
+Comp AttentionFreeOp parent Op FindIn
+----------------------------------------------------------------
+* Attention-free sequence operations (AFT, RWKV, Linear Attention)
+* Args: query, key, value (required)
+----------------------------------------------------------------
+
+	Element aft_op       key   . + AFT operation identifier
+	Element variant      word  . + aft, rwkv, linear_attention
+	Element hidden_dim   word  . + Hidden dimension
+	Element sequence_dim word  . + Sequence dimension index
+	Element recurrent    word  . * true/false for recurrent formulation
+
+Comp RecurrentFormulation parent AttentionFreeOp FindIn
+----------------------------------------------------------------
+* Recurrent formulation parameters for attention-free ops
+----------------------------------------------------------------
+
+	Element formulation  key   . + Formulation identifier
+	Element time_decay   word  . + Time decay parameter
+	Element time_first   word  . + Time first parameter
+	Element state_update word  . + State update mechanism
+	Element desc         text  . * Description
+
+// ================================================================
+// GRAPH NEURAL NETWORK OPERATIONS
+// ================================================================
+
+Comp GraphOp parent Op FindIn
+----------------------------------------------------------------
+* Graph neural network operations
+* Args: node_features, adjacency (required), edge_features (optional)
+----------------------------------------------------------------
+
+	Element graph_op      key   . + Graph operation identifier
+	Element gnn_type      word  . + gcn, gat, graphsage, message_passing
+	Element aggregation   word  . + sum, mean, max, attention
+	Element num_layers    word  . * Number of message passing layers
+
+Comp GraphLearningOp parent Op FindIn
+----------------------------------------------------------------
+* Graph structure learning operations
+* Args: input_nodes (required), learned_adjacency (output)
+----------------------------------------------------------------
+
+	Element graph_op      key   . + GraphLearning operation identifier
+	Element graph_learner word  . + knn, attention, mlp
+	Element k_neighbors   word  . * Number of neighbors
+	Element threshold     word  . * Edge threshold
+	Element similarity    word  . + cosine, dot_product, mlp
+	Element sparse        word  . * true/false for sparse output
+
+// ================================================================
+// RECURRENT AND STATEFUL OPERATIONS
+// ================================================================
+
+Comp StatefulOp parent Op FindIn
+----------------------------------------------------------------
+* Operations with persistent state across invocations
+* Args: hidden_state (required), cell_state (for LSTM)
+----------------------------------------------------------------
+
+	Element state_op      key  . + Stateful operation identifier
+	Element state_type   word  . + lstm, gru, custom_rnn
+	Element sequence_dim word  . + Dimension index for sequence
+	Element stateful     word  . + true (maintains state) or false
+
+Comp LTCOp parent Op FindIn
+----------------------------------------------------------------
+* Liquid time-constant network operations
+* Args: state, input, time_const, response
+----------------------------------------------------------------
+
+	Element ltc_op       key   . + LTC operation identifier
+	Element solver       word  . + ODE solver type
+	Element adaptive     word  . * true/false adaptive time stepping
+	Element time_decay   word  . * Time decay parameter
+	Element time_first   word  . * Time first parameter
+	Element state_update word  . * State update mechanism
+
+// ================================================================
+// DIFFERENTIAL EQUATION OPERATIONS
+// ================================================================
+
+Comp ODEOp parent Op FindIn
+----------------------------------------------------------------
+* ODE integration operation
+* Args: state_input (required), state_output, time_tensor (optional)
+----------------------------------------------------------------
+
+	Element ode_op       key   . + ODE operation identifier
+	Element integration  word  . + Integration method (euler, rk4, dopri5)
+	Element solver       word  . + Solver type
+	Element time_steps   word  . * Number of evaluation time steps
+	Element adaptive     word  . * true/false for adaptive stepping
+	Element tolerance    word  . * Error tolerance
+	Element adjoint      word  . * true/false for adjoint method (backprop)
+
+Comp SDEOp parent Op FindIn
+----------------------------------------------------------------
+* Stochastic differential equation operations
+* Args: drift, diffusion, brownian, state_input, state_output
+----------------------------------------------------------------
+
+	Element sde_op        key   . + SDE operation identifier
+	Element solver        word  . + euler, milstein, sra
+	Element brownian_dim  word  . + Brownian motion dimension
+	Element time_step     word  . + Time step size
+	Element adaptive      word  . * true/false for adaptive stepping
+
+Comp PDEOp parent Op FindIn
+----------------------------------------------------------------
+* Partial differential equation operations
+* Args: domain (required), boundary, initial (optional)
+----------------------------------------------------------------
+
+	Element pde_op       key   . + SDE operation identifier
+	Element pde_type     word  . + heat, wave, burger, custom
+	Element solver       word  . + Solver method
+	Element spatial_dims word  . + Number of spatial dimensions
+
+// ================================================================
+// MEMORY OPERATIONS
+// ================================================================
+
+Comp MemoryOp parent Op FindIn
+----------------------------------------------------------------
+* Differentiable external memory access operations
+* Args: memory (required), query, keys, values (depending on operation)
+----------------------------------------------------------------
+
+	Element mem_op       key   . + Memory operation identifier
+	Element memory_op    word  . + read, write, content_address
+	Element memory_size  word  . * Number of memory slots
+	Element slot_dim     word  . * Dimension per slot
+	Element read_heads   word  . * Number of read heads
+	Element write_heads  word  . * Number of write heads
+	Element addressing   word  . + content_based, location_based
+
+// ================================================================
+// EXPERT ROUTING OPERATIONS
+// ================================================================
+
+Comp ExpertRoutingOp parent Op FindIn
+----------------------------------------------------------------
+* Mixture of experts routing mechanism
+* Args: gate_tensor (required), expert_inputs, expert_outputs
+----------------------------------------------------------------
+
+	Element expert_op    key       .     + ExpertRouting operation identifier
+	Element num_experts  word      .     + Number of expert networks
+	Element top_k        word      .     + Number of experts to activate
+	Element model2       up_copy   Model + Navigate up to parent Model
+	Element experts      ref_child Layer + Expert layer references
+	Element load_balance word      .     * Load balancing strategy
+	Element capacity     word      .     * Expert capacity
+	Element router_type  word      .     + top_k, learned, hash
+	Element aux_loss     word      .     * Auxiliary loss weight
+
+Comp CapacityAwareRoutingOp parent ExpertRoutingOp FindIn
+----------------------------------------------------------------
+* Capacity-aware expert routing with constraints
+* Args: gate_input, expert_mask, token_assign
+----------------------------------------------------------------
+
+	Element router       key   . + Router identifier
+	Element load_metric  word  . + Utilization metric
+
+// ================================================================
+// SAMPLING AND STOCHASTIC OPERATIONS
+// ================================================================
+
+Comp SamplingOp parent Op FindIn
+----------------------------------------------------------------
+* Sampling operations from distributions
+* Args: logits or parameters (input), sample (output)
+----------------------------------------------------------------
+
+	Element sampling_op  key   . + Sampling operation identifier
+	Element distribution word  . + normal, categorical, gumbel, bernoulli
+	Element temperature  word  . * Sampling temperature
+	Element reparam      word  . * true/false for reparameterization trick
+
+Comp StochasticOp parent Op FindIn
+----------------------------------------------------------------
+* General stochastic operations with sampling
+* Args: parameters (input), sample (output)
+----------------------------------------------------------------
+
+	Element Stochastic_op  key  . + Stochastic operation identifier
+	Element distribution  word  . + Distribution type
+	Element reparam       word  . * true/false for reparameterization
+
+// ================================================================
+// ROUTING AND DYNAMIC OPERATIONS
+// ================================================================
+
+Comp DynamicRoutingOp parent Op FindIn
+----------------------------------------------------------------
+* Learned routing between alternative operations
+* Args: selector (input), candidates (multiple inputs), output
+----------------------------------------------------------------
+
+	Element dr_op        key   . + DynamicRouting operation identifier
+	Element mechanism    word  . + softmax, gumbel, hard
+	Element num_paths    word  . + Number of alternative paths
+
+Comp DynamicOp parent Op FindIn
+----------------------------------------------------------------
+* Operations with dynamic structure based on conditions
+* Args: selector (input), alternatives (multiple options)
+----------------------------------------------------------------
+
+	Element dynamic_op    key   . + Dynamic operation identifier
+	Element selector_type word  . + tensor_based, control_flow, learned
+
+// ================================================================
+// NEURAL PROGRAM OPERATIONS
+// ================================================================
+
+Comp NeuralProgramOp parent Op FindIn
+----------------------------------------------------------------
+* Neural program instruction execution
+* Args: operands (inputs), program_memory, program_counter
+----------------------------------------------------------------
+
+	Element np_op        key   . + NeuralProgram operation identifier
+	Element opcode       word  . + Operation code
+	Element next_pc      word  . * Next program counter
+	Element max_steps    word  . * Maximum execution steps
+
+// ================================================================
+// HYPERNETWORK OPERATIONS
+// ================================================================
+
+Comp WeightGenerationOp parent Op FindIn
+----------------------------------------------------------------
+* Weight generation from hypernetwork
+* Args: condition (input), generated_weights (output)
+----------------------------------------------------------------
+
+	Element wg_op         key   . + WeightGeneration operation identifier
+	Element target_param  word  . + Target parameter name
+	Element input_size    word  . + Input dimension
+	Element output_size   word  . + Generated weight size
+
+// ================================================================
+// ARCHITECTURE SEARCH OPERATIONS
+// ================================================================
+
+Comp ArchitectureSearchOp parent Op FindIn
+----------------------------------------------------------------
+* Searchable operation candidate in NAS
+* Args: architecture_param (input for mixing), operation outputs
+----------------------------------------------------------------
+
+	Element as_op        key   . + ArchitectureSearch operation identifier
+	Element arch_param   word  . + Architecture parameter name
+	Element complexity   word  . * Computational complexity estimate
+	Element weight_share word  . * true/false for supernet weight sharing
+
+// ================================================================
+// CONTINUOUS DEPTH OPERATIONS
+// ================================================================
+
+Comp ContinuousDepthOp parent Op FindIn
+----------------------------------------------------------------
+* Continuous-depth neural network operation
+* Args: state_input, dynamics, state_output
+----------------------------------------------------------------
+
+	Element cd_op        key   . + ContinuousDepth operation identifier
+	Element solver       word  . + ODE solver type (euler, rk4, dopri5)
+	Element time_steps   word  . * Number of evaluation time steps
+	Element t_start      word  . + Start time
+	Element t_end        word  . + End time
+	Element adaptive     word  . * true/false for adaptive stepping
+	Element tolerance    word  . * Error tolerance
+
+// ================================================================
+// ENUMERATION RULES
+// ================================================================
+
+Comp OpTypeRule parent . Find
+----------------------------------------------------------------
+* Enumeration of valid operation types
+----------------------------------------------------------------
+
+	Element op_type  key  . + Operation type name
+	Element category word . + Category (compute, attention, graph, memory, control, etc)
+	Element desc     text . * Description
+
+// Valid op_type values:
+// - kernel: Standard kernel operation (KernelOp)
+// - attention: Attention mechanism (AttentionOp)
+// - attention_free: Attention-free operations (AttentionFreeOp)
+// - graph: Graph neural network operation (GraphOp)
+// - graph_learning: Graph structure learning (GraphLearningOp)
+// - stateful: Stateful/recurrent operation (StatefulOp)
+// - ltc: Liquid time-constant operation (LTCOp)
+// - ode: ODE integration (ODEOp)
+// - sde: Stochastic differential equation (SDEOp)
+// - pde: Partial differential equation (PDEOp)
+// - memory: Memory access operation (MemoryOp)
+// - expert_routing: Mixture of experts routing (ExpertRoutingOp)
+// - capacity_routing: Capacity-aware routing (CapacityAwareRoutingOp)
+// - sampling: Sampling operation (SamplingOp)
+// - stochastic: General stochastic operation (StochasticOp)
+// - dynamic_routing: Learned routing (DynamicRoutingOp)
+// - dynamic: Dynamic operation (DynamicOp)
+// - neural_program: Neural program instruction (NeuralProgramOp)
+// - weight_generation: Weight generation (WeightGenerationOp)
+// - architecture_search: Architecture search op (ArchitectureSearchOp)
+// - continuous_depth: Continuous depth op (ContinuousDepthOp)
+
+Comp ArgRoleRule parent . Find
+----------------------------------------------------------------
+* Enumeration of valid argument roles by operation type
+----------------------------------------------------------------
+
+	Element role     key  . + Role name
+	Element op_types word . + Comma-separated list of applicable op_types
+	Element required word . + true/false if required for those op_types
+	Element desc     text . * Description
+
+// Standard roles (all op types):
+// - input: Standard input tensor
+// - output: Standard output tensor
+// - param: Kernel parameter (scalar or small tensor)
+
+// Attention roles (attention, attention_free):
+// - query: Query tensor for attention (required)
+// - key: Key tensor for attention (required)
+// - value: Value tensor for attention (required)
+// - mask: Attention mask tensor (optional)
+
+// Graph roles (graph, graph_learning):
+// - node_features: Node feature tensor (required for graph)
+// - edge_features: Edge feature tensor (optional)
+// - adjacency: Graph adjacency matrix/tensor (required for graph)
+// - node_output: Output node features (output)
+// - input_nodes: Input for graph learning (required for graph_learning)
+// - learned_adjacency: Learned adjacency (output for graph_learning)
+
+// Memory roles (memory):
+// - memory: External memory matrix (required)
+// - memory_query: Query for memory access (required for read/content_address)
+// - memory_keys: Memory key tensor (optional)
+// - memory_values: Memory value tensor (optional)
+
+// State roles (stateful, ltc, ode, sde, continuous_depth):
+// - hidden_state: Hidden state for RNN/LSTM/GRU (required for stateful)
+// - cell_state: Cell state for LSTM (required for lstm state_type)
+// - state_input: Initial state for ODE/SDE/continuous (required)
+// - state_output: Final state for ODE/SDE/continuous (output)
+// - state: System state for LTC (required)
+// - time_const: Time constant parameters for LTC (required)
+// - response: Response function output for LTC (output)
+
+// Expert routing roles (expert_routing, capacity_routing):
+// - gate_tensor: Gating network output (required)
+// - expert_input: Input to expert network
+// - expert_output: Output from expert network
+// - expert_mask: Expert capacity mask (optional)
+// - token_assign: Token assignment tensor (optional)
+// - gate_input: Input to routing gate (required for capacity_routing)
+
+// ODE/SDE/PDE roles:
+// - drift: Drift term for SDE (required)
+// - diffusion: Diffusion term for SDE (required)
+// - brownian: Brownian motion tensor (required)
+// - time_tensor: Time evaluation points (optional)
+// - dynamics: Dynamics function output (required for continuous_depth)
+// - domain: Spatial domain tensor (required for pde)
+// - boundary: Boundary condition tensor (optional)
+// - initial: Initial condition tensor (optional)
+
+// Sampling roles (sampling, stochastic):
+// - logits: Input logits for sampling (required for categorical)
+// - sample: Output sample tensor (output, required)
+// - parameters: Distribution parameters (required)
+
+// Routing/Selection roles (dynamic_routing, dynamic):
+// - selector: Operation selector tensor (required)
+// - candidates: Candidate operation outputs (multiple inputs)
+
+// Program/Control roles (neural_program):
+// - operands: Instruction operands (required)
+// - program_counter: Program counter tensor (required)
+// - program_memory: Program memory (required)
+
+// Hypernetwork roles (weight_generation):
+// - condition: Conditioning input for weight generation (required)
+// - generated_weights: Generated weight tensor (output, required)
+
+// Architecture search roles (architecture_search):
+// - architecture_param: Architecture parameter tensor (required)Comp Tensor parent Model FindIn
+----------------------------------------------------------------
+* User tensor specification - supports both static and dynamic shapes
+----------------------------------------------------------------
+
+	Element tensor      key  .         + Tensor identifier
+	Element shape       word .         + Logical shape (batch,height,width,channels)
+	Element shape_type  word .         * static (default), dynamic, or symbolic
+	Element dyn_dims    word .         * Comma-separated indices of dynamic dimensions (e.g., "0,1")
+	Element layout      word .         + Memory layout (nhwc, nchw, csr, coo, jagged, etc)
+	Element dtype       ref  DtypeRule + Data type (linked to Rule)
+	Element desc        text .         * Tensor description
+	Element symbolic    word .         * Symbolic shape expression
+
+Comp Config parent Model FindIn
+----------------------------------------------------------------
+* User-specified inference configuration
+----------------------------------------------------------------
+
+	Element config    key  .          + Configuration name
+	Element target    ref  TargetRule + Target device (linked to Rule)
+	Element batch     word .          + Batch size
+	Element opt_flags ref  FlagRule   * Optimization preference (linked to Rule)
+	Element desc      text .          * Description
+
+Comp Schedule parent Config
+----------------------------------------------------------------
+* User-specified execution order - supports static and control flow
+----------------------------------------------------------------
+
+	Element seq       word       .           + Sequence number
+	Element model1    up_copy    Model       + Navigate up to parent Model
+	Element layer     ref_child  Layer       + Layer within parent Model
+	Element op        ref_child  Op          + Operation within Layer
+	Element model2    up_copy    Model       + Navigate up to parent Model
+	Element control   ref_child  ControlFlow * Control flow reference
+	Element desc      text       .           * Scheduling note
+
+// ================================================================
+// EXTENDED COMPONENTS FOR MODERN NEURAL NETWORKS
+// ================================================================
+
+// 1. DYNAMIC/CONDITIONAL COMPUTATION
+// ================================================================
+
+Comp ControlFlow parent Model FindIn
+----------------------------------------------------------------
+* Control flow constructs for dynamic execution
+----------------------------------------------------------------
+
+	Element control key  .  + Control flow identifier
+	Element type    word .  + conditional, loop, switch, dynamic_dispatch
+	Element desc    text .  * Description
+
+Comp Condition parent ControlFlow FindIn
+----------------------------------------------------------------
+* Condition evaluation for control flow
+----------------------------------------------------------------
+
+	Element condition key       .      + Condition identifier
+	Element predicate word      .      + Predicate type (tensor_value, expert_router, threshold)
+	Element model     up_copy   Model  + Navigate up to parent Model
+	Element input     ref_child Tensor * Input tensor for evaluation
+	Element threshold word      .      * Threshold value (for threshold predicates)
+	Element desc      text      .      * Description
+
+Comp Branch parent ControlFlow FindIn
+----------------------------------------------------------------
+* Execution branch in control flow
+----------------------------------------------------------------
+
+	Element branch    key        .        + Branch identifier
+	Element branch_id word       .        + Branch number (0, 1, 2, etc) or "default"
+	Element model     up_copy    Model    + Navigate up to parent Model
+	Element layers    ref_child  Layer    + Layers to execute in this branch
+	Element weight    word       .        * Branch selection weight (for routing)
+	Element desc      text       .        * Description
+
+// 3. GRAPH NEURAL NETWORKS
+// ================================================================
+
+Comp GraphTensor parent Model FindIn
+----------------------------------------------------------------
+* Graph-structured data representation
+----------------------------------------------------------------
+
+	Element graph_tensor  key  .         + Graph tensor identifier
+	Element graph_type    word .         + node_features, edge_features, adjacency
+	Element num_nodes     word .         * Number of nodes (can be dynamic)
+	Element num_edges     word .         * Number of edges (can be dynamic)
+	Element feature_dim   word .         * Feature dimensionality
+	Element sparse_format word .         + csr, coo, edge_list
+	Element dtype         ref  DtypeRule + Data type
+	Element desc          text .         * Description
+
+
+Comp StateTransfer parent Config FindIn
+----------------------------------------------------------------
+* State management policy for recurrent networks
+----------------------------------------------------------------
+
+	Element transfer     key        .            + State transfer identifier
+	Element policy       word       .            + keep, reset, transfer
+	Element model1       up_copy    Model        + Navigate up to parent Model
+	Element source_state ref_child  Tensor       + Source state tensor
+	Element model2       up_copy    Model        + Navigate up to parent Model
+	Element target_state ref_child  Tensor       + Target state tensor
+	Element trigger      word       .            + batch_boundary, sequence_end, manual
+	Element desc         text       .            * Description
+
+// 5. NEURAL ODEs AND CONTINUOUS DEPTH
+// ================================================================
+
+Comp ContinuousLayer parent Model FindIn
+----------------------------------------------------------------
+* Continuous-depth neural network layer
+----------------------------------------------------------------
+
+	Element cont_layer   key        .      + Continuous layer identifier
+	Element solver       word       .      + ode_solver type (euler, rk4, dopri5)
+	Element time_steps   word       .      * Number of evaluation time steps
+	Element t_start      word       .      + Start time
+	Element t_end        word       .      + End time
+	Element adaptive     word       .      * true/false for adaptive stepping
+	Element model        up_copy    Model  + Navigate up to parent Model
+	Element dynamics     ref_child  Layer  + Layer defining dynamics function
+	Element tolerance    word       .      * Error tolerance for adaptive solvers
+	Element desc         text       .      * Description
+
+
+// ================================================================
+// NEURAL ARCHITECTURE SEARCH (NAS)
+// ================================================================
+
+Comp SearchSpace parent Model FindIn
+----------------------------------------------------------------
+* Differentiable architecture search space definition
+----------------------------------------------------------------
+
+	Element search_space key        .          + Search space identifier
+	Element supernet     word       .          * true/false for weight-sharing
+	Element temperature  word       .          * Softmax temperature for relaxation
+	Element desc         text       .          * Description
+
+Comp SearchOp parent SearchSpace FindIn
+----------------------------------------------------------------
+* Searchable operation candidate
+----------------------------------------------------------------
+
+	Element search_op    key        .        + Operation candidate name
+	Element model        up_copy    Model    + Navigate up to parent Model
+	Element layer        ref_child  Layer    + Navigate up to parent Layer
+	Element operation    ref_child  Op       * Concrete operation
+	Element arch_param   word       .        + Architecture parameter name
+	Element complexity   word       .        * Computational complexity estimate
+	Element desc         text       .        * Description
+
+Comp SearchEdge parent SearchSpace FindIn
+----------------------------------------------------------------
+* Searchable connection between nodes
+----------------------------------------------------------------
+
+	Element search_edge  key        .        + Edge identifier
+	Element from_node    word       .        + Source node name
+	Element to_node      word       .        + Target node name  
+	Element arch_param   word       .        + Architecture parameter name
+	Element desc         text       .        * Description
+
+Comp ArchitectureParam parent Model FindIn
+----------------------------------------------------------------
+* Learnable architecture parameters
+----------------------------------------------------------------
+
+	Element arch_param   key   . + Architecture parameter name
+	Element value        word  . * Initial value
+	Element learnable    word  . + true/false
+	Element constraint   word  . * simplex, none, positive
+	Element desc         text  . * Description
+
+Comp ArchitectureGradient parent Model FindIn
+----------------------------------------------------------------
+* Gradient-based architecture learning
+----------------------------------------------------------------
+
+	Element arch_gradient key        .             + Architecture gradient identifier
+	Element model         up_copy    Model               + Navigate up to parent Model
+	Element arch_params   ref_child  ArchitectureParam   * Architecture parameters
+	Element model2        up_copy    Model               + Navigate up to parent Model
+	Element layer         ref_child  Layer               * Layer
+	Element gradient_ops  ref_child  Op                  * Gradient operations
+	Element optimizer     word       .                   + Architecture optimizer
+	Element learning_rate word       .                   + Architecture learning rate
+	Element desc          text       .                   * Description
+
+// ================================================================
+// HYPERNETWORKS AND WEIGHT GENERATION
+// ================================================================
+
+Comp HyperNetwork parent Model FindIn
+----------------------------------------------------------------
+* Network that generates weights for other networks
+----------------------------------------------------------------
+
+	Element hypernet     key        .          + Hypernetwork identifier
+	Element model1       up_copy    Model      + Navigate up to parent Model
+	Element target_net   ref_child  Layer      * Target network layer
+	Element input_size   word       .          + Input dimension
+	Element output_size  word       .          + Generated weight size
+	Element model2       up_copy    Model      + Navigate up to parent Model
+	Element condition    ref_child  Tensor     * Conditioning input
+	Element desc         text       .          * Description
+
+Comp WeightGenerator parent HyperNetwork FindIn
+----------------------------------------------------------------
+* Weight generation operation
+----------------------------------------------------------------
+
+	Element generator     key        .      + Generator identifier
+	Element target_param  word       .      + Target parameter name
+	Element model1        up_copy    Model  + Navigate up to parent Model
+	Element input_tensor  ref_child  Tensor * Input to generator
+	Element model2        up_copy    Model  + Navigate up to parent Model
+	Element output_tensor ref_child  Tensor * Generated weights
+	Element desc          text       .      * Description
+
+// ================================================================
+// NEURAL MEMORY ARCHITECTURES
+// ================================================================
+
+Comp MemoryMatrix parent Model FindIn
+----------------------------------------------------------------
+* Differentiable external memory
+----------------------------------------------------------------
+
+	Element memory       key        .         + Memory identifier
+	Element memory_size  word       .         + Number of memory slots
+	Element slot_dim     word       .         + Dimension per slot
+	Element read_heads   word       .         + Number of read heads
+	Element write_heads  word       .         + Number of write heads
+	Element desc         text       .         * Description
+
+
+// ================================================================
+// DIFFERENTIABLE PROGRAMMING AND META-LEARNING
+// ================================================================
+
+Comp DifferentiableProgram parent Model FindIn
+----------------------------------------------------------------
+* Learnable program execution
+----------------------------------------------------------------
+
+	Element program      key        .                   + Program identifier
+-	Element instructions ref_child  ProgramInstruction  * Program instructions
+	Element state_size   word       .                   + Program state dimension
+	Element max_steps    word       .                   + Maximum execution steps
+	Element desc         text       .                   * Description
+
+Comp ProgramInstruction parent DifferentiableProgram FindIn
+----------------------------------------------------------------
+* Learnable program instruction
+----------------------------------------------------------------
+
+	Element instruction  key        .           + Instruction identifier
+	Element op_type      word       .           + add, mul, branch, loop, call
+	Element model1       up_copy    Model       + Navigate up to parent Model
+	Element operands     ref_child  Tensor      * Instruction operands
+	Element model2       up_copy    Model       + Navigate up to parent Model
+	Element control_flow ref_child  ControlFlow * Navigate to ControlFlow
+	Element condition    ref_child  Condition   * Execution condition
+	Element target       word       .           * Target instruction for jumps
+	Element desc         text       .           * Description
+
+Comp MetaLearner parent Model FindIn
+----------------------------------------------------------------
+* Meta-learning components
+----------------------------------------------------------------
+
+	Element meta_learner key        .          + Meta-learner identifier
+	Element model1       up_copy    Model      + Navigate up to parent Model
+	Element inner_loop   ref_child  Layer      * Inner loop layers
+	Element model2       up_copy    Model      + Navigate up to parent Model
+	Element outer_loop   ref_child  Layer      * Outer loop layers
+	Element adapt_steps  word       .          + Adaptation steps
+	Element desc         text       .          * Description
+
+
+// ================================================================
+// ADVANCED SPARSE EXPERT SYSTEMS
+// ================================================================
+
+Comp SparseExpertSystem parent Model FindIn
+----------------------------------------------------------------
+* Advanced sparse expert routing with capacity constraints
+----------------------------------------------------------------
+
+	Element expert_system key        .          + Expert system identifier
+	Element model         up_copy    Model      + Navigate up to parent Model
+	Element experts       ref_child  Layer      * Expert layers
+	Element capacity      word       .          + Expert capacity
+	Element load_balance  word       .          + Load balancing strategy
+	Element router_type   word       .          + top_k, learned, hash
+	Element aux_loss      word       .          * Auxiliary loss weight
+	Element desc          text       .          * Description
+
+Comp CapacityAwareRouter parent SparseExpertSystem FindIn
+----------------------------------------------------------------
+* Capacity-aware expert routing
+----------------------------------------------------------------
+
+	Element router       key        .      + Router identifier
+	Element model1       up_copy    Model  + Navigate up to parent Model
+	Element gate_input   ref_child  Tensor + Gate input tensor
+	Element model2       up_copy    Model  + Navigate up to parent Model
+	Element expert_mask  ref_child  Tensor * Expert capacity mask
+	Element model3       up_copy    Model  + Navigate up to parent Model
+	Element token_assign ref_child  Tensor * Token assignment
+	Element load_metric  word       .      + Utilization metric
+	Element desc         text       .      * Description
+
+// ================================================================
+// ADVANCED NEURAL DIFFERENTIAL EQUATIONS
+// ================================================================
+
+Comp NeuralSDE parent Model FindIn
+----------------------------------------------------------------
+* Neural Stochastic Differential Equations
+----------------------------------------------------------------
+
+	Element neural_sde    key        .          + SDE identifier
+	Element model1        up_copy    Model      + Navigate up to parent Model
+	Element drift_net     ref_child  Layer      + Drift network
+	Element model2        up_copy    Model      + Navigate up to parent Model
+	Element diffusion_net ref_child  Layer      + Diffusion network
+	Element brownian_dim  word       .          + Brownian motion dimension
+	Element solver        word       .          + euler, milstein, sra
+	Element desc          text       .          * Description
+
+Comp NeuralPDE parent Model FindIn
+----------------------------------------------------------------
+* Neural Partial Differential Equations
+----------------------------------------------------------------
+
+	Element neural_pde   key        .          + PDE identifier
+	Element pde_type     word       .          + heat, wave, burger, custom
+	Element model1       up_copy    Model      + Navigate up to parent Model
+	Element domain       ref_child  Tensor     + Spatial domain
+	Element model2       up_copy    Model      + Navigate up to parent Model
+	Element boundary     ref_child  Tensor     * Boundary conditions
+	Element model3       up_copy    Model      + Navigate up to parent Model
+	Element initial      ref_child  Tensor     * Initial conditions
+	Element desc         text       .          * Description
+
+
+// ================================================================
+// DYNAMIC GRAPH NETWORKS
+// ================================================================
+
+Comp DynamicGraphNetwork parent Model FindIn
+----------------------------------------------------------------
+* Graphs with learnable topology
+----------------------------------------------------------------
+
+	Element dynamic_graph key        .           + Dynamic graph identifier
+	Element model1        up_copy    Model       + Navigate up to parent Model
+	Element node_features ref_child  GraphTensor + Node features
+	Element model2        up_copy    Model       + Navigate up to parent Model
+	Element edge_predictor ref_child Layer       + Edge predictor network
+	Element graph_learner word       .           + knn, attention, mlp
+	Element k_neighbors   word       .           * Number of neighbors
+	Element threshold     word       .           * Edge threshold
+	Element desc          text       .           * Description
+
+Comp GraphLearner parent DynamicGraphNetwork FindIn
+----------------------------------------------------------------
+* Graph structure learning operations
+----------------------------------------------------------------
+
+	Element learner      key        .           + Graph learner identifier
+	Element model1       up_copy    Model       + Navigate up to parent Model
+	Element input_nodes  ref_child  GraphTensor + Input node features
+	Element model2       up_copy    Model       + Navigate up to parent Model
+	Element adjacency    ref_child  GraphTensor + Learned adjacency
+	Element similarity   word       .           + cosine, dot_product, mlp
+	Element sparse       word       .           * true/false for sparse output
+	Element desc         text       .           * Description
+
+// ================================================================
+// NEURAL PROGRAMS
+// ================================================================
+
+Comp NeuralProgram parent Model FindIn
+----------------------------------------------------------------
+* Neural program execution
+----------------------------------------------------------------
+
+	Element neural_prog     key        .                 + Neural program identifier
+-	Element instructions    ref_child  ProgInstruction   * Program instructions
+	Element program_counter word       .                 + Program counter tensor
+	Element model           up_copy    Model             + Navigate up to parent Model
+	Element memory          ref_child  Tensor            * Program memory
+	Element max_steps       word       .                 + Maximum execution steps
+	Element desc            text       .                 * Description
+
+Comp ProgInstruction parent NeuralProgram FindIn
+----------------------------------------------------------------
+* Neural program instruction
+----------------------------------------------------------------
+
+	Element prog_inst    key        .           + Program instruction identifier
+	Element opcode       word       .           + Operation code
+	Element model1       up_copy    Model       + Navigate up to parent Model
+	Element operands     ref_child  Tensor      * Instruction operands
+	Element model2       up_copy    Model       + Navigate up to parent Model
+	Element control_flow ref_child  ControlFlow * Navigate to ControlFlow
+	Element condition    ref_child  Condition   * Execution condition
+	Element next_pc      word       .           * Next program counter
+	Element desc         text       .           * Description
+
+// ================================================================
+// LIQUID TIME-CONSTANT NETWORKS
+// ================================================================
+
+Comp LiquidNetwork parent Model FindIn
+----------------------------------------------------------------
+* Liquid time-constant networks
+----------------------------------------------------------------
+
+	Element liquid_net   key        .          + Liquid network identifier
+	Element model        up_copy    Model      + Navigate up to parent Model
+	Element time_const   ref_child  Tensor     + Time constant parameters
+	Element hidden_dim   word       .          + Hidden dimension
+	Element solver       word       .          + ODE solver type
+	Element adaptive     word       .          * true/false adaptive
+	Element desc         text       .          * Description
+
+// ================================================================
+// SYMBOLIC AND COMPILATION COMPONENTS
+// ================================================================
+
+Comp SymbolicShape parent Model FindIn
+----------------------------------------------------------------
+* Symbolic shape expressions
+----------------------------------------------------------------
+
+	Element symbolic_shape key   . + Symbolic shape identifier
+	Element expression     text  . + Shape expression
+	Element variables      word  . * Comma-separated variables
+	Element constraints    text  . * Shape constraints
+	Element desc           text  . * Description
+
+Comp JITCompiler parent Model FindIn
+----------------------------------------------------------------
+* Just-in-time compilation specifications
+----------------------------------------------------------------
+
+	Element jit_compiler   key   . + JIT compiler identifier
+	Element dynamic_dims   word  . * Dynamic dimensions
+	Element specialization word  . * Specialization strategy
+	Element cache_key      text  . * Cache key expression
+	Element desc           text  . * Description
+
+// ================================================================
+// ENUMERATION/RULE COMPONENTS (Centralized Extensible Lists)
+// ================================================================
+
+Comp TargetRule parent . Find
+----------------------------------------------------------------
+* Enumeration of valid deployment targets
+----------------------------------------------------------------
+
+	Element target key    . + Target name (e.g., gpu_a100)
+	Element arch   word   . + Hardware architecture (e.g., ampere, mali)
+	Element vendor word   . + Vendor name (e.g., nvidia, arm)
+
+Comp DtypeRule parent . Find
+----------------------------------------------------------------
+* Enumeration of valid data types
+----------------------------------------------------------------
+
+	Element dtype key  . + Data type name (e.g., fp32, int8)
+	Element bits  word . + Bit width (e.g., 32, 8)
+	Element type  word . + Type category (float, int, bool)
+
+Comp FlagRule parent . Find
+----------------------------------------------------------------
+* Enumeration of valid optimization flags
+----------------------------------------------------------------
+
+	Element flag key  . + Optimization flag (e.g., fused_ops)
+	Element desc text . * Description of the optimization strategy
+
+Comp DistributionRule parent . Find
+----------------------------------------------------------------
+* Valid probability distributions
+----------------------------------------------------------------
+
+	Element distribution key  . + Distribution name (normal, categorical, gumbel, etc)
+	Element params       word . + Parameter names (comma-separated)
+	Element reparam      word . + true/false for reparameterization trick support
+	Element desc         text . * Description
+
+Comp SearchStrategyRule parent . Find
+----------------------------------------------------------------
+* Neural architecture search strategies
+----------------------------------------------------------------
+
+	Element strategy       key  . + Search strategy name (darts, enas, proxyless, etc)
+	Element differentiable word . + true/false
+	Element weight_share   word . + true/false for supernet weight sharing
+	Element desc           text . * Description
+
+Comp DynamicGraphRule parent . Find
+----------------------------------------------------------------
+* Dynamic graph learning strategies
+----------------------------------------------------------------
+
+	Element graph_rule   key  . + Graph rule name (knn, attention, threshold, etc)
+	Element sparse       word . + true/false for sparse adjacency
+	Element symmetric    word . + true/false for symmetric edges
+	Element desc         text . * Description
+
+// ================================================================
+// COMPATIBILITY AND VERSIONING
+// ================================================================
+
+Comp CompatibilityNote parent . Find
+----------------------------------------------------------------
+* Compatibility and migration notes
+----------------------------------------------------------------
+
+	Element note         key   . + Note identifier
+	Element component    word  . + Component name affected
+	Element version      word  . + Required version
+	Element migration    text  . * Migration instructions
+	Element desc         text  . * Description

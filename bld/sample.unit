@@ -1,0 +1,89 @@
+----------------------------------------------------------------
+Comp Type parent . Find
+----------------------------------------------------------------
+* Definitions for database tables.
+*
+* Contains (Attr) database colomns and (Use) tables.
+----------------------------------------------------------------
+
+	Element name word . + Its name.
+	Element desc text . * Description.
+
+----------------------------------------------------------------
+Comp Data parent Type
+----------------------------------------------------------------
+* Hard coded data
+* Small pick lists, validation and default values
+----------------------------------------------------------------
+
+	Element name    word . + Field name
+	Element op      word . + (= >)
+	Element value   text . + Data value
+
+----------------------------------------------------------------
+Comp Attr parent Type FindIn
+----------------------------------------------------------------
+* Database colomns names.
+----------------------------------------------------------------
+
+	Element table    ref  Type . Pointer to (Table).
+	Element relation word .    + Relation type
+	
+	Opt boolean   * check box
+	Opt calculate * db field, no input, display
+	Opt dropdown  * lookup from external table
+	Opt file      * file upload name
+	Opt hidden    * non display, captured later
+	Opt pk        * primary key
+	Opt lookup    * no dropdown, add button to do lookup to verify and add (X) extra fields
+	Opt missing   * 
+	Opt none      * name to display for lookups
+	Opt parent    * parent table
+	Opt rule      * non display field, value derived or hard coded
+	Opt select    * hard coded drop down
+	Opt text      * multi line
+	Opt view      * fields in the view and not in the table, search params and not in the grid
+	Opt viewed    * a view with a drop down
+	Opt where     * search param not in view
+	Opt extra     * display field not in data set
+	Opt hidden    * roles
+	
+	Element name     word . + Colomn name.
+	Element mytype   word . + Data type.
+	Element len      word . + Default length.
+	Element null     word . + Not null.
+	Element flags    word . + Input flags - search,grid,edit,modify
+	Element desc     text . * Documentation.
+
+
+----------------------------------------------------------------
+Comp Where parent Type
+----------------------------------------------------------------
+* View select data (V)
+* View where clauses (V,W)
+----------------------------------------------------------------
+
+	Element attr     link      Attr       + Field name
+	Element table    ref_copy  Type       + the table of the attr
+	Element from_id  ref_child Attr       + From id
+	Element eq       word      .          + =
+	Element id       link      Attr       + id
+	Element op       word      .          + (=, >, like)
+	Element value    word      .          * Select value
+
+----------------------------------------------------------------
+Comp Logic parent Type
+----------------------------------------------------------------
+* Rule logic code block
+* Dedicated code for this type. 
+* Its Logic BL - from type
+* Its Logic_attr BL - from attr
+* Actor BL . code = USER_DOC
+----------------------------------------------------------------
+
+	Element attr    link Attr + Field name
+	Element op      word .    + (=)
+	Element code    word .    + Code block name
+
+
+

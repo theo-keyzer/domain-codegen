@@ -1,0 +1,51 @@
+----------------------------------------------------------------
+Comp Artifact parent . Find  // The Unit of Knowledge
+----------------------------------------------------------------
+
+	Element name        word .         * name of artifact
+        Element category    ref  Artifact  * General Domain - glossary
+            Opt structure                 * Data structure definitions
+            Opt pattern                   * Design patterns
+            Opt workflow                  * Processes
+            Opt principle                 * Fundamental rules
+        Element topic_type  ref  Artifact  * what kind of information
+            Opt overview                  * High-level summary
+            Opt example                   * Concrete example
+            Opt detail                    * Implementation detail
+            Opt rule                      * Constraint or requirement
+            Opt tutorial                  * Step-by-step guide
+            Opt reference                 * Quick lookup information
+
+----------------------------------------------------------------
+Comp Link parent Artifact
+----------------------------------------------------------------
+
+	Element artifact     ref  Artifact + Ref to artifact
+	Element relation     ref  Artifact + Type of relationship
+	    Opt prerequisite              * Must understand this first
+	    Opt related                   * Related concept
+	    Opt extension                 * Builds upon this
+	    Opt example                   * Concrete example of this
+	    Opt contrast                  * Different approach
+
+----------------------------------------------------------------
+Comp O parent Artifact - Overview
+----------------------------------------------------------------
+
+    Element note   text . * Content to output (Markdown format).
+
+----------------------------------------------------------------  
+Comp Section parent Artifact FindIn    * The Sub-Unit of Documentation
+----------------------------------------------------------------
+
+	Element name  word     .              + Section name
+	Element level tree     .              + Markdown heading level
+        Element text  text     .              * Text description
+
+----------------------------------------------------------------
+Comp D parent Section - Document
+----------------------------------------------------------------
+
+    Element note   text . * Content to output (Markdown format).
+
+
