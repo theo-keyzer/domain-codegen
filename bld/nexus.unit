@@ -1,0 +1,868 @@
+// ================================================================
+// net7.unit – UNIFIED MULTI-PARADIGM COMPUTING SCHEMA
+// Standalone, flat architecture for classical, neuromorphic,
+// analog, quantum, photonic, and molecular computing
+// Version: 1.0.0
+// ================================================================
+
+// ================================================================
+// FOUNDATION LAYER - Project Tree
+// ================================================================
+
+Comp Project parent . Find
+----------------------------------------------------------------
+* Top-level project container for multi-paradigm computing
+----------------------------------------------------------------
+	Element project       key   . + Project identifier
+	Element version       word  . + Schema version (e.g., 1.0.0)
+	Element target_hardware text . + Comma-separated hardware targets
+	Element desc          text  . * Project description
+
+Comp ComputeGraph parent Project FindIn
+----------------------------------------------------------------
+* Flat operation graph with direct dependencies (no Layer nesting)
+----------------------------------------------------------------
+	Element graph         key   . + Graph identifier
+	Element entry_point   word  . + First operation to execute
+	Element parallel      word  . * true/false for concurrent execution
+	Element desc          text  . * Description
+	Element project_ref   ref  Project + Parent project
+
+Comp HardwareTarget parent ComputeGraph FindIn
+----------------------------------------------------------------
+* Multiple hardware targets for a compute graph
+----------------------------------------------------------------
+	Element hardware    ref  Hardware + Target hardware
+	Element priority    word . + primary, secondary, fallback
+	Element partition   word . * Graph partition for this hardware
+	Element desc        text . * Description
+
+Comp DataTensor parent ComputeGraph FindIn
+----------------------------------------------------------------
+* Data tensor specification (inputs, outputs, intermediate)
+----------------------------------------------------------------
+	Element tensor        key       .            + Tensor identifier
+	Element shape         word      .            + Shape (e.g., batch,height,width,channels)
+	Element dtype         word      .            + fp32, fp16, int8, event_based, analog_voltage, qubit_state, photon_count
+	Element layout        word      .            + nhwc, nchw, sparse_coo, event_stream
+	Element producer      word      .            * Operation that produces this tensor
+	Element desc          text      .            * Description
+
+Comp TensorConsumer parent DataTensor FindIn
+----------------------------------------------------------------
+* Operations that consume this tensor
+----------------------------------------------------------------
+	Element graph       up_copy   ComputeGraph + Graph id
+	Element consumer_op ref_child Operation    + Consumer operation
+	Element input_port  word      .            * Which input port uses this tensor
+	Element desc        text      .            * Description
+
+Comp Operation parent ComputeGraph FindIn
+----------------------------------------------------------------
+* Unified operation across all paradigms (no nested hierarchy)
+----------------------------------------------------------------
+	Element op            key   . + Operation identifier
+	Element op_type       word  . + Paradigm.operation (e.g., classical.conv2d, quantum.gate)
+	Element hardware_hint word  . * Preferred hardware (can be overridden)
+	Element kernel        word  . * Kernel name for implementation
+	Element desc          text  . * Description
+	Element hardware_target ref Hardware * Preferred hardware
+	Element kernel_ref    ref  Kernel * Kernel implementation
+
+Comp OperationArg parent Operation FindIn
+----------------------------------------------------------------
+* Operation arguments (inputs, outputs, parameters)
+----------------------------------------------------------------
+	Element arg         key       .            + Argument name (e.g., "input_1", "weight", "output")
+	Element role        word      .            + input, output, parameter
+	Element graph       up_copy   ComputeGraph + Graph id
+	Element tensor_ref  ref_child DataTensor   + Tensor reference
+	Element dtype       word      .            * Data type override
+	Element optional    word      .            * true/false
+	Element desc        text      .            * Description
+
+Comp OpDependency parent Operation FindIn
+----------------------------------------------------------------
+* Explicit operation dependencies for scheduling
+----------------------------------------------------------------
+	Element predecessor     word      .            + Operation that must complete first
+	Element dependency_type word      .            + data, control, resource
+	Element desc            text      .            * Description
+	Element graph           up_copy   ComputeGraph + Graph id
+	Element pred_op         ref_child Operation    + Predecessor operation
+
+Comp ClassicalOp parent Operation FindIn
+----------------------------------------------------------------
+* Classical ML operations (conv, matmul, etc.)
+----------------------------------------------------------------
+	Element classical_type word . + conv2d, matmul, relu, softmax, pool, norm
+	Element tiling        text  . * Tile size for spatial operations
+	Element dataflow      word  . * row_stationary, output_stationary, weight_stationary
+	Element fusion_group  word  . * Group ID for operation fusion
+	Element desc          text  . * Description
+	Element fusion_pattern ref FusionPattern * Fusion group
+
+Comp SpikingOp parent Operation FindIn
+----------------------------------------------------------------
+* Spiking neural network operations
+----------------------------------------------------------------
+	Element neuron_model  word  . + lif, alif, izhikevich, hodgkin_huxley
+	Element spike_encoding word . + rate, latency, population, temporal, phase
+	Element threshold     word  . * Firing threshold
+	Element refractory    word  . * Refractory period (ms)
+	Element plasticity_rule word . * stdp, hebbian, oja, bcm
+	Element synapse_model word  . + exponential, alpha, delta
+	Element timestep      word  . + Simulation timestep (ms)
+	Element desc          text  . * Description
+
+Comp PlasticityRule parent SpikingOp FindIn
+----------------------------------------------------------------
+* Synaptic plasticity specification
+----------------------------------------------------------------
+	Element rule_name     word  . + stdp, rstdp, triplet_stdp
+	Element time_window   word  . + Window size (ms, e.g., ±20)
+	Element A_plus        word  . + Potentiation amplitude
+	Element A_minus       word  . + Depression amplitude
+	Element tau_plus      word  . + Potentiation time constant (ms)
+	Element tau_minus     word  . + Depression time constant (ms)
+	Element weight_dependence word . + additive, multiplicative, soft_bound
+	Element homeostasis   word  . * target_rate=5Hz
+	Element desc          text  . * Description
+
+Comp AnalogOp parent Operation FindIn
+----------------------------------------------------------------
+* Analog compute operations (crossbar MVP, etc.)
+----------------------------------------------------------------
+	Element analog_type   word  . + crossbar_mvp, capacitor_mac, vcsel_mac
+	Element array_ref     word  . + Reference to memristor/analog array
+	Element pulse_protocol word . * Voltage pulse scheme
+	Element adc_bits      word  . * ADC resolution
+	Element dac_bits      word  . * DAC resolution
+	Element non_ideal     word  . * true to include drift, noise, saturation
+	Element programming_time word . * Time to update weights (µs)
+	Element desc          text  . * Description
+	Element array_target  ref  AnalogHardware + Target analog array (NOT word!)
+
+Comp QuantumOp parent Operation FindIn
+----------------------------------------------------------------
+* Quantum gate and measurement operations
+----------------------------------------------------------------
+	Element quantum_type  word  . + gate, measurement, adiabatic, variational
+	Element gate_type     word  . * h, x, y, z, cnot, cz, rx, ry, rz, toffoli
+	Element angle         word  . * Rotation angle (radians or symbolic)
+	Element measurement_basis word . * computational, bell, pauli_x, pauli_y, pauli_z
+	Element error_mitigation word . * zne, pec, symmetry_verification
+	Element desc          text  . * Description
+
+Comp QubitTarget parent QuantumOp FindIn
+----------------------------------------------------------------
+* Target qubits for quantum operations
+----------------------------------------------------------------
+	Element qubit_index key  . + Qubit index (0-based)
+	Element role        word . + target, control, ancillary
+	Element desc        text . * Description
+
+Comp ControlQubit parent QuantumOp FindIn  
+----------------------------------------------------------------
+* Control qubits for controlled operations
+----------------------------------------------------------------
+	Element qubit_index key  . + Control qubit index
+	Element condition   word . + active_high, active_low
+	Element desc        text . * Description
+
+Comp QuantumCircuit parent QuantumOp FindIn
+----------------------------------------------------------------
+* Quantum circuit specification
+----------------------------------------------------------------
+	Element circuit_name  key   . + Circuit identifier
+	Element depth         word  . + Circuit depth
+	Element gate_count    word  . * Total gate count
+	Element entanglement  word  . * Entanglement measure
+	Element transpiled    word  . * true if hardware-native
+	Element desc          text  . * Description
+
+Comp PhotonicOp parent Operation FindIn
+----------------------------------------------------------------
+* Photonic computing operations
+----------------------------------------------------------------
+	Element photonic_type word  . + interference, modulation, detection, switch
+	Element interferometer word . * mach_zehnder, ring_resonator, directional_coupler
+	Element phase_shift   word  . * Tunable phase (radians)
+	Element splitting_ratio word . * For beam splitters (e.g., 0.5 for 50:50)
+	Element modulation    word  . * thermo_optic, electro_optic, mems
+	Element wavelength    word  . + Operating wavelength (nm)
+	Element power_budget  word  . * Optical power (dBm)
+	Element desc          text  . * Description
+
+Comp MolecularOp parent Operation FindIn
+----------------------------------------------------------------
+* DNA/molecular computing operations
+----------------------------------------------------------------
+	Element molecular_type word . + hybridization, strand_displacement, catalysis
+	Element rate_constant word  . + Forward rate constant (M⁻¹s⁻¹)
+	Element reverse_rate  word  . * Reverse rate constant
+	Element gibbs_energy  word  . * ΔG (kcal/mol)
+	Element temperature   word  . + Reaction temperature (°C)
+	Element time_scale    word  . + Expected reaction time
+	Element desc          text  . * Description
+
+Comp Reactant parent MolecularOp FindIn
+----------------------------------------------------------------
+* Reactant species for molecular operations
+----------------------------------------------------------------
+	Element species     key  . + Chemical species name
+	Element concentration word . + Initial concentration (M)
+	Element stoichiometry word . + Stoichiometric coefficient
+	Element desc        text . * Description
+
+Comp Product parent MolecularOp FindIn
+----------------------------------------------------------------
+* Product species for molecular operations  
+----------------------------------------------------------------
+	Element species     key  . + Chemical species name
+	Element concentration word . * Expected concentration (M)
+	Element stoichiometry word . + Stoichiometric coefficient
+	Element desc        text . * Description
+
+Comp HybridOp parent Operation FindIn
+----------------------------------------------------------------
+* Operations that span multiple paradigms
+----------------------------------------------------------------
+	Element primary_mode  word  . + Primary execution paradigm
+	Element mode_switch_cost word . * Latency + energy to switch (µs, µJ)
+	Element conversion_kernel word . * Data format converter
+	Element fidelity_loss word  . * Information loss in conversion (0-1)
+	Element desc          text  . * Description
+
+Comp FallbackMode parent HybridOp FindIn
+----------------------------------------------------------------
+* Fallback paradigms for hybrid operations
+----------------------------------------------------------------
+	Element paradigm    word . + neuromorphic, analog, quantum, photonic, molecular
+	Element priority    word . + first, second, last_resort
+	Element switch_condition text . * When to switch to this mode
+	Element desc        text . * Description
+
+Comp RedundancyStrategy parent Operation FindIn
+----------------------------------------------------------------
+* Fault tolerance via redundancy
+----------------------------------------------------------------
+	Element replication_factor word . + N-modular redundancy (e.g., 3)
+	Element voting        word  . + majority, weighted, ml_anomaly_detection
+	Element rollback_checkpoints text . * Checkpoint IDs for recovery
+	Element overhead      word  . * Performance overhead (e.g., 1.5×)
+	Element desc          text  . * Description
+	Element checkpoints   ref Checkpoint * Recovery checkpoints
+
+Comp ProfilingHook parent Operation FindIn
+----------------------------------------------------------------
+* Per-operation instrumentation
+----------------------------------------------------------------
+	Element hook_id       key   . + Hook identifier
+	Element metrics       text  . + Comma-separated metrics to collect
+	Element sampling_rate word  . + Collection frequency (1.0 = always)
+	Element overhead      word  . * Profiling overhead (%)
+	Element desc          text  . * Description
+	Element metrics_ref   ref Metric * Metrics to collect
+
+Comp AdaptiveParameter parent Operation FindIn
+----------------------------------------------------------------
+* Runtime-tunable parameter with feedback
+----------------------------------------------------------------
+	Element param         key   . + Parameter identifier
+	Element adaptation    word  . + feedback_based, schedule_based, rl_based
+	Element update_rule   text  . + Update formula or policy
+	Element update_freq   word  . + Steps between updates
+	Element bounds        text  . * Min/max during adaptation
+	Element initial_value word  . + Starting value
+	Element desc          text  . * Description
+
+Comp SecureCompute parent Operation FindIn
+----------------------------------------------------------------
+* Secure/private computation
+----------------------------------------------------------------
+	Element encryption    word  . + homomorphic, secure_multiparty, differential_privacy
+	Element key_management word . + hardware, tee, software
+	Element side_channel_resistance word . * power_analysis, timing_attack, em_leakage
+	Element desc          text  . * Description
+
+Comp SearchSpace parent ComputeGraph FindIn
+----------------------------------------------------------------
+* Hyperparameter search space for auto-tuning
+----------------------------------------------------------------
+	Element search_space  key   .        + Search space identifier
+	Element objective     word .         + minimize_latency, minimize_energy, maximize_throughput, pareto
+	Element constraints   text .         * Hard constraints (e.g., power<5W, accuracy>0.95)
+	Element desc          text .         * Description
+
+Comp SearchTarget parent SearchSpace FindIn
+----------------------------------------------------------------
+* Operations to tune in search space
+----------------------------------------------------------------
+	Element graph          up_copy   ComputeGraph + Graph id
+	Element operation      ref_child Operation    + Operation to tune
+	Element importance     word      .            + high, medium, low
+	Element tunable_params text      .            * Which parameters to tune
+	Element desc           text      .            * Description
+
+Comp SearchParameter parent SearchSpace FindIn
+----------------------------------------------------------------
+* Individual tunable parameter
+----------------------------------------------------------------
+	Element param         key   . + Parameter name
+	Element param_type    word  . + continuous, discrete, categorical
+	Element range_min     word  . * Min value (continuous/discrete)
+	Element range_max     word  . * Max value
+	Element values        text  . * Categorical values
+	Element initial_value word  . * Starting value
+	Element mutation_rate word  . + Mutation probability (0.0-1.0)
+	Element importance    word  . * high, medium, low
+	Element desc          text  . * Description
+
+Comp EnergyBudget parent ComputeGraph FindIn
+----------------------------------------------------------------
+* Energy allocation across operations
+----------------------------------------------------------------
+	Element budget_id     key       .            + Budget identifier
+	Element total_budget  word      .            + Total energy (Joules) or power (Watts)
+	Element source        word      .            + battery, grid, energy_harvesting
+	Element dvfs_policy   word      .            * Dynamic voltage/frequency scaling
+	Element sleep_states  text      .            * Power gating strategy
+	Element desc          text      .            * Description
+
+Comp EnergyAllocation parent EnergyBudget FindIn
+----------------------------------------------------------------
+* Per-operation energy allocations
+----------------------------------------------------------------
+	Element graph       up_copy   ComputeGraph + Graph id
+	Element operation   ref_child Operation    + Target operation
+	Element budget      word      .            + Energy allocation (Joules)
+	Element priority    word      .            + critical, high, medium, low
+	Element flexible    word      .            * true/false if can be reduced
+	Element desc        text      .            * Description
+
+Comp TileMapping parent ComputeGraph FindIn
+----------------------------------------------------------------
+* Spatial tiling for array processors
+----------------------------------------------------------------
+	Element tile_id               key       .            + Tiling identifier
+	Element tile_size             word      .            + Tile dimensions (e.g., 32×32)
+	Element dataflow              word      .            + row_stationary, output_stationary, weight_stationary
+	Element buffer_hierarchy      text      .            + L1, L2, DRAM sizes
+	Element communication_pattern word      .            + nearest_neighbor, broadcast, multicast
+	Element desc                  text      .            * Description
+
+Comp TileTarget parent TileMapping FindIn
+----------------------------------------------------------------
+* Operations to apply tiling to
+----------------------------------------------------------------
+	Element graph       up_copy   ComputeGraph + Graph id
+	Element operation   ref_child Operation    + Operation to tile
+	Element tile_size   word      .            * Operation-specific tile size
+	Element dataflow    word      .            * Operation-specific dataflow
+	Element desc        text      .            * Description
+
+Comp PrivacyBudget parent ComputeGraph FindIn
+----------------------------------------------------------------
+* Differential privacy budget
+----------------------------------------------------------------
+	Element epsilon       word  . + Privacy parameter
+	Element delta         word  . + Failure probability
+	Element mechanism     word  . + laplace, gaussian, exponential
+	Element desc          text  . * Description
+
+Comp TraceCollection parent ComputeGraph FindIn
+----------------------------------------------------------------
+* Execution trace recording
+----------------------------------------------------------------
+	Element trace_id      key   . + Trace identifier
+	Element format        word  . + chrome_trace, perfetto, custom
+	Element buffer_size   word  . + Maximum events to buffer
+	Element triggers      text  . * Start/stop conditions
+	Element desc          text  . * Description
+
+Comp EvolvableGraph parent ComputeGraph FindIn
+----------------------------------------------------------------
+* Graph subject to structural evolution
+----------------------------------------------------------------
+	Element evolvable_id  key   . + Identifier
+	Element mutation_ops  text  . + add_op, remove_op, change_connection
+	Element growth_rule   text  . + When/how to grow
+	Element pruning_rule  text  . + When/how to prune
+	Element max_ops       word  . * Maximum operation count
+	Element fitness_metric word . + Metric to optimize
+	Element desc          text  . * Description
+	Element fitness_metric ref Metric + Fitness metric
+
+Comp Provenance parent Project FindIn
+----------------------------------------------------------------
+* Reproducibility tracking
+----------------------------------------------------------------
+	Element git_commit    word  . + Code version
+	Element dataset_hash  word  . + SHA256 of input data
+	Element random_seed   word  . + For stochastic operations
+	Element hardware_version word . * Chip stepping, firmware
+	Element timestamp     word  . + Execution timestamp
+	Element desc          text  . * Description
+
+Comp OptimizationRun parent Project FindIn
+----------------------------------------------------------------
+* Record of optimization campaign
+----------------------------------------------------------------
+	Element run_id        key   . + Run identifier
+	Element strategy      word  . + Strategy used
+	Element start_time    word  . + Timestamp
+	Element end_time      word  . * Timestamp
+	Element total_trials  word  . * Total evaluations
+	Element best_config   text  . * Best configuration found
+	Element convergence   word  . * converged, max_trials, timeout
+	Element desc          text  . * Description
+	Element project_ref   ref Project + Parent project
+	Element strategy_ref  ref OptimizationStrategy + Strategy used
+	Element best_checkpoint ref Checkpoint * Best configuration
+
+Comp Validation parent Project FindIn
+----------------------------------------------------------------
+* Validation rules and checks
+----------------------------------------------------------------
+	Element rule          key     .       + Rule identifier
+	Element target        word    .       * Target component
+	Element condition     text    .       + Validation logic
+	Element check_time    word    .       + compile_time, runtime, post_execution
+	Element desc          text    .       * Description
+	Element target_key    word    .       * Target component (generic)
+
+Comp Genotype parent Project FindIn
+----------------------------------------------------------------
+* Evolvable model blueprint
+----------------------------------------------------------------
+	Element genome_id     key   . + Genome identifier
+	Element encoding      word  . + direct, indirect, cppn, grammar
+	Element mutation_rate word  . + Mutation probability
+	Element crossover     word  . + single_point, uniform, grammar_based
+	Element constraints   text  . * Structural constraints
+	Element desc          text  . * Description
+
+Comp Phenotype parent Project FindIn
+----------------------------------------------------------------
+* Realized model from genotype
+----------------------------------------------------------------
+	Element phenotype_id   key  .            + Phenotype identifier
+	Element age            word .            + Generation count
+	Element fitness_score  word .            * Evaluated fitness
+	Element validated      word .            + true/false
+	Element desc           text .            * Description
+	Element realized_graph link ComputeGraph + Realized graph
+	Element genome_source  link Genotype     + Source genome (NOT word!)
+
+// ================================================================
+// HARDWARE ABSTRACTION - Hardware Tree
+// ================================================================
+
+Comp Hardware parent . Find
+----------------------------------------------------------------
+* Unified hardware specification across all paradigms
+----------------------------------------------------------------
+	Element hardware      key   . + Hardware identifier
+	Element paradigm      word  . + classical, neuromorphic, analog, quantum, photonic, molecular
+	Element backend       word  . + cuda, hip, loihi, memristor, ibm_quantum, silicon_photonics, dna
+	Element vendor        word  . * nvidia, intel, extropic, ibm, etc.
+	Element emulation     word  . * true/false for software emulation
+	Element desc          text  . * Description
+
+Comp PhysicsModel parent Hardware FindIn
+----------------------------------------------------------------
+* Physical characteristics and constraints
+----------------------------------------------------------------
+	Element model_id      key   . + Physics model identifier
+	Element energy_eq     text  . * Energy equation (e.g., E = C*V^2*f)
+	Element thermal_model text  . * Thermal dissipation model
+	Element noise_model   text  . * Noise characteristics
+	Element latency_model text  . * Propagation delay model
+	Element power_budget  word  . * Maximum power (Watts)
+	Element operating_temp word . * Operating temperature (Kelvin)
+	Element desc          text  . * Description
+
+Comp ClassicalHardware parent Hardware FindIn
+----------------------------------------------------------------
+* GPU, TPU, CPU specifications
+----------------------------------------------------------------
+	Element arch          word  . + ampere, hopper, milan, sapphire_rapids
+	Element compute_units word  . + Number of cores/SMs
+	Element memory_bw     word  . + GB/s
+	Element peak_flops    word  . + TFLOPS
+	Element precision     text  . + fp32, fp16, int8, tf32
+	Element desc          text  . * Description
+
+Comp NeuromorphicHardware parent Hardware FindIn
+----------------------------------------------------------------
+* Spiking neural network chips
+----------------------------------------------------------------
+	Element chip_type     word  . + loihi, loihi2, truenorth, brainscales, dynapse
+	Element neuron_count  word  . + Maximum neurons
+	Element synapse_count word  . + Maximum synapses
+	Element spike_protocol word . + aer, ttfs, rate_coded
+	Element timestep      word  . + Simulation timestep (e.g., 0.1ms)
+	Element plasticity    word  . * Hardware STDP support: true/false
+	Element desc          text  . * Description
+
+Comp AnalogHardware parent Hardware FindIn
+----------------------------------------------------------------
+* Memristor, analog compute, in-memory computing
+----------------------------------------------------------------
+	Element compute_type  word  . + memristor, capacitor, vcsel, analog_cmos
+	Element array_size    word  . + rows×cols (e.g., 128×128)
+	Element cell_type     word  . + OxRAM, CBRAM, PCM, ReRAM, VCSEL
+	Element precision     word  . + Effective bits
+	Element endurance     word  . * Write cycle limit
+	Element nonlinearity  text  . * Saturation, asymmetry characteristics
+	Element read_noise    word  . * SNR or voltage noise (µV)
+	Element desc          text  . * Description
+
+Comp QuantumHardware parent Hardware FindIn
+----------------------------------------------------------------
+* Quantum computing platforms
+----------------------------------------------------------------
+	Element qubit_type    word  . + superconducting, ion_trap, photonic, topological
+	Element qubit_count   word  . + Physical qubits
+	Element connectivity  word  . + all_to_all, linear, grid, heavy_hex
+	Element gate_set      text  . + Native gates (e.g., sqrt_iswap, cz, rz)
+	Element t1_time       word  . * T1 coherence time (µs)
+	Element t2_time       word  . * T2 dephasing time (µs)
+	Element gate_fidelity word  . + Two-qubit gate fidelity (e.g., 0.995)
+	Element error_correction word . * surface_code, color_code, none
+	Element desc          text  . * Description
+
+Comp PhotonicHardware parent Hardware FindIn
+----------------------------------------------------------------
+* Photonic computing platforms
+----------------------------------------------------------------
+	Element platform_type word  . + silicon_photonics, inp_photonics, free_space
+	Element wavelength    word  . + Operating wavelength (nm, e.g., 1550)
+	Element waveguide_loss word . + dB/cm
+	Element modulation_bw word  . + GHz
+	Element detector_eff  word  . + Quantum efficiency (0-1)
+	Element thermal_crosstalk word . * Adjacent channel coupling (dB)
+	Element wdm_channels  word  . * Wavelength division multiplexing channels
+	Element desc          text  . * Description
+
+Comp MolecularHardware parent Hardware FindIn
+----------------------------------------------------------------
+* DNA/molecular computing platforms
+----------------------------------------------------------------
+	Element platform_type word  . + dna_origami, microfluidics, test_tube, cell_free
+	Element reaction_volume word . + Volume (nL, µL, mL)
+	Element temperature_control word . + Precision (±°C)
+	Element time_scale    word  . + Typical reaction time (ms, sec, min)
+	Element readout_method word . + fluorescence, gel_electrophoresis, sequencing
+	Element spatial_model word  . + well_mixed, diffusion_limited, compartmentalized
+	Element desc          text  . * Description
+
+Comp PowerDomain parent Hardware FindIn
+----------------------------------------------------------------
+* Voltage domains and power gating
+----------------------------------------------------------------
+	Element domain_id     key   . + Domain identifier
+	Element voltage_rails text  . + Supported voltages (e.g., 1.8V, 3.3V)
+	Element switching_cost word . + Energy to power on/off (µJ)
+	Element leakage_model text  . * Static power vs. temperature
+	Element desc          text  . * Description
+
+Comp SpatialArray parent Hardware FindIn
+----------------------------------------------------------------
+* Systolic array or PE grid
+----------------------------------------------------------------
+	Element array_id      key   . + Array identifier
+	Element pe_dims       word  . + PE grid dimensions (e.g., 16×16)
+	Element interconnect  word  . + mesh, torus, crossbar, noc
+	Element local_memory  word  . + Per-PE memory size (KB)
+	Element desc          text  . * Description
+
+// ================================================================
+// KERNEL IMPLEMENTATIONS - Kernel Tree
+// ================================================================
+
+Comp Kernel parent . Find
+----------------------------------------------------------------
+* Cross-hardware kernel implementation
+----------------------------------------------------------------
+	Element kernel        key   . + Kernel identifier
+	Element paradigm      word  . + classical, spiking, analog, quantum, photonic, molecular
+	Element hardware      word  . + Target hardware (can use wildcards)
+	Element signature     text  . + Function signature
+	Element body          text  . * Implementation code/template
+	Element language      word  . + cuda, c++, spi, qasm, openqasm, verilog
+	Element performance_model text . * FLOPS, latency, energy model
+	Element desc          text  . * Description
+	Element hardware_target ref Hardware + Target hardware (NOT word!)
+	Element fusion_source ref FusionPattern * Source fusion pattern
+
+Comp FusionPattern parent . Find
+----------------------------------------------------------------
+* Operation fusion for efficiency
+----------------------------------------------------------------
+	Element pattern       key   . + Pattern identifier
+	Element fused_kernel  word  . + Reference to fused kernel
+	Element speedup       word  . * Expected speedup vs. unfused
+	Element applicable_hardware text . + Hardware where fusion applies
+	Element desc          text  . * Description
+	Element fused_kernel_ref ref Kernel + Fused kernel (NOT word!)
+
+Comp FusionHardwareTarget parent FusionPattern FindIn
+----------------------------------------------------------------
+* Hardware where this fusion pattern applies
+----------------------------------------------------------------
+	Element hardware     ref  Hardware + Target hardware
+	Element efficiency   word . * Efficiency gain on this hardware (1.0-2.0)
+	Element desc         text . * Description
+
+Comp FusionOpTarget parent FusionPattern FindIn
+----------------------------------------------------------------
+* Operation types to include in fusion pattern
+----------------------------------------------------------------
+	Element op_type      key  . + Operation type to fuse (e.g., "classical.conv2d", "classical.relu")
+	Element position     word . * Position in fusion sequence (e.g., 1, 2, 3)
+	Element mandatory    word . + true/false whether this op must be present
+	Element desc         text . * Description
+
+// ================================================================
+// DATA FORMAT CONVERSION - DataFormatConverter Tree
+// ================================================================
+
+Comp DataFormatConverter parent . Find
+----------------------------------------------------------------
+* Convert between paradigm-specific data formats
+----------------------------------------------------------------
+	Element converter     key   . + Converter identifier
+	Element input_format  word  . + spike_train, analog_voltage, qubit_state, photon_count
+	Element output_format word  . + fp32_tensor, fp16_tensor, binary_events
+	Element conversion_kernel word . + Reference to kernel
+	Element latency       word  . * Conversion latency (µs)
+	Element energy        word  . * Conversion energy (µJ)
+	Element desc          text  . * Description
+
+// ================================================================
+// AUTO-OPTIMIZATION & SEARCH - OptimizationStrategy Tree
+// ================================================================
+
+Comp OptimizationStrategy parent . Find
+----------------------------------------------------------------
+* Evolutionary/Bayesian/RL optimization strategy
+----------------------------------------------------------------
+	Element strategy      key       .                    + Strategy identifier
+	Element algorithm     word      .                    + genetic_algorithm, cma_es, bayesian_opt, ppo, grid_search
+	Element population    word      .                    * Population size (for evolutionary)
+	Element generations   word      .                    * Number of generations
+	Element learning_rate word      .                    * Learning rate (for gradient-based)
+	Element parallel_trials word    .                    + true/false
+	Element desc          text      .                    * Description
+	Element project_ref   ref       Project              * Target project
+	Element target_graph  ref_child ComputeGraph         * Graph to simulate
+	Element search_space  ref_child SearchSpace          + Search space to explore
+	Element strategy      ref       OptimizationStrategy + Search space to explore
+	Element fitness_fn    word      .                    + Fitness function
+
+Comp FitnessFunction parent OptimizationStrategy FindIn
+----------------------------------------------------------------
+* Multi-objective fitness evaluation
+----------------------------------------------------------------
+	Element fitness_fn    key   . + Fitness function name
+	Element normalization word  . * z_score, min_max, none
+	Element higher_better word  . + true/false
+	Element desc          text  . * Description
+
+Comp FitnessComponent parent FitnessFunction FindIn
+----------------------------------------------------------------
+* Weighted components for multi-objective fitness
+----------------------------------------------------------------
+	Element metric      ref  Metric + Metric to optimize
+	Element weight      word . + Weight (0.0-1.0)
+	Element target      word . * Target value to achieve
+	Element normalize   word . * z_score, min_max, none
+	Element desc        text . * Description
+
+// ================================================================
+// FAULT TOLERANCE - FaultModel Tree
+// ================================================================
+
+Comp FaultModel parent . Find
+----------------------------------------------------------------
+* Fault injection and tolerance modeling
+----------------------------------------------------------------
+	Element fault_id      key   . + Fault model identifier
+	Element fault_type    word  . + transient, permanent, intermittent
+	Element distribution  word  . + exponential, weibull, constant_rate
+	Element affected_key  text  . + Target components
+	Element rate          word  . * Fault rate (FIT or MTBF)
+	Element mitigation    word  . + redundancy, ecc, retransmission, checkpoint
+	Element desc          text  . * Description
+	Element target_key    word  . + Affected components (generic)
+
+// ================================================================
+// SIMULATION & VALIDATION - Simulator Tree
+// ================================================================
+
+Comp Simulator parent . Find
+----------------------------------------------------------------
+* Multi-fidelity, multi-physics simulator
+----------------------------------------------------------------
+	Element sim_id        key   . + Simulator identifier
+	Element components    text  . + Components to simulate
+	Element fidelity      word  . + cycle_accurate, functional, analytical
+	Element solver        word  . + event_driven, ode, quasi_static, monte_carlo
+	Element time_scale    word      . + Simulation timestep
+	Element energy_tracker word     . * true/false
+	Element fault_injection word    . * Reference to FaultModel
+	Element desc          text      . * Description
+	Element project_ref   ref       Project      * Target project
+	Element target_graph  ref_child ComputeGraph * Graph to simulate
+	Element fault_models  ref_child FaultModel   * Fault models to apply
+
+Comp SimulationLevel parent Simulator FindIn
+----------------------------------------------------------------
+* Multi-fidelity simulation configuration
+----------------------------------------------------------------
+	Element component     word  . + Component to configure
+	Element fidelity      word  . + cycle_accurate, functional, analytical
+	Element speed_factor  word  . * Speedup vs. cycle-accurate (e.g., 1000×)
+	Element accuracy      word  . * RMSE vs. hardware
+	Element calibration_data text . * Hardware trace for tuning
+	Element desc          text  . * Description
+	Element target_component ref Operation + Component to configure
+
+Comp AdaptiveFidelity parent Simulator FindIn
+----------------------------------------------------------------
+* Dynamic fidelity switching during simulation
+----------------------------------------------------------------
+	Element switch_triggers text . + Conditions for switching (e.g., error>0.01)
+	Element fidelity_schedule text . + Time-based or event-based schedule
+	Element desc          text  . * Description
+
+Comp DeterminismConstraint parent Simulator FindIn
+----------------------------------------------------------------
+* Determinism level specification
+----------------------------------------------------------------
+	Element level         word  . + bit_exact, numerically_stable, statistically_equivalent
+	Element tolerance     word  . * Floating-point comparison tolerance
+	Element seed_propagation word . + How randomness flows
+	Element desc          text  . * Description
+
+// ================================================================
+// CONSTRAINTS - Constraint Tree
+// ================================================================
+
+Comp Constraint parent . Find
+----------------------------------------------------------------
+* Multi-domain constraints
+----------------------------------------------------------------
+	Element constraint_id key   . + Constraint identifier
+	Element target        word  . + Target component or operation
+	Element condition     text  . + Constraint expression
+	Element severity      word  . + warning, error, halt
+	Element temporal      word  . + static, per_step, cumulative, phase_based
+	Element auto_repair   text  . * Suggested fix or mitigation
+	Element desc          text  . * Description
+	Element target_key    word  . + Target component (generic)
+
+// ================================================================
+// OBSERVABILITY & TELEMETRY - Metric Tree
+// ================================================================
+
+Comp Metric parent . Find
+----------------------------------------------------------------
+* Performance, hardware, and domain-specific metrics
+----------------------------------------------------------------
+	Element metric        key   . + Metric identifier
+	Element category      word  . + performance, hardware, neuromorphic, quantum
+	Element measurement   text  . + How to measure
+	Element unit          word  . + Unit (ms, mJ, Hz, fidelity, spikes/sec)
+	Element target_value  word  . * Target to achieve
+	Element tolerance     word  . * Acceptable deviation
+	Element desc          text  . * Description
+	Element target_key    word  . * Component to measure
+
+// ================================================================
+// CHECKPOINTS - Checkpoint Tree
+// ================================================================
+
+Comp Checkpoint parent . Find
+----------------------------------------------------------------
+* Versioned snapshot for rollback/transfer
+----------------------------------------------------------------
+	Element checkpoint_id key        .            + Checkpoint identifier
+	Element project_ref   ref        Project      + Parent project
+	Element generation    word       .            * Generation number
+	Element state         text       .            + Serialized state
+	Element timestamp     word       .            + When created
+	Element desc          text       .            * Description
+	Element project_source ref       Project      + Source project (NOT word!)
+	Element graph_snapshot ref_child ComputeGraph * Graph state
+
+// ================================================================
+// ENUMERATION RULES
+// ================================================================
+
+Comp ParadigmRule parent . Find
+----------------------------------------------------------------
+* Valid computing paradigms
+----------------------------------------------------------------
+	Element paradigm      key   . + classical, neuromorphic, analog, quantum, photonic, molecular
+	Element desc          text  . * Description
+
+Comp NeuronModelRule parent . Find
+----------------------------------------------------------------
+* Valid neuron models
+----------------------------------------------------------------
+	Element model         key   . + lif, alif, izhikevich, hodgkin_huxley
+	Element equations     text  . * Governing equations
+	Element params        text  . * Required parameters
+	Element desc          text  . * Description
+
+Comp QuantumGateRule parent . Find
+----------------------------------------------------------------
+* Valid quantum gates
+----------------------------------------------------------------
+	Element gate          key   . + h, x, y, z, cnot, cz, rx, ry, rz, toffoli
+	Element qubit_count   word  . + Number of qubits
+	Element unitary       text  . * Matrix representation
+	Element desc          text  . * Description
+
+Comp DataflowRule parent . Find
+----------------------------------------------------------------
+* Valid dataflow patterns
+----------------------------------------------------------------
+	Element dataflow      key   . + row_stationary, output_stationary, weight_stationary
+	Element suitable_for  text  . * Operation types (e.g., conv2d, matmul)
+	Element desc          text  . * Description
+
+Comp FusionStrategyRule parent . Find
+----------------------------------------------------------------
+* Valid fusion strategies
+----------------------------------------------------------------
+	Element strategy      key   . + vertical, horizontal, loop_fusion
+	Element applicable_paradigms text . + Where fusion applies
+	Element desc          text  . * Description
+
+// ================================================================
+// EXTENSIBILITY - Extension Tree
+// ================================================================
+
+Comp Extension parent . Find
+----------------------------------------------------------------
+* User-defined domain extension
+----------------------------------------------------------------
+	Element ext_name      key   . + Extension name
+	Element base_comp     word  . + Base component to extend
+	Element new_elements  text  . * New fields to add
+	Element validation    text  . * Additional validation rules
+	Element desc          text  . * Description
+	Element base_key      word  . + Base component to extend
+
+Comp CustomParadigm parent Extension FindIn
+----------------------------------------------------------------
+* Define new computing paradigm
+----------------------------------------------------------------
+	Element paradigm_name word  . + New paradigm name
+	Element hardware_reqs text  . + Required Hardware fields
+	Element operation_reqs text . + Required Operation fields
+	Element desc          text  . * Description

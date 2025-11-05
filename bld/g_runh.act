@@ -261,9 +261,13 @@ Actor refs_ele2 . type = up_copy
 
 C //  ${._lno}
 
-C 	p = st.Kparentp
+-C 	p = st.Kparentp
+-Its parent.parent up
 
-Its parent.parent up
+C 	p = st.Me
+
+Its parent up
+
 
 C 	if p >= 0 {
 C 		st.K${name:l}p = p

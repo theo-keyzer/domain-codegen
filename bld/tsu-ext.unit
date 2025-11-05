@@ -1,0 +1,313 @@
+// ================================================================
+// TSU DOMAIN EXTENSIONS (tsu_extensions.unit)
+// Enhanced for Advanced PGMs, Multi-State, and TSU Optimization
+// Compatible with tsu.unit v1.0; append after core components
+// ================================================================
+
+// ================================================================
+// 1. MODEL & PGM EXTENSIONS
+// Support loopy/hybrid PGMs, variational approximations
+// ================================================================
+
+Comp MultiStateModel parent Model Find
+----------------------------------------------------------------
+* Energy-based models with non-binary states (e.g., Potts, one-hot QUBO)
+----------------------------------------------------------------
+	Element model             key   . + Model name
+	Element num_states        word  . + q (discrete states per variable)
+	Element state_encoding    word  . * binary, one_hot, integer
+	Element variational       word  . * true/false for hybrid VI+MCMC
+	Element desc              text  . * Description
+
+Comp LoopyPGM parent PGMSchema FindIn
+----------------------------------------------------------------
+* Loopy belief propagation support for cyclic graphs
+----------------------------------------------------------------
+	Element loops_detected    word  . * true/false (tree vs. loopy)
+	Element belief_prop       word  . + loopy_bp, mean_field
+	Element max_iterations    word  . * BP convergence limit
+	Element damping_factor    word  . * 0.5-1.0 for stability
+	Element desc              text  . * Description
+
+Comp VariationalModel parent Model FindIn
+----------------------------------------------------------------
+* Hybrid variational inference for PGMs (e.g., mean-field approx)
+----------------------------------------------------------------
+	Element variational_free_energy text . + F = <E> - T S (ELBO)
+	Element approx_family     word       . + mean_field, structured
+	Element optimizer_ref     ref   EvolutionStrategy * From tsu-auto (for tuning)
+	Element desc              text       . * Free energy minimization
+
+Comp HybridSampling parent Layer Find
+----------------------------------------------------------------
+* Combine MCMC with variational (e.g., for better mixing)
+----------------------------------------------------------------
+	Element layer             key   . + Layer ID
+	Element mcmc_weight       word  . * Fraction for MCMC (0.0-1.0)
+	Element vi_weight         word  . * Fraction for variational
+	Element fusion_pattern    ref   Fusion * Fuse for efficiency
+	Element desc              text  . * Description
+
+// ================================================================
+// 2. OPERATION & SAMPLING EXTENSIONS
+// Potts, Multi-state ops, cluster methods, variational updates
+// ================================================================
+
+Comp PottsOp parent SamplingOp FindIn
+----------------------------------------------------------------
+* Multi-state sampling for Potts models on TSU
+----------------------------------------------------------------
+	Element potts_op      key   . + Op name (e.g., potts_gibbs)
+	Element num_states    word  . + q (number of states per site)
+	Element energy_fn     ref   EnergyFunction + Potts energy
+	Element algorithm     word  . + gibbs, swendsen_wang (for clusters)
+	Element tsu_hint      word  . * tsu_parallel for multi-state flips
+	Element desc          text  . * Description
+
+Comp PottsKernel parent TSUKernel FindIn
+----------------------------------------------------------------
+* TSU-native Potts kernel
+----------------------------------------------------------------
+	Element potts_kernel    key   . + Kernel name
+	Element energy_fn       text  . + "E = -∑_{i<j} J_ij δ(s_i, s_j) - ∑_i h_i(s_i)"
+	Element sample_shape    word  . + "sites=N, states=q"
+	Element thermal_relax   text  . * τ per state flip (e.g., 200ns for q=4)
+	Element control_voltage word  . + V per state (e.g., 0.3V increments)
+	Element desc            text  . * Description
+
+Comp MultiStateOp parent SamplingOp FindIn
+----------------------------------------------------------------
+* Sampling for q-ary discrete variables (e.g., Potts Gibbs)
+----------------------------------------------------------------
+	Element op                key   . + Op name
+	Element num_states        word  . + q
+	Element conditional_prob  text  . + P(s_i=k | neighbors) ∝ exp(-ΔE_k / T)
+	Element parallel_flips    word  . * true for TSU vectorization
+	Element desc              text  . * Description
+
+Comp ClusterSamplingOp parent SamplingOp FindIn
+----------------------------------------------------------------
+* Cluster-based methods (e.g., Swendsen-Wang for Potts/Ising)
+----------------------------------------------------------------
+	Element cluster_op        key   . + Op name
+	Element bond_prob         word  . * p_bond = 1 - exp(-2βJ) for ferro
+	Element flip_clusters     word  . + parallel, sequential
+	Element desc              text  . * Description
+
+Comp VariationalOp parent Op FindIn
+----------------------------------------------------------------
+* Variational updates (e.g., mean-field expectations)
+----------------------------------------------------------------
+	Element var_op            key   . + Op name
+	Element params_update     text  . + ∇F = 0 for free energy
+	Element elbo_estimate     word  . * true to track lower bound
+	Element desc              text  . * Description
+
+Comp BeliefPropagationOp parent Op FindIn
+----------------------------------------------------------------
+* Loopy BP for marginals in PGMs
+----------------------------------------------------------------
+	Element bp_op             key   . + Op name
+	Element message_type      word  . + sum_prod, max_prod
+	Element convergence_tol   word  . * 1e-6 for fixed-point
+	Element desc              text  . * Description
+
+// ================================================================
+// 3. ENERGY & FACTOR EXTENSIONS
+// Multi-state potentials, degenerate energies
+// ================================================================
+
+Comp MultiStateEnergyFactor parent EnergyFactor FindIn
+----------------------------------------------------------------
+* Factors for q-states (e.g., Potts delta potentials)
+----------------------------------------------------------------
+	Element factor            key   . + Factor ID
+	Element states            word  . + q-ary domains
+	Element potential_form    text  . + δ(s_i,s_j), softmax(h)
+	Element degeneracy        word  . * true if symmetric states
+	Element desc              text  . * Description
+
+Comp VariationalFactor parent EnergyFactor FindIn
+----------------------------------------------------------------
+* Approx factors for VI (e.g., KL divergence terms)
+----------------------------------------------------------------
+	Element var_factor        key   . + Factor ID
+	Element kl_div            text  . * D_KL(q || p) ≈ ∫ q ln(q/p)
+	Element evidence_lower    word  . * true for ELBO components
+	Element desc              text  . * Description
+
+Comp DegenerateEnergy parent EnergyFunction FindIn
+----------------------------------------------------------------
+* Handle near-degenerate states (TSU min_gap constraint)
+----------------------------------------------------------------
+	Element energy_fn         key   . + Function name
+	Element degeneracy_level  word  . * Number of symmetric minima
+	Element resolution_req    text  . * ΔE ≥ gap * kT for TSU
+	Element desc              text  . * Description
+
+// ================================================================
+// 4. TSU HARDWARE & COMPILATION EXTENSIONS
+// Multi-level voltages, calibration for q-states
+// ================================================================
+
+Comp MultiLevelTSU parent TSU Find
+----------------------------------------------------------------
+* TSU with multi-voltage support (e.g., for q-states)
+----------------------------------------------------------------
+	Element tsu_id            key   . + ID
+	Element voltage_levels    word  . + Number of discrete V bins
+	Element state_precision   word  . * Bits per state (e.g., log2(q))
+	Element desc              text  . * Description
+
+Comp AdvancedTSUCompilation parent TSUCompilation FindIn
+----------------------------------------------------------------
+* Enhanced mapping with calibration and degeneracy handling
+----------------------------------------------------------------
+	Element plan_id           key   . + Plan ID
+	Element state_mapping     text  . + One-hot to voltages
+	Element calibration_type  word  . + per_state, adaptive_drift
+	Element degeneracy_map    text  . * Symmetric states to shared pins
+	Element desc              text  . * Description
+
+Comp NoiseModel parent Hardware FindIn
+----------------------------------------------------------------
+* TSU noise extensions (thermal, shot noise for multi-states)
+----------------------------------------------------------------
+	Element noise_id          key   . + Model ID
+	Element noise_type        word  . + thermal_gaussian, shot_poisson
+	Element state_dependence  word  . * true if q-dependent variance
+	Element sigma_per_state   text  . * σ_k for each state k
+	Element desc              text  . * Description
+
+// ================================================================
+// 5. INFERENCE & EXECUTION EXTENSIONS
+// Hybrid schedules, ELBO monitoring
+// ================================================================
+
+Comp HybridConfig parent Config FindIn
+----------------------------------------------------------------
+* Configs for mixed MCMC/VI inference
+----------------------------------------------------------------
+	Element config            key   . + Config name
+	Element mcmc_iters        word  . * Number of MCMC steps
+	Element vi_iters          word  . * VI optimization steps
+	Element switch_temp       word  . * T where MCMC → VI
+	Element desc              text  . * Description
+
+Comp ELBOTracking parent Config FindIn
+----------------------------------------------------------------
+* Track evidence lower bound during inference
+----------------------------------------------------------------
+	Element elbo_config       key   . + Config ID
+	Element elbo_estimate     word  . + running, per_step
+	Element convergence_elbo  word  . * ΔELBO < 1e-4
+	Element desc              text  . * Description
+
+// ================================================================
+// 6. SIMULATION & VALIDATION EXTENSIONS
+// Ergodicity checks, multi-state metrics
+// ================================================================
+
+Comp ErgodicityValidation parent Validation FindIn
+----------------------------------------------------------------
+* Check MCMC mixing (e.g., autocorrelation, detailed balance)
+----------------------------------------------------------------
+	Element rule              key   . + Rule name
+	Element autocorr_time     word  . * τ < max_steps / 10
+	Element detailed_balance  word  . * Verify P→Q = Q→P ratios
+	Element desc              text  . * Description
+
+Comp MultiStateConstraint parent PhysicalConstraint FindIn
+----------------------------------------------------------------
+* Physics for q-states (e.g., voltage resolution per level)
+----------------------------------------------------------------
+	Element constraint        key   . + ID
+	Element target            word  . + e.g., multi_level_tsu
+	Element state_gap         text  . * ΔV >= 0.1V per state
+	Element thermodynamic     word  . + true
+	Element desc              text  . * Description
+
+Comp DegeneracySimulation parent ThermodynamicSimulation FindIn
+----------------------------------------------------------------
+* Simulate degenerate landscapes (e.g., Potts symmetry)
+----------------------------------------------------------------
+	Element sim_id            key   . + ID
+	Element symmetry_group    word  . + Z_q for Potts
+	Element barrier_height    text  . * Tunneling probability
+	Element desc              text  . * Description
+
+// ================================================================
+// 7. KERNEL & OPTIMIZATION EXTENSIONS
+// Cluster kernels, VI optimizers
+// ================================================================
+
+Comp ClusterKernel parent Kernel FindIn
+----------------------------------------------------------------
+* TSU kernels for cluster flips
+----------------------------------------------------------------
+	Element kernel            key   . + Name
+	Element bond_threshold    word  . * βJ for bond formation
+	Element desc              text  . * Description
+
+Comp VariationalKernel parent Kernel FindIn
+----------------------------------------------------------------
+* Kernels for VI (e.g., JAX grads for ELBO)
+----------------------------------------------------------------
+	Element kernel            key   . + Name
+	Element grad_fn           text  . + jax.grad for free energy
+	Element desc              text  . * Description
+
+// ================================================================
+// 8. ENUMERATION RULES EXTENSIONS
+// New distributions/algorithms for multi-state
+// ================================================================
+
+Comp MultiStateDistributionRule parent DistributionRule Find
+----------------------------------------------------------------
+* q-ary distributions (Potts, categorical Boltzmann)
+----------------------------------------------------------------
+	Element distribution      key   . + Name (e.g., potts)
+	Element q_param           word  . + Required q
+	Element energy_based      word  . + true/false
+	Element desc              text . * Description
+
+Comp AdvancedSamplingAlgorithmRule parent SamplingAlgorithmRule Find
+----------------------------------------------------------------
+* Swendsen-Wang, HMC, tempered transitions
+----------------------------------------------------------------
+	Element algorithm         key   . + Name
+	Element cluster_support   word  . + true/false
+	Element hmc_leapfrog      word  . * Steps for Hamiltonian MC
+	Element desc              text  . * Description
+
+Comp VIAlgorithmRule parent . Find
+----------------------------------------------------------------
+* Variational algorithms (new category)
+----------------------------------------------------------------
+	Element algorithm         key   . + Name (e.g., adam_elbo)
+	Element optimizer         word  . + adam, sgd
+	Element learning_rate     word  . * Initial lr
+	Element desc              text  . * Description
+
+// ================================================================
+// 9. PROJECT & AUTO-TUNE BRIDGES
+// Link to tsu-auto for multi-state tuning
+// ================================================================
+
+Comp MultiStateProject parent Project FindIn
+----------------------------------------------------------------
+* Projects with q-state variants
+----------------------------------------------------------------
+	Element project           key   . + Name
+	Element tune_q            word  . * true to search q in auto-tune
+	Element desc              text  . * Description
+
+Comp AutoTuneExtension parent AutoTuneConfig FindIn  // Ref tsu-auto.unit
+----------------------------------------------------------------
+* Extensions for variational/multi-state tuning
+----------------------------------------------------------------
+	Element autotune          key   . + ID
+	Element multi_objective   ref   MultiObjective * Pareto for q vs. time
+	Element desc              text  . * Description
+
+

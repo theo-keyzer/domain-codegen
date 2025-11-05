@@ -1,0 +1,296 @@
+// ================================================================
+// EVOLUTIONARY OPTIMIZATION & AUTO-TUNING
+// ================================================================
+
+Comp SearchSpace parent . Find
+----------------------------------------------------------------
+* Define hyperparameter search space for auto-tuning
+----------------------------------------------------------------
+	Element search_space   key   .        + Search space identifier
+	Element target         ref   Config   * Target config to optimize
+	Element objective      word  .        + minimize_energy, maximize_cut, minimize_time
+	Element constraints    text  .        * Hard constraints (e.g., "power < 5W")
+	Element desc           text  .        * Description
+
+Comp SearchParameter parent SearchSpace FindIn
+----------------------------------------------------------------
+* Individual parameter in search space
+----------------------------------------------------------------
+	Element param          key   .        + Parameter name
+	Element param_type     word  .        + continuous, discrete, categorical, schedule
+	Element range_min      word  .        * Min value (for continuous/discrete)
+	Element range_max      word  .        * Max value
+	Element values         text  .        * List for categorical: "sequential,parallel,async"
+	Element initial_value  word  .        * Starting value
+	Element mutation_rate  word  .        + Probability of mutation (0.0-1.0)
+	Element importance     word  .        * high, medium, low (affects search priority)
+	Element desc           text  .        * Description
+
+Comp ScheduleParameter parent SearchParameter FindIn
+----------------------------------------------------------------
+* Special case: temperature/annealing schedule parameters
+----------------------------------------------------------------
+	Element schedule_type  word  .        + geometric, linear, exponential, adaptive
+	Element T_initial      word  .        + Starting temperature
+	Element T_final        word  .        + Ending temperature
+	Element num_steps      word  .        + Number of annealing steps
+	Element cooling_rate   word  .        * For geometric: T[i+1] = rate * T[i]
+	Element adaptation     word  .        * adaptive_variance, adaptive_acceptance
+	Element desc           text  .        * Description
+
+Comp EvolutionStrategy parent . Find
+----------------------------------------------------------------
+* Evolutionary algorithm configuration
+----------------------------------------------------------------
+	Element strategy       key   .           + Strategy identifier
+	Element algorithm      word  .           + genetic_algorithm, CMA-ES, bayesian_opt, differential_evolution
+	Element search_space   ref   SearchSpace + Search space to explore
+	Element population     word  .           + Population size
+	Element generations    word  .           + Number of generations
+	Element elite_count    word  .           * Number of elite individuals preserved
+	Element crossover_rate word  .           * Crossover probability
+	Element mutation_rate  word  .           * Global mutation rate
+	Element selection      word  .           + tournament, roulette, rank, elitist
+	Element parallel       word  .           + true/false for parallel evaluation
+	Element desc           text  .           * Description
+
+Comp FitnessFunction parent EvolutionStrategy FindIn
+----------------------------------------------------------------
+* Define how to evaluate candidate solutions
+----------------------------------------------------------------
+	Element fitness_fn     key   .      + Fitness function name
+	Element expression     text  .      + Mathematical expression or composite
+	Element components     text  .      + "solution_quality:0.7, time_cost:0.2, energy:0.1"
+	Element normalization  word  .      * z_score, min_max, none
+	Element higher_better  word  .      + true/false
+	Element desc           text  .      * Description
+
+Comp AdaptiveParameter parent . Find
+----------------------------------------------------------------
+* Parameters that adapt during execution
+----------------------------------------------------------------
+	Element param          key   .        + Parameter identifier
+	Element adaptation     word  .        + feedback_based, schedule_based, rl_based
+	Element update_rule    text  .        + Update formula or policy
+	Element update_freq    word  .        + Steps between updates
+	Element bounds         text  .        * Min/max bounds during adaptation
+	Element initial_value  word  .        + Starting value
+	Element desc           text  .        * Description
+
+Comp PerformanceMetric parent . Find
+----------------------------------------------------------------
+* Metrics to track during evolution
+----------------------------------------------------------------
+	Element metric         key   .      + Metric identifier
+	Element type           word  .      + solution_quality, runtime, energy, convergence
+	Element measurement    text  .      + How to measure (formula or procedure)
+	Element target_value   word  .      * Target to achieve (stopping criterion)
+	Element tolerance      word  .      * Acceptable deviation
+	Element desc           text  .      * Description
+
+Comp ExperimentTrial parent . Find
+----------------------------------------------------------------
+* Record of single experimental trial
+----------------------------------------------------------------
+	Element trial_id       key   .              + Unique trial identifier
+	Element strategy       ref   EvolutionStrategy + Strategy used
+	Element generation     word  .              + Generation number
+	Element individual_id  word  .              + Individual in population
+	Element config_params  text  .              + JSON of all parameter values
+	Element fitness_score  word  .              * Achieved fitness
+	Element timestamp      word  .              * Trial timestamp
+	Element desc           text  .              * Description
+
+Comp TrialMetrics parent ExperimentTrial FindIn
+----------------------------------------------------------------
+* Detailed metrics from trial
+----------------------------------------------------------------
+	Element metric         ref   PerformanceMetric + Metric reference
+	Element value          word  .                 + Measured value
+	Element rank           word  .                 * Rank in population (1=best)
+	Element improved       word  .                 * true/false vs previous best
+
+Comp OptimizationRun parent . Find
+----------------------------------------------------------------
+* Complete optimization campaign
+----------------------------------------------------------------
+	Element run_id         key   .              + Run identifier
+	Element strategy       ref   EvolutionStrategy + Strategy used
+	Element start_time     word  .              + Start timestamp
+	Element end_time       word  .              * End timestamp
+	Element total_trials   word  .              * Total evaluations
+	Element best_trial     ref   ExperimentTrial * Best trial found
+	Element convergence    word  .              * converged, max_gen, timeout
+	Element desc           text  .              * Description
+
+Comp Checkpoint parent OptimizationRun FindIn
+----------------------------------------------------------------
+* Checkpoint for resumable optimization
+----------------------------------------------------------------
+	Element checkpoint_id  key   .        + Checkpoint identifier
+	Element generation     word  .        + Generation number
+	Element population     text  .        + Serialized population state
+	Element best_fitness   word  .        + Best fitness so far
+	Element checkpoint_path text .        + File path for checkpoint
+	Element desc           text  .        * Description
+
+Comp HyperParameterRule parent . Find
+----------------------------------------------------------------
+* Rules for hyper-parameter selection
+----------------------------------------------------------------
+	Element rule_id        key   .        + Rule identifier
+	Element condition      text  .        + When rule applies
+	Element recommendation text  .        + What to do
+	Element confidence     word  .        * high, medium, low
+	Element learned_from   ref   OptimizationRun * Run that discovered this
+	Element desc           text  .        * Description
+
+Comp MetaLearning parent . Find
+----------------------------------------------------------------
+* Cross-experiment learning
+----------------------------------------------------------------
+	Element meta_id        key   .        + Meta-learner identifier
+	Element learner_type   word  .        + transfer_learning, warm_start, surrogate_model
+	Element source_runs    text  .        + Comma-separated run_ids to learn from
+	Element model          text  .        * Learned model (e.g., GP surrogate)
+	Element improvement    word  .        * Speedup vs random search
+	Element desc           text  .        * Description
+
+Comp AutoTuneConfig parent Config FindIn
+----------------------------------------------------------------
+* Automatic tuning configuration
+----------------------------------------------------------------
+	Element autotune    key  .                 + AutoTune identifier
+	Element enabled     word .                 + true/false
+	Element strategy    ref  EvolutionStrategy + Optimization strategy
+	Element budget      word .                 + Max trials or time
+	Element early_stop  word .                 * Stop if no improvement for N trials
+	Element opt_from    ref  OptimizationRun   * Run that discovered this
+	Element resume_from ref_child Checkpoint   * Resume from checkpoint
+	Element desc        text .                 * Description
+
+Comp SensitivityAnalysis parent . Find
+----------------------------------------------------------------
+* Parameter sensitivity analysis results
+----------------------------------------------------------------
+	Element analysis_id    key   .           + Analysis identifier
+	Element search_space   ref   SearchSpace + Analyzed space
+	Element method         word  .           + sobol, morris, variance_based
+	Element results        text  .           * Sensitivity indices (JSON)
+	Element most_sensitive text  .           * Top parameters by importance
+	Element desc           text  .           * Description
+
+Comp EnsembleStrategy parent . Find
+----------------------------------------------------------------
+* Ensemble multiple configurations
+----------------------------------------------------------------
+	Element ensemble_id    key   .      + Ensemble identifier
+	Element configs        text  .      + Comma-separated config IDs
+	Element voting         word  .      + majority, weighted, best_of_k
+	Element weights        text  .      * Weights for weighted voting
+	Element desc           text  .      * Description
+
+// ================================================================
+// LEARNED OPTIMIZATION PATTERNS
+// ================================================================
+
+Comp OptimizationPattern parent . Find
+----------------------------------------------------------------
+* Discovered optimization pattern (learned knowledge)
+----------------------------------------------------------------
+	Element pattern_id     key   .        + Pattern identifier
+	Element problem_class  word  .        + maxcut, ising, protein_folding
+	Element pattern_type   word  .        + schedule, topology, fusion
+	Element precondition   text  .        + When pattern applies
+	Element recommendation text  .        + What to do
+	Element success_rate   word  .        * Historical success rate (0.0-1.0)
+	Element discovered_by  ref   OptimizationRun * Run that found it
+	Element desc           text  .        * Description
+
+Comp TransferLearning parent . Find
+----------------------------------------------------------------
+* Transfer learned parameters between problems
+----------------------------------------------------------------
+	Element transfer_id    key   .        + Transfer identifier
+	Element source_problem word  .        + Source problem type
+	Element target_problem word  .        + Target problem type
+	Element mapping        text  .        + How to map parameters
+	Element effectiveness  word  .        * measured_speedup
+	Element desc           text  .        * Description
+
+// ================================================================
+// MULTI-OBJECTIVE OPTIMIZATION
+// ================================================================
+
+Comp MultiObjective parent EvolutionStrategy FindIn
+----------------------------------------------------------------
+* Multi-objective optimization (Pareto frontier)
+----------------------------------------------------------------
+	Element objectives     text  .        + Comma-separated objective names
+	Element pareto_method  word  .        + NSGA-II, MOEA-D, SPEA2
+	Element diversity      word  .        * Diversity preservation method
+	Element archive_size   word  .        * Pareto archive size
+	Element desc           text  .        * Description
+
+Comp ParetoFront parent OptimizationRun FindIn
+----------------------------------------------------------------
+* Pareto-optimal solutions found
+----------------------------------------------------------------
+	Element front_id       key   .        + Front identifier
+	Element solutions      text  .        + List of non-dominated trial_ids
+	Element generation     word  .        + Generation when found
+	Element coverage       word  .        * Hypervolume or coverage metric
+	Element desc           text  .        * Description
+
+// ================================================================
+// AUTOMATED DEBUGGING & DIAGNOSIS
+// ================================================================
+
+Comp DiagnosticRule parent . Find
+----------------------------------------------------------------
+* Automatic problem diagnosis
+----------------------------------------------------------------
+	Element rule_id        key   .        + Rule identifier
+	Element symptom        text  .        + Observable symptom
+	Element diagnosis      text  .        + Likely cause
+	Element remedy         text  .        + Suggested fix
+	Element confidence     word  .        * high, medium, low
+	Element desc           text  .        * Description
+
+Comp FailureMode parent . Find
+----------------------------------------------------------------
+* Known failure modes and recovery
+----------------------------------------------------------------
+	Element failure_id     key   .        + Failure identifier
+	Element pattern        text  .        + Failure pattern (e.g., "energy diverges")
+	Element root_cause     text  .        + Root cause
+	Element mitigation     text  .        + How to mitigate
+	Element recovery       text  .        + Recovery procedure
+	Element frequency      word  .        * How often seen
+	Element desc           text  .        * Description
+
+// ================================================================
+// RESOURCE ALLOCATION & SCHEDULING
+// ================================================================
+
+Comp ResourceBudget parent OptimizationRun FindIn
+----------------------------------------------------------------
+* Resource constraints for optimization
+----------------------------------------------------------------
+	Element budget_id      key   .        + Budget identifier
+	Element max_time       word  .        * Maximum wall-clock time
+	Element max_trials     word  .        * Maximum evaluations
+	Element max_energy     word  .        * Maximum energy consumption (J)
+	Element max_cost       word  .        * Maximum dollar cost
+	Element priority       word  .        + high, medium, low
+	Element desc           text  .        * Description
+
+Comp AdaptiveScheduling parent . Find
+----------------------------------------------------------------
+* Dynamically schedule trials across hardware
+----------------------------------------------------------------
+	Element schedule_id    key   .        + Schedule identifier
+	Element allocation     word  .        + round_robin, priority, load_balance
+	Element hardware_pool  text  .        + Available hardware targets
+	Element cost_model     text  .        + Cost per trial per hardware
+	Element desc           text  .        * Description

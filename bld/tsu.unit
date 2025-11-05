@@ -1,0 +1,449 @@
+// ================================================================
+// tsu.unit — TSU/THRML DOMAIN SCHEMA
+// Standalone domain for thermodynamic sampling & probabilistic AI
+// ================================================================
+
+// ================================================================
+// DOMAIN KNOWLEDGE COMPONENTS (Expert-defined HOW)
+// ================================================================
+
+Comp Domain parent . Find
+----------------------------------------------------------------
+* Domain knowledge for thermodynamic/probabilistic computing
+----------------------------------------------------------------
+	Element name          key   . + Domain name
+	Element desc          text  . * Description
+	Element version       word  . + Schema version
+
+Comp Hardware parent . Find
+----------------------------------------------------------------
+* Hardware targets: TSU chips, emulators
+----------------------------------------------------------------
+	Element hardware      key   . + Identifier (e.g., tsu_extropic_1)
+	Element backend       word  . + tsu, tsu_emulated
+	Element emulation     word  . * true/false for software emulation
+	Element constraints   text  . * Hardware limits
+	Element energy_model  text  . * Thermodynamic cost model
+	Element latency_model text  . * Latency model
+	Element desc          text  . * Description
+
+Comp TSU parent Hardware FindIn
+----------------------------------------------------------------
+* Thermodynamic Sampling Unit (Extropic hardware)
+----------------------------------------------------------------
+	Element tsu_id                  key  . + TSU identifier
+	Element process_node            word . + Semiconductor node (e.g., 3nm)
+	Element operating_T             word . + Operating temperature (Kelvin)
+	Element sample_rate             word . + Max samples/sec
+	Element entropy_budget          text . * Max entropy generation rate
+	Element precision               word . + Effective bit precision
+	Element connectivity            word . + Interface: PCIe, CXL, optical
+	Element programmable_energy     word . + true/false
+	Element physical_implementation word . + CMOS-stochastic, spintronics
+	Element thermal_noise           word . * Noise characteristics
+	Element desc                    text . * Description
+
+Comp Kernel parent . Find
+----------------------------------------------------------------
+* Kernel implementation for TSU
+----------------------------------------------------------------
+	Element kernel        key  .        + Unique kernel name
+	Element hardware      ref  Hardware + Target hardware
+	Element desc          text .        * Description
+	Element signature     text .        + Function signature
+	Element body          text .        + Implementation template
+	Element stochastic    word .        * true/false
+	Element thermodynamic word .        * true if governed by thermodynamics
+	Element energy_fn     text .        * Energy function E(x;θ)
+
+Comp TSUKernel parent Kernel FindIn
+----------------------------------------------------------------
+* TSU-native kernel encoding energy function
+----------------------------------------------------------------
+	Element tsu_kernel      key       .        + Tsu kernel name
+	Element copy_kernel     up_copy   Kernel   + Unique kernel name
+	Element hardware        ref_copy  Hardware + Target hardware
+	Element tsu_target      ref_child TSU      + Target TSU device
+	Element energy_fn       text      .        + Mathematical form: E(x) = ...
+	Element sample_shape    word      .        + Output shape
+	Element thermal_relax   text      .        * Relaxation time τ
+	Element control_voltage word      .        + Programming voltage
+	Element desc            text      .        * Description
+
+Comp KernelParam parent Kernel FindIn
+----------------------------------------------------------------
+* Defines the explicit signature and calculation for a kernel parameter
+----------------------------------------------------------------
+
+	Element param          key   . + Parameter name (M, N, K, stride, etc)
+	Element type           word  . + C data type (float*, int, etc)
+	Element calculation    text  . + How to calculate from tensor shapes
+	Element dynamic        word  . * true/false for runtime calculation
+
+Comp KernelOp parent Kernel FindIn
+----------------------------------------------------------------
+* Operation dispatch knowledge
+* Provides dimension calculations and launch config
+----------------------------------------------------------------
+
+	Element op                     key   . + Operation primitive name
+	Element desc                   text  . * Operation description
+	Element input_rank             word  . * Expected input rank
+	Element output_rank            word  . * Expected output rank
+	Element dimension_calc         text  . + Code to calculate dimensions
+	Element block_size             word  . + Threads per block
+	Element grid_calc              text  . + Grid size calculation formula
+
+Comp Optimization parent . Find
+----------------------------------------------------------------
+* TSU-specific optimizations
+----------------------------------------------------------------
+	Element target    ref  Hardware + Target device
+	Element type      word .        + thermodynamic_fusion, entropy_coding
+	Element params    text .        * Optimization parameters
+	Element desc      text .        * Description
+
+Comp Fusion parent . Find
+----------------------------------------------------------------
+* Fuse sampling operations for TSU
+----------------------------------------------------------------
+	Element fusion        key   . + Fusion pattern name
+	Element pattern       text  . + Operations to fuse
+	Element fused_kernel  ref   Kernel * Fused kernel
+	Element hardware      ref   Hardware * Target hardware
+	Element desc          text  . * Description
+
+// ================================================================
+// FRAMEWORK SUPPORT (THRML/JAX)
+// ================================================================
+
+Comp Framework parent . Find
+----------------------------------------------------------------
+* ML framework with PGM/sampling support
+----------------------------------------------------------------
+	Element framework     key   . + Framework name (thrml, jax)
+	Element language      word  . + jax, python
+	Element paradigm      word  . + probabilistic, energy_based
+	Element runtime       word  . + gpu, tpu, tsu_emulated
+	Element desc          text  . * Description
+
+Comp THRML parent Framework FindIn
+----------------------------------------------------------------
+* Thermodynamic AI Library (JAX-based)
+----------------------------------------------------------------
+	Element thrml_id      key   . + Identifier
+	Element version       word  . + Version string
+	Element features      text  . * Features list
+	Element hardware_accel word  . + gpu, tpu, tsu_proto
+	Element tsu_emulation text  . * ideal, noisy, limited_entropy
+	Element jit_compile   word  . + true/false for XLA
+	Element control_flow  word  . + scan, while_loop
+	Element desc          text  . * Description
+
+Comp PGMSchema parent . Find
+----------------------------------------------------------------
+* Probabilistic graphical model structure
+----------------------------------------------------------------
+	Element schema        key   . + PGM name
+	Element variables     text  . + Variable list
+	Element domains       text  . + Variable domains
+	Element factors       text  . + Factor types
+	Element graph_sparsity text . + dense, sparse, tree
+	Element factor_graph  word  . + true/false
+	Element energy_based  word  . + true/false
+	Element tsu_suitable  word  . + true/false
+	Element desc          text  . * Description
+
+// ================================================================
+// USER ML SPECIFICATION (User-defined WHAT)
+// ================================================================
+
+Comp Model parent . Find
+----------------------------------------------------------------
+* Probabilistic/energy-based model
+----------------------------------------------------------------
+	Element model         key   . + Model name
+	Element type          word  . + probabilistic, pgm, energy_based, tsu_native
+	Element hardware      ref   Hardware * Target hardware
+	Element framework     ref   Framework * Framework
+	Element pgm_schema    ref   PGMSchema * PGM structure
+	Element tsu_use       word  . * preferred, required, avoided
+	Element desc          text  . * Description
+
+Comp Tensor parent . Find
+----------------------------------------------------------------
+* Tensor with probabilistic semantics
+----------------------------------------------------------------
+	Element tensor        key   .                + Tensor identifier
+	Element shape         word  .                + Shape
+	Element dtype         word  .                + Data type
+	Element layout        word  .                + Memory layout
+	Element role          word  .                * latent, observed, factor_param
+	Element pgm_node      word  .                * true if part of PGM
+	Element distribution  ref   DistributionRule * Distribution
+	Element desc          text  .                * Description
+
+Comp Layer parent . Find
+----------------------------------------------------------------
+* Layer in probabilistic model
+----------------------------------------------------------------
+	Element layer         key   . + Layer identifier
+	Element type          word  . + sampling, energy, factor
+	Element desc          text  . * Description
+
+// ================================================================
+// OPERATIONS
+// ================================================================
+
+Comp Op parent Layer FindIn
+----------------------------------------------------------------
+* Base operation
+----------------------------------------------------------------
+	Element op         key       .        + Operation name
+	Element op_type    type_of   Op       * Type of Op (e.g., "SamplingOp")
+	Element desc       text      .        * Description
+	Element stochastic word      .        * true/false
+	Element kernel     ref       Kernel   * Kernel reference
+	Element kernel_op  ref_child KernelOp * KernelOp from domain knowledge
+
+Comp Arg parent Op FindIn
+----------------------------------------------------------------
+* Operation argument
+----------------------------------------------------------------
+	Element arg       key  .      + Argument name
+	Element role      word .      + input, output, param
+	Element tensor    ref  Tensor + Tensor reference in Model
+	Element dtype     word .      * Data type override
+	Element pgm_role  word .      * variable, factor_param, conditioning
+	Element desc      text .      * Description
+
+Comp SamplingOp parent Op FindIn
+----------------------------------------------------------------
+* Sampling operation with TSU support
+----------------------------------------------------------------
+	Element sampling_op   key  .              + Sampling op name
+	Element distribution  word .              + Distribution type
+	Element temperature   word .              * Sampling temperature
+	Element reparam       word .              * true/false
+	Element algorithm     word .              + Algorithm type
+	Element tsu_hint      word .              * TSU offload hint
+	Element energy_fn     text .              * Energy function
+	Element energy_fn_ref ref  EnergyFunction * Linked energy function
+	Element desc          text .              * Description
+
+Comp TSUSamplingOp parent SamplingOp FindIn
+----------------------------------------------------------------
+* Direct TSU sampling interface
+----------------------------------------------------------------
+	Element tsu_op        key       .        + TSU op name
+	Element sample_shape  word      .        + Output shape
+	Element control_lines text      .        + Control mapping
+	Element calibration   word      .        * Calibration mode
+	Element desc          text      .        * Description
+
+Comp BlockGibbsOp parent SamplingOp FindIn
+----------------------------------------------------------------
+* Block Gibbs sampling for PGMs
+----------------------------------------------------------------
+	Element block_op      key       .      + Operation name
+	Element factor_subset text      .      + Factors involved
+	Element resampling    word      .      + sequential, parallel, async
+	Element thrml_kernel  word      .      + JAX function name
+	Element jitted        word      .      + true/false
+	Element energy_cost   text      .      * Energy cost per update
+	Element desc          text      .      * Description
+
+Comp EnergyFunction parent . Find
+----------------------------------------------------------------
+* Energy function for sampling
+----------------------------------------------------------------
+	Element energy_fn     key   .      + Function name
+	Element expression    text  .      + Mathematical expression
+	Element variables     word  .      + Variable names
+	Element params        ref   Tensor * Parameters
+	Element source        word  .      + learned, symbolic, diffusion_prior
+	Element desc          text  .      * Description
+
+Comp EnergyFactor parent . Find
+----------------------------------------------------------------
+* Factor in energy-based PGM
+----------------------------------------------------------------
+	Element factor        key   .      + Factor name
+	Element type          word  .      + pairwise, clique, unary, neural
+	Element variables     ref   Tensor + Involved variables
+	Element potential     text  .      + Potential function
+	Element learned       word  .      + true/false
+	Element param_tensor  ref   Tensor * Parameters
+	Element sparse        word  .      + true/false
+	Element tsu_native    word  .      + true/false
+	Element desc          text  .      * Description
+
+// ================================================================
+// TSU COMPILATION & MAPPING
+// ================================================================
+
+Comp TSUCompilation parent . Find
+----------------------------------------------------------------
+* Compilation plan: PGM → TSU
+----------------------------------------------------------------
+	Element plan_id       key       .        + Plan identifier
+	Element source        ref       Model    + Source model
+	Element hardware      ref       Hardware + Hardware
+	Element target        ref_child TSU      + Target TSU
+	Element mapping       text      .        + Variable/factor mapping
+	Element clocking      word      .        + Clocking mode
+	Element control_bus   word      .        + Control line count
+	Element calibration   text      .        * Calibration procedure
+	Element fidelity      word      .        + Expected fidelity
+	Element desc          text      .        * Description
+
+Comp TSUSubstrateModel parent . Find
+----------------------------------------------------------------
+* Physical TSU substrate capabilities
+----------------------------------------------------------------
+	Element substrate      key   . + Substrate ID
+	Element max_vars       word  . + Max variables
+	Element max_factors    word  . + Max factors
+	Element connectivity   word  . + Connectivity pattern
+	Element interaction    word  . + Interaction type
+	Element kT_per_step    text  . * kT cost per step
+	Element min_energy_gap text  . * Min resolvable ΔE
+	Element desc           text  . * Description
+
+// ================================================================
+// INFERENCE & EXECUTION
+// ================================================================
+
+Comp Config parent . Find
+----------------------------------------------------------------
+* Inference configuration
+----------------------------------------------------------------
+	Element config        key   .        + Config name
+	Element target        ref   Hardware + Target device
+	Element batch         word  .        + Batch size
+	Element sample_budget word  .        * Max samples
+	Element desc          text  .        * Description
+
+Comp Schedule parent Config FindIn
+----------------------------------------------------------------
+* Execution schedule
+----------------------------------------------------------------
+	Element seq       word      .     + Sequence number
+	Element layer     ref       Layer + Layer to execute
+	Element op        ref_child Op    * Operation
+	Element desc      text      .     * Description
+
+// ================================================================
+// SIMULATION & VALIDATION
+// ================================================================
+
+Comp ThermodynamicSimulation parent . Find
+----------------------------------------------------------------
+* Thermodynamic simulation
+----------------------------------------------------------------
+	Element sim_id         key  . + Simulation ID
+	Element T              word . + Temperature (K)
+	Element kT             word . + Thermal energy (J)
+	Element entropy_traced word . + true/false
+	Element landauer_limit text . * Landauer limit tracking
+	Element desc           text . * Description
+
+Comp Validation parent . Find
+----------------------------------------------------------------
+* Validation rule
+----------------------------------------------------------------
+	Element rule       key  .     + Rule name
+	Element target     ref  Model * Target model
+	Element condition  text .     + Validation condition
+	Element desc       text .     * Description
+
+Comp PhysicalConstraint parent Validation FindIn
+----------------------------------------------------------------
+* Physics-based constraint
+----------------------------------------------------------------
+	Element constraint    key   . + Constraint ID
+	Element target        word  . + Target component
+	Element condition     text  . + Constraint condition
+	Element severity      word  . + warning, error, halt
+	Element thermodynamic word  . + true/false
+	Element desc          text  . * Description
+
+// ================================================================
+// ENUMERATION RULES
+// ================================================================
+
+Comp DistributionRule parent . Find
+----------------------------------------------------------------
+* Valid probability distributions
+----------------------------------------------------------------
+	Element distribution  key   . + Distribution name
+	Element params        word  . + Parameter names
+	Element reparam       word  . + true/false
+	Element tsu_native    word  . + true/false
+	Element energy_based  word  . + true/false
+	Element desc          text  . * Description
+
+Comp SamplingAlgorithmRule parent . Find
+----------------------------------------------------------------
+* Valid sampling algorithms
+----------------------------------------------------------------
+	Element algorithm     key   . + Algorithm name
+	Element discrete      word  . + true/false
+	Element tsu_accel     word  . + true/false
+	Element jax_pattern   word  . + JAX pattern
+	Element desc          text  . * Description
+
+Comp BackendRule parent . Find
+----------------------------------------------------------------
+* Backend types
+----------------------------------------------------------------
+	Element backend       key   . + Backend name
+	Element execution     word  . + Execution mode
+	Element desc          text  . * Description
+
+Comp HardwareRule parent . Find
+----------------------------------------------------------------
+* Hardware enumeration
+----------------------------------------------------------------
+	Element hardware      key   . + Hardware type
+	Element vendor        word  . + Vendor name
+	Element arch          word  . + Architecture
+	Element desc          text  . * Description
+
+// ================================================================
+// 5. PROJECT GROUPING FOR MULTI-TARGET GENERATION
+// ================================================================
+
+Comp Project parent . Find
+----------------------------------------------------------------
+* Project for multi-hardware code generation and simulation
+----------------------------------------------------------------
+	Element project   key  .      + Project name
+	Element domain    ref  Domain * Primary domain knowledge
+	Element model     ref  Model  + Target model to deploy
+	Element desc      text .      * Description
+
+Comp TargetConfig parent Project FindIn
+----------------------------------------------------------------
+* Hardware target configuration for code generation
+----------------------------------------------------------------
+	Element target_id key  .        + Target identifier (e.g., tsu_prod, gpu_sim)
+	Element hardware  ref  Hardware + Hardware to target
+	Element mode      word .        + production, simulation, emulation, validation
+	Element config    ref  Config   * Model config to use
+	Element codegen   word .        + true/false - generate code for this target
+	Element priority  word .        + primary, fallback, validation
+	Element desc      text .        * Description
+
+Comp BuildRule parent Project FindIn
+----------------------------------------------------------------
+* Code generation rules for project
+----------------------------------------------------------------
+	Element build_id         key       .            + Build rule name
+	Element targets          text      .            + Comma-separated target_ids
+	Element output_dir       text      .            + Output directory
+	Element template         word      .            + Template set (cuda, tsu, jax)
+	Element project          up_copy   Project      * Use project for chain
+	Element validate_against ref_child TargetConfig * Validation baseline
+	Element desc             text      .            * Description
+
