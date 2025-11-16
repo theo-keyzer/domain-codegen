@@ -1,0 +1,628 @@
+----------------------------------------------------------------
+Actor main .
+----------------------------------------------------------------
+
+C // ================================================================
+C // ${1:u} SCHEMA CONSTRUCTION GUIDE
+C // How to build unit files and use the generator system
+C // ================================================================
+C
+
+All Comp gen_comp_guide
+
+C
+C // ================================================================
+C // REFERENCE AND NAVIGATION PATTERNS
+C // ================================================================
+C
+
+Du gen_reference_guide
+-Du gen_getvar_guide
+-Du gen_doits_guide
+
+----------------------------------------------------------------
+Actor gen_comp_guide Comp find = Find
+----------------------------------------------------------------
+
+Out delay
+
+C Artifact ${name:l}_component structure overview
+C
+C O Defines a top-level ${name:c} component with Find searchability, meaning instances can be looked up globally by their key field.
+C
+C Section declaration 2 Component Declaration
+C D To declare a ${name:c} component in a .unit file:
+C D
+C D ```
+C D Comp ${name:c} parent . Find
+Its Element its_elements
+C D ```
+C D
+C D This creates a root-level component that will be searchable by name across the entire schema.
+C
+Its Element link
+C
+
+
+Du gen_variable_guide
+Du gen_navigate_guide
+
+C
+
+Break
+
+----------------------------------------------------------------
+Actor gen_comp_guide Comp find = FindIn
+----------------------------------------------------------------
+
+Out delay
+
+C Artifact ${name:l}_component structure detail
+C O Defines a ${name:c} component with FindIn searchability under parent ${parent:c}, meaning instances are searchable within their parent's context.
+C
+Its Element link
+C
+C Section declaration 2 Component Declaration
+C D To declare a ${name:c} component in a .unit file:
+C D
+C D ```
+C D Comp ${name:c} parent ${parent:c} FindIn
+Its Element its_elements
+C D ```
+C D
+C D This creates a nested component under ${parent:c} that will be indexed within its parent's namespace.
+C
+
+
+Du gen_variable_guide
+Du gen_navigate_guide
+
+C
+
+Break
+
+----------------------------------------------------------------
+Actor gen_comp_guide .
+----------------------------------------------------------------
+
+Out delay
+
+C Artifact ${name:l}_component structure detail
+C O Defines a ${name:c} component with no indexing under parent ${parent:c}. Instances are not searchable but accessible through parent iteration.
+C
+Its Element link
+C
+C Section declaration 2 Component Declaration
+C D To declare a ${name:c} component in a .unit file:
+C D
+C D ```
+C D Comp ${name:c} parent ${parent:c} .
+Its Element its_elements
+C D ```
+C D
+C D This creates a non-indexed nested component under ${parent:c}.
+C
+
+Du gen_variable_guide
+Du gen_navigate_guide
+
+C
+
+----------------------------------------------------------------
+Actor link Element type in ref,link,ref_copy,ref_child,up_copy
+----------------------------------------------------------------
+
+C Link ${comp:l}_component ${type}
+
+----------------------------------------------------------------
+Actor its_elements Element
+----------------------------------------------------------------
+
+C D Element ${name} ${type} ${comp} ${check} ${doc}
+
+----------------------------------------------------------------
+Actor gen_variable_guide Element
+----------------------------------------------------------------
+
+C Section variables 2 Variable fields
+C D ```
+Its Element variable_guide
+Its parent variable_guide_parent
+Its Element variable_guide_ref
+Its Element_comp variable_guide_rev
+C D ```
+
+----------------------------------------------------------------
+Actor variable_guide Element
+----------------------------------------------------------------
+
+C D $${${name}}
+
+----------------------------------------------------------------
+Actor variable_guide_parent Element
+----------------------------------------------------------------
+
+Cs D $${parent.
+Its Element other_ele 
+C }
+
+----------------------------------------------------------------
+Actor other_ele Element
+----------------------------------------------------------------
+
+Cs ${name}
+
+Break loop
+
+----------------------------------------------------------------
+Actor variable_guide_ref Element type in ref,link,ref_copy,ref_child,up_copy
+----------------------------------------------------------------
+
+Cs D $${${name:l}.
+Its comp.Element other_ele
+C }
+
+----------------------------------------------------------------
+Actor variable_guide_rev Element type in ref,link,ref_copy,ref_child,up_copy
+----------------------------------------------------------------
+
+Cs D $${${parent.name:c}_${name:l}.
+Its parent.Element other_ele
+C }
+
+----------------------------------------------------------------
+Actor gen_navigate_guide Element
+----------------------------------------------------------------
+
+C Section Navigation 2 Command navigation
+C D ```
+Its parent navigate_guide
+Its Comp_parent navigate_guide_parent
+Its Element navigate_guide_ref
+Its Element_comp navigate_guide_rev
+C D ```
+
+-Its parent parent_field_func
+-Its Ref ref_func
+-Its Element ref_func
+-Its Element_comp other_func
+
+----------------------------------------------------------------
+Actor navigate_guide_parent Element
+----------------------------------------------------------------
+
+C D Its ${name:c} actor
+
+----------------------------------------------------------------
+Actor navigate_guide Element
+----------------------------------------------------------------
+
+C D Its parent actor
+
+----------------------------------------------------------------
+Actor navigate_guide_rev Element type in ref,link,ref_copy,ref_child,up_copy
+----------------------------------------------------------------
+
+C D Its ${parent.name:c}_${name:l} actor
+
+----------------------------------------------------------------
+Actor navigate_guide_ref Element type in ref,link,ref_copy,ref_child,up_copy
+----------------------------------------------------------------
+
+C D Its ${name:l} actor
+
+----------------------------------------------------------------
+Actor gen_element_guide Element type = key
+----------------------------------------------------------------
+
+C Section ${name:l}_field 2 ${name:c} Field (key)
+C D ```
+C D Element ${name} key . ${check} ${doc}
+C D ```
+C D This is the primary identifier field used for indexing ${.gen_comp_guide.name:c} components. ${check_desc} When loading data, this field value becomes the lookup key.
+C
+
+Break
+
+----------------------------------------------------------------
+Actor gen_element_guide Element type = word
+----------------------------------------------------------------
+
+C Section ${name:l}_field 2 ${name:c} Field (word)
+C D ```
+C D Element ${name} word . ${check} ${doc}
+C D ```
+C D Single whitespace-delimited token. Access via Names["${name:l}"] in generated code.
+C
+
+Break
+
+----------------------------------------------------------------
+Actor gen_element_guide Element type = text
+----------------------------------------------------------------
+
+C Section ${name:l}_field 2 ${name:c} Field (text)
+C D ```
+C D Element ${name} text . ${check} ${doc}
+C D ```
+C D Text extending to end of line. Access via Names["${name:l}"] in generated code.
+C
+
+Break
+
+----------------------------------------------------------------
+Actor gen_element_guide Element type = ref
+----------------------------------------------------------------
+
+C Section ${name:l}_reference 2 ${name:c} Reference (ref → ${comp:c})
+C D ```
+C D Element ${name} ref ${comp:c} ${check} ${doc}
+C D ```
+C D Creates a reference to a top-level ${comp:c} component by name. The loader will resolve this to K${name:l}p (an integer index). In actors, navigate via: \`Its ${name:l} actor\` or access via: \`$\{${name:l}.field\}\`
+C
+
+Break
+
+----------------------------------------------------------------
+Actor gen_element_guide Element type = link
+----------------------------------------------------------------
+
+C Section ${name:l}_reference 2 ${name:c} Reference (link → ${comp:c})
+C D ```
+C D Element ${name} link ${comp:c} ${check} ${doc}
+C D ```
+C D Creates a reference to a sibling ${comp:c} component under the same parent. ${check_desc} Resolves to K${name:l}p. Navigate via: \`Its ${name:l} actor\`
+C
+
+Break
+
+----------------------------------------------------------------
+Actor gen_element_guide Element type = ref_copy
+----------------------------------------------------------------
+
+C Section ${name:l}_reference 2 ${name:c} Reference (ref_copy → ${comp:c})
+C D ```
+C D Element ${name} ref_copy ${comp:c} ${check} ${doc}
+C D ```
+C D Copies the reference value from a previous ref/link element that points to ${comp:c}. ${check_desc} This enables reference chaining: first element resolves the reference, this element copies it. The previous element must be defined before this one and must reference ${comp:c}.
+C
+
+Break
+
+----------------------------------------------------------------
+Actor gen_element_guide Element type = ref_child
+----------------------------------------------------------------
+
+C Section ${name:l}_reference 2 ${name:c} Reference (ref_child → ${comp:c})
+C D ```
+C D Element ${name} ref_child ${comp:c} ${check} ${doc}
+C D ```
+C D Looks up a ${comp:c} child within the component referenced by the previous element. ${check_desc} Creates parent-child lookup chains. The field value contains the child's name, and lookup happens within the previously referenced component's children.
+C
+
+Break
+
+----------------------------------------------------------------
+Actor gen_element_guide Element type = up_copy
+----------------------------------------------------------------
+
+C Section ${name:l}_reference 2 ${name:c} Reference (up_copy → ${comp:c})
+C D ```
+C D Element ${name} up_copy ${comp:c} ${check} ${doc}
+C D ```
+C D Navigates up the parent chain to find a ${comp:c} ancestor. Sets up context for subsequent ref_child lookups. The generator walks parent pointers until it finds a ${comp:c} component.
+C
+
+Break
+
+----------------------------------------------------------------
+Actor gen_element_guide Element type = type_of
+----------------------------------------------------------------
+
+C Section ${name:l}_reference 2 ${name:c} Reference (type_of → ${comp:c})
+C D ```
+C D Element ${name} type_of ${comp:c} ${check} ${doc}
+C D ```
+C D References a child component by matching type name. The field value is a component type name, and the reference resolves to the child whose type matches that name.
+C
+
+Break
+
+----------------------------------------------------------------
+Actor gen_element_guide Element type = tree
+----------------------------------------------------------------
+
+C Section ${name:l}_field 2 ${name:c} Field (tree)
+C D ```
+C D Element ${name} tree . ${check} ${doc}
+C D ```
+C D Numeric depth value for hierarchical navigation. Enables special Its navigation: \`Its ${name:l}.up actor\`, \`Its ${name:l}.down actor\`, \`Its ${name:l}.left actor\`, \`Its ${name:l}.right actor\` for tree traversal based on level values.
+C
+
+Break
+
+----------------------------------------------------------------
+Actor gen_element_guide Element type = number
+----------------------------------------------------------------
+
+C Section ${name:l}_field 2 ${name:c} Field (number)
+C D ```
+C D Element ${name} number . ${check} ${doc}
+C D ```
+C D Numeric value. Used for ordering or indexing.
+C
+
+Break
+
+----------------------------------------------------------------
+Actor gen_element_guide .
+----------------------------------------------------------------
+
+C Section ${name:l}_field 2 ${name:c} Field (${type})
+C D ```
+C D Element ${name} ${type} ${comp} ${check} ${doc}
+C D ```
+C D ${check_desc}
+C
+
+----------------------------------------------------------------
+Actor check_desc Element check = +
+----------------------------------------------------------------
+
+Add .check_desc "Required field - error if missing or target not found."
+
+Break
+
+----------------------------------------------------------------
+Actor check_desc Element check = 1
+----------------------------------------------------------------
+
+Add .check_desc "Required and unique - error if missing, target not found, or multiple matches."
+
+Break
+
+----------------------------------------------------------------
+Actor check_desc Element check = *
+----------------------------------------------------------------
+
+Add .check_desc "Optional field - no error if missing or target not found."
+
+Break
+
+----------------------------------------------------------------
+Actor check_desc Element check = .
+----------------------------------------------------------------
+
+Add .check_desc "No validation - flexible field."
+
+Break
+
+----------------------------------------------------------------
+Actor check_desc .
+----------------------------------------------------------------
+
+Add .check_desc ""
+
+----------------------------------------------------------------
+Actor gen_usage_example .
+----------------------------------------------------------------
+
+Out delay
+
+C Section actor_access 2 Accessing in Actor Files
+C D In .act files, access ${name:c} components using:
+C D
+C D **Iteration:**
+C D ```
+C D All ${name:c} actor_name
+C D ```
+C D Calls actor_name for each ${name:c} instance.
+C D
+C D **Field Access:**
+C D ```
+C D $\{field_name\}     # Current component field value
+-C D $\{field_name:c\}   # Capitalized
+-C D $\{field_name:u\}   # Uppercase
+-C D $\{field_name:l\}   # Lowercase
+C D ```
+C D
+
+Its Element gen_ref_navigation
+
+Its Comp_parent gen_child_iteration
+
+----------------------------------------------------------------
+Actor gen_ref_navigation Element type in ref,link,ref_copy,ref_child,up_copy,type_of
+----------------------------------------------------------------
+
+C D **Reference Navigation (${name:l} → ${comp:c}):**
+C D ```
+C D Its ${name:l} actor_name
+C D $\{${name:l}.field\}
+C D ```
+C D
+
+----------------------------------------------------------------
+Actor gen_ref_navigation .
+----------------------------------------------------------------
+
+----------------------------------------------------------------
+Actor gen_child_iteration Comp parent = ${.gen_usage_example.name:c}
+----------------------------------------------------------------
+
+C D **Child Iteration (${name:c}):**
+C D ```
+C D Its ${name:c} actor_name
+C D ```
+C D
+
+----------------------------------------------------------------
+Actor gen_child_iteration .
+----------------------------------------------------------------
+
+----------------------------------------------------------------
+Actor gen_reference_guide .
+----------------------------------------------------------------
+
+C Artifact reference_resolution_guide workflow overview
+C O Multi-pass reference resolution algorithm that handles complex reference chains.
+C
+C Section resolution_order 2 Resolution Order
+C D References resolve in passes until stable:
+C D
+C D **Pass 1: Direct References**
+C D - ref: Direct lookup in global index
+C D - link: Lookup in parent's child index
+C D
+C D **Pass 2+: Derived References**
+C D - ref_copy: Copies resolved reference from previous field
+C D - ref_child: Looks up child in previously referenced component
+C D - up_copy: Walks parent chain to find ancestor
+C D
+C D The loader repeats passes until error count stops changing (typically 2-4 passes).
+C
+C Section chaining_pattern 2 Common Chaining Pattern
+C D ```
+C D Element base_ref    ref       Target    +
+C D Element child_ref   ref_child ChildType +
+C D ```
+C D First field resolves Target by name, second field looks up ChildType within that Target.
+C
+C Section up_chain_pattern 2 Up-Chain Pattern
+C D ```
+C D Element context     up_copy   Ancestor  +
+C D Element target      ref_child ChildType +
+C D ```
+C D First field walks parents to find Ancestor, second field looks up ChildType within it.
+C
+
+----------------------------------------------------------------
+Actor gen_getvar_guide .
+----------------------------------------------------------------
+
+C Artifact getvar_navigation_guide pattern overview
+C O Variable resolution and navigation patterns in actor files.
+C
+C Section variable_syntax 2 Variable Syntax
+C D **Basic Field Access:**
+C D ```
+C D $\{field_name\}      # Current node field
+C D $\{field_name:c\}    # Capitalize first letter
+C D $\{field_name:C\}    # Capitalize word
+C D $\{field_name:u\}    # UPPERCASE
+C D $\{field_name:l\}    # lowercase
+C D $\{field_name::default\}     # Optional - no error if missing. Value is default.
+C D ```
+C D
+C D **Navigation:**
+C D ```
+C D $\{ref_field.target_field\}        # Navigate reference
+C D $\{parent.field\}                  # Parent component
+C D $\{.actor_name.var_name\}         # Ancestor actor's variable
+C D ```
+C D
+C D **Special Variables:**
+C D ```
+C D $\{.-\}              # Loop counter (0-based)
+C D $\{.+\}              # Loop counter (1-based)
+C D $\{kMe\}             # Component index
+C D $\{kComp\}           # Component type name
+C D $\{N\}               # Command-line argument N
+C D ```
+C
+C Section collection_access 2 Collection Access
+C D ```
+C D $\{_.collection_name\}              # String value
+C D $\{_.collection_name.field\}        # Node field
+C D $\{._key\}                          # Map key
+C D $\{._value\}                        # Map value
+C D $\{.:join\}                         # Join with commas
+C D $\{.:join: \}                       # Join with spaces
+C D $\{.:count\}                        # Item count
+C D ```
+C
+
+----------------------------------------------------------------
+Actor gen_doits_guide .
+----------------------------------------------------------------
+
+C Artifact doits_iteration_guide pattern overview
+C O Iteration and navigation commands in actor files.
+C
+C Section iteration_commands 2 Iteration Commands
+C D **All - Global Iteration:**
+C D ```
+C D All CompType actor_name
+C D All CompType actor_name arg1 arg2
+C D ```
+C D Iterates all instances of CompType globally.
+C D
+C D **Its - Reference/Child Navigation:**
+C D ```
+C D Its RefField actor_name          # Navigate reference
+C D Its ChildComp actor_name          # Iterate child components
+C D Its parent actor_name             # Navigate to parent
+C D Its RefField.ChildComp actor_name # Chain navigation
+C D ```
+C D
+C D **Tree Navigation:**
+C D ```
+C D Its tree_field.up actor_name      # Previous level
+C D Its tree_field.down actor_name    # Next level
+C D Its tree_field.left actor_name    # Previous sibling
+C D Its tree_field.right actor_name   # Next sibling
+C D ```
+C D
+C D **Du - Current Node:**
+C D ```
+C D Du actor_name
+C D ```
+C D Calls actor with current node (useful for conditional re-processing).
+C
+C Section actor_matching 2 Actor Match Conditions
+C D ```
+C D Actor name CompType                  # Match by component type
+C D Actor name CompType attr = value     # Match field equals value
+C D Actor name CompType attr != value    # Match field not equals
+C D Actor name CompType attr in a,b,c    # Match field in set
+C D Actor name CompType attr not-in x,y  # Match field not in set
+C D Actor name .                         # Match any component
+C D ```
+C
+C Section output_control 2 Output Control
+C D ```
+C D Out delay            # Buffer output until actor completes
+C D Out normal           # Resume normal output
+C D Out off              # Stop output
+C D Out on               # Resume output
+C D ```
+C D Use "Out delay" in recursive actors to maintain proper output order.
+C
+C Section collections 2 Collections
+C D ```
+C D The path is . for the root map. Path has no keys token.
+C D All maps need a key. Lists has not key.
+C D Add path:key value     # Add to collection for maps
+C D Add path value         # Add to collection for lists
+C D Add.map path:key       # Add a new map type
+C D Add.list path:key      # Add a new list type
+C D Add.clear path value   # Clear before adding
+C D Add.break path value   # Break actor case on duplicate
+C D Add.check path value   # Only add if not exists
+C D This path actor_name   # Iterate collection
+C D ```
+C
+C Section code_generation 2 Code Generation
+C D ```
+C D C Output line with substitution
+C D Cs Output without newline
+C D ```
+C
+C Section control_flow 2 Control Flow
+C D ```
+C D Break                # Exit current actor
+C D Break loop           # Exit current Its/All loop
+C D Break actor          # Exit actor chain
+C D Break cmds           # Exit command sequence
+C D Break exit           # Exit program
+C D ```

@@ -1,0 +1,732 @@
+// ================================================================
+// UNIT.UNIT,ARTIFACT.UNIT,ACT.UNIT SCHEMA CONSTRUCTION GUIDE
+// How to build unit files and use the generator system
+// ================================================================
+
+Artifact comp_component structure overview
+
+O Defines a top-level Comp component with Find searchability, meaning instances can be looked up globally by their key field.
+
+Section declaration 2 Component Declaration
+D To declare a Comp component in a .unit file:
+D
+D ```
+D Comp Comp parent . Find
+D Element name word . + The unique name of the component (e.g., 'Project').
+D Element nop word . + Ignored, place holder for readability 
+D Element parent ref Comp . The parent component, or '.' for a top-level component.
+D Element find word . * How the component can be found: 'Find' for top-level, 'FindIn' for nested.
+D Element doc text . * Documentation string for the component.
+D ```
+D
+D This creates a root-level component that will be searchable by name across the entire schema.
+
+Link comp_component ref
+
+Section variables 2 Variable fields
+D ```
+D ${name}
+D ${nop}
+D ${parent}
+D ${find}
+D ${doc}
+D ${parent.name}
+D ${Comp_parent.name}
+D ${Element_comp.name}
+D ```
+Section Navigation 2 Command navigation
+D ```
+D Its Element actor
+D Its parent actor
+D Its Comp_parent actor
+D Its Element_comp actor
+D ```
+
+Artifact element_component structure detail
+O Defines a Element component with FindIn searchability under parent Comp, meaning instances are searchable within their parent's context.
+
+Link comp_component ref
+
+Section declaration 2 Component Declaration
+D To declare a Element component in a .unit file:
+D
+D ```
+D Comp Element parent Comp FindIn
+D Element name word . + The name of the element (field).
+D Element type word . + The storage and data type.
+D Element comp ref Comp . Component this links to. Use (dot) here for non ref types.
+D Element check word . + How to check target found for refs and end of line for word
+D Element doc text . * Documentation string.
+D ```
+D
+D This creates a nested component under Comp that will be indexed within its parent's namespace.
+
+Section variables 2 Variable fields
+D ```
+D ${name}
+D ${type}
+D ${comp}
+D ${check}
+D ${doc}
+D ${parent.name}
+D ${comp.name}
+D ```
+Section Navigation 2 Command navigation
+D ```
+D Its parent actor
+D Its Opt actor
+D Its comp actor
+D ```
+
+Artifact opt_component structure detail
+O Defines a Opt component with FindIn searchability under parent Element, meaning instances are searchable within their parent's context.
+
+
+Section declaration 2 Component Declaration
+D To declare a Opt component in a .unit file:
+D
+D ```
+D Comp Opt parent Element FindIn
+D Element name word . * name of value option
+D Element pad word . * Ignored, separator for alignment
+D Element doc text . * documentation string
+D ```
+D
+D This creates a nested component under Element that will be indexed within its parent's namespace.
+
+Section variables 2 Variable fields
+D ```
+D ${name}
+D ${pad}
+D ${doc}
+D ${parent.name}
+D ```
+Section Navigation 2 Command navigation
+D ```
+D Its parent actor
+D ```
+
+Artifact artifact_component structure overview
+
+O Defines a top-level Artifact component with Find searchability, meaning instances can be looked up globally by their key field.
+
+Section declaration 2 Component Declaration
+D To declare a Artifact component in a .unit file:
+D
+D ```
+D Comp Artifact parent . Find
+D Element name key . + Unique artifact identifier
+D Element category word . * Optional category word
+D Element topic_type word . * Optional type word
+D Element doc text . * Not used in definition files
+D ```
+D
+D This creates a root-level component that will be searchable by name across the entire schema.
+
+
+Section variables 2 Variable fields
+D ```
+D ${name}
+D ${category}
+D ${topic_type}
+D ${doc}
+D ${Link_concept.concept}
+D ${Link_relation.concept}
+D ```
+Section Navigation 2 Command navigation
+D ```
+D Its Link actor
+D Its O actor
+D Its Section actor
+D Its Link_concept actor
+D Its Link_relation actor
+D ```
+
+Artifact link_component structure detail
+O Defines a Link component with FindIn searchability under parent Artifact, meaning instances are searchable within their parent's context.
+
+Link artifact_component ref
+Link artifact_component ref
+
+Section declaration 2 Component Declaration
+D To declare a Link component in a .unit file:
+D
+D ```
+D Comp Link parent Artifact FindIn
+D Element concept ref Artifact + Target artifact (must exist)
+D Element relation ref Artifact + Relationship type (must exist)
+D ```
+D
+D This creates a nested component under Artifact that will be indexed within its parent's namespace.
+
+Section variables 2 Variable fields
+D ```
+D ${concept}
+D ${relation}
+D ${parent.name}
+D ${concept.name}
+D ${relation.name}
+D ```
+Section Navigation 2 Command navigation
+D ```
+D Its parent actor
+D Its concept actor
+D Its relation actor
+D ```
+
+Artifact o_component structure detail
+O Defines a O component with FindIn searchability under parent Artifact, meaning instances are searchable within their parent's context.
+
+
+Section declaration 2 Component Declaration
+D To declare a O component in a .unit file:
+D
+D ```
+D Comp O parent Artifact FindIn
+D Element note text . * Overview content
+D ```
+D
+D This creates a nested component under Artifact that will be indexed within its parent's namespace.
+
+Section variables 2 Variable fields
+D ```
+D ${note}
+D ${parent.name}
+D ```
+Section Navigation 2 Command navigation
+D ```
+D Its parent actor
+D ```
+
+Artifact section_component structure detail
+O Defines a Section component with FindIn searchability under parent Artifact, meaning instances are searchable within their parent's context.
+
+
+Section declaration 2 Component Declaration
+D To declare a Section component in a .unit file:
+D
+D ```
+D Comp Section parent Artifact FindIn
+D Element name word . + Section identifier
+D Element level tree . + Heading depth (2=h2, 3=h3, 4=h4)
+D Element note text . * Section heading text
+D ```
+D
+D This creates a nested component under Artifact that will be indexed within its parent's namespace.
+
+Section variables 2 Variable fields
+D ```
+D ${name}
+D ${level}
+D ${note}
+D ${parent.name}
+D ```
+Section Navigation 2 Command navigation
+D ```
+D Its parent actor
+D Its D actor
+D ```
+
+Artifact d_component structure detail
+O Defines a D component with FindIn searchability under parent Section, meaning instances are searchable within their parent's context.
+
+
+Section declaration 2 Component Declaration
+D To declare a D component in a .unit file:
+D
+D ```
+D Comp D parent Section FindIn
+D Element note text . * Content with markdown formatting
+D ```
+D
+D This creates a nested component under Section that will be indexed within its parent's namespace.
+
+Section variables 2 Variable fields
+D ```
+D ${note}
+D ${parent.name}
+D ```
+Section Navigation 2 Command navigation
+D ```
+D Its parent actor
+D ```
+
+Artifact actor_component structure overview
+
+O Defines a top-level Actor component with Find searchability, meaning instances can be looked up globally by their key field.
+
+Section declaration 2 Component Declaration
+D To declare a Actor component in a .unit file:
+D
+D ```
+D Comp Actor parent . Find
+D Element name word . * of actor
+D Element comp word . * what it belongs to
+D Element attr word . * what to check
+D Element eq word . * to equal
+D Element value text . * this
+D ```
+D
+D This creates a root-level component that will be searchable by name across the entire schema.
+
+
+Section variables 2 Variable fields
+D ```
+D ${name}
+D ${comp}
+D ${attr}
+D ${eq}
+D ${value}
+D ${All_actor.what}
+D ${Du_actor.actor}
+D ${Its_actor.what}
+D ${This_actor.path}
+D ```
+Section Navigation 2 Command navigation
+D ```
+D Its All actor
+D Its Du actor
+D Its New actor
+D Its Refs actor
+D Its Var actor
+D Its Its actor
+D Its C actor
+D Its Cs actor
+D Its Out actor
+D Its In actor
+D Its Break actor
+D Its Add actor
+D Its This actor
+D Its Replace actor
+D Its All_actor actor
+D Its Du_actor actor
+D Its Its_actor actor
+D Its This_actor actor
+D ```
+
+Artifact all_component structure detail
+O Defines a All component with no indexing under parent Actor. Instances are not searchable but accessible through parent iteration.
+
+Link actor_component ref
+
+Section declaration 2 Component Declaration
+D To declare a All component in a .unit file:
+D
+D ```
+D Comp All parent Actor .
+D Element what word . * what to look for
+D Element actor ref Actor check what actor to run for it
+D Element args text . * arg data value
+D ```
+D
+D This creates a non-indexed nested component under Actor.
+
+Section variables 2 Variable fields
+D ```
+D ${what}
+D ${actor}
+D ${args}
+D ${parent.name}
+D ${actor.name}
+D ```
+Section Navigation 2 Command navigation
+D ```
+D Its parent actor
+D Its actor actor
+D ```
+
+Artifact du_component structure detail
+O Defines a Du component with no indexing under parent Actor. Instances are not searchable but accessible through parent iteration.
+
+Link actor_component ref
+
+Section declaration 2 Component Declaration
+D To declare a Du component in a .unit file:
+D
+D ```
+D Comp Du parent Actor .
+D Element actor ref Actor check what actor to run for it
+D Element args text . * arg data value
+D ```
+D
+D This creates a non-indexed nested component under Actor.
+
+Section variables 2 Variable fields
+D ```
+D ${actor}
+D ${args}
+D ${parent.name}
+D ${actor.name}
+D ```
+Section Navigation 2 Command navigation
+D ```
+D Its parent actor
+D Its actor actor
+D ```
+
+Artifact new_component structure detail
+O Defines a New component with no indexing under parent Actor. Instances are not searchable but accessible through parent iteration.
+
+
+Section declaration 2 Component Declaration
+D To declare a New component in a .unit file:
+D
+D ```
+D Comp New parent Actor .
+D Element where word . * add to dats or acts
+D Element what word . * what comp to load
+D Element line text . * load line args
+D ```
+D
+D This creates a non-indexed nested component under Actor.
+
+Section variables 2 Variable fields
+D ```
+D ${where}
+D ${what}
+D ${line}
+D ${parent.name}
+D ```
+Section Navigation 2 Command navigation
+D ```
+D Its parent actor
+D ```
+
+Artifact refs_component structure detail
+O Defines a Refs component with no indexing under parent Actor. Instances are not searchable but accessible through parent iteration.
+
+
+Section declaration 2 Component Declaration
+D To declare a Refs component in a .unit file:
+D
+D ```
+D Comp Refs parent Actor .
+D Element where word . * ref of dats or acts
+D ```
+D
+D This creates a non-indexed nested component under Actor.
+
+Section variables 2 Variable fields
+D ```
+D ${where}
+D ${parent.name}
+D ```
+Section Navigation 2 Command navigation
+D ```
+D Its parent actor
+D ```
+
+Artifact var_component structure detail
+O Defines a Var component with no indexing under parent Actor. Instances are not searchable but accessible through parent iteration.
+
+
+Section declaration 2 Component Declaration
+D To declare a Var component in a .unit file:
+D
+D ```
+D Comp Var parent Actor .
+D Element attr word . * variable name
+D Element eq word . * to equal
+D Element value text . * this
+D ```
+D
+D This creates a non-indexed nested component under Actor.
+
+Section variables 2 Variable fields
+D ```
+D ${attr}
+D ${eq}
+D ${value}
+D ${parent.name}
+D ```
+Section Navigation 2 Command navigation
+D ```
+D Its parent actor
+D ```
+
+Artifact its_component structure detail
+O Defines a Its component with no indexing under parent Actor. Instances are not searchable but accessible through parent iteration.
+
+Link actor_component ref
+
+Section declaration 2 Component Declaration
+D To declare a Its component in a .unit file:
+D
+D ```
+D Comp Its parent Actor .
+D Element what word . * to look for
+D Element actor ref Actor check what to do
+D Element args text . * arg data value
+D ```
+D
+D This creates a non-indexed nested component under Actor.
+
+Section variables 2 Variable fields
+D ```
+D ${what}
+D ${actor}
+D ${args}
+D ${parent.name}
+D ${actor.name}
+D ```
+Section Navigation 2 Command navigation
+D ```
+D Its parent actor
+D Its actor actor
+D ```
+
+Artifact c_component structure detail
+O Defines a C component with no indexing under parent Actor. Instances are not searchable but accessible through parent iteration.
+
+
+Section declaration 2 Component Declaration
+D To declare a C component in a .unit file:
+D
+D ```
+D Comp C parent Actor .
+D Element desc text . * code to output.
+D ```
+D
+D This creates a non-indexed nested component under Actor.
+
+Section variables 2 Variable fields
+D ```
+D ${desc}
+D ${parent.name}
+D ```
+Section Navigation 2 Command navigation
+D ```
+D Its parent actor
+D ```
+
+Artifact cs_component structure detail
+O Defines a Cs component with no indexing under parent Actor. Instances are not searchable but accessible through parent iteration.
+
+
+Section declaration 2 Component Declaration
+D To declare a Cs component in a .unit file:
+D
+D ```
+D Comp Cs parent Actor .
+D Element desc text . * code to output.
+D ```
+D
+D This creates a non-indexed nested component under Actor.
+
+Section variables 2 Variable fields
+D ```
+D ${desc}
+D ${parent.name}
+D ```
+Section Navigation 2 Command navigation
+D ```
+D Its parent actor
+D ```
+
+Artifact out_component structure detail
+O Defines a Out component with no indexing under parent Actor. Instances are not searchable but accessible through parent iteration.
+
+
+Section declaration 2 Component Declaration
+D To declare a Out component in a .unit file:
+D
+D ```
+D Comp Out parent Actor .
+D Element what word . * to look for.
+D Element pad word . * to look for
+D Element desc text . * code to buffer.
+D ```
+D
+D This creates a non-indexed nested component under Actor.
+
+Section variables 2 Variable fields
+D ```
+D ${what}
+D ${pad}
+D ${desc}
+D ${parent.name}
+D ```
+Section Navigation 2 Command navigation
+D ```
+D Its parent actor
+D ```
+
+Artifact in_component structure detail
+O Defines a In component with no indexing under parent Actor. Instances are not searchable but accessible through parent iteration.
+
+
+Section declaration 2 Component Declaration
+D To declare a In component in a .unit file:
+D
+D ```
+D Comp In parent Actor .
+D Element flag word . * set on or off
+D ```
+D
+D This creates a non-indexed nested component under Actor.
+
+Section variables 2 Variable fields
+D ```
+D ${flag}
+D ${parent.name}
+D ```
+Section Navigation 2 Command navigation
+D ```
+D Its parent actor
+D ```
+
+Artifact break_component structure detail
+O Defines a Break component with no indexing under parent Actor. Instances are not searchable but accessible through parent iteration.
+
+
+Section declaration 2 Component Declaration
+D To declare a Break component in a .unit file:
+D
+D ```
+D Comp Break parent Actor .
+D Element what word . * what to break
+D Element pad word . * padding (of)
+D Element actor word Actor . which actor to break
+D Element check word . * only if not unique
+D ```
+D
+D This creates a non-indexed nested component under Actor.
+
+Section variables 2 Variable fields
+D ```
+D ${what}
+D ${pad}
+D ${actor}
+D ${check}
+D ${parent.name}
+D ```
+Section Navigation 2 Command navigation
+D ```
+D Its parent actor
+D ```
+
+Artifact add_component structure detail
+O Defines a Add component with no indexing under parent Actor. Instances are not searchable but accessible through parent iteration.
+
+
+Section declaration 2 Component Declaration
+D To declare a Add component in a .unit file:
+D
+D ```
+D Comp Add parent Actor .
+D Element path word . * node path where to add
+D Element data text . * data to add
+D ```
+D
+D This creates a non-indexed nested component under Actor.
+
+Section variables 2 Variable fields
+D ```
+D ${path}
+D ${data}
+D ${parent.name}
+D ```
+Section Navigation 2 Command navigation
+D ```
+D Its parent actor
+D ```
+
+Artifact this_component structure detail
+O Defines a This component with no indexing under parent Actor. Instances are not searchable but accessible through parent iteration.
+
+Link actor_component ref
+
+Section declaration 2 Component Declaration
+D To declare a This component in a .unit file:
+D
+D ```
+D Comp This parent Actor .
+D Element path word . * node path
+D Element actor ref Actor check what to do
+D Element args text . * arg data value
+D ```
+D
+D This creates a non-indexed nested component under Actor.
+
+Section variables 2 Variable fields
+D ```
+D ${path}
+D ${actor}
+D ${args}
+D ${parent.name}
+D ${actor.name}
+D ```
+Section Navigation 2 Command navigation
+D ```
+D Its parent actor
+D Its actor actor
+D ```
+
+Artifact replace_component structure detail
+O Defines a Replace component with no indexing under parent Actor. Instances are not searchable but accessible through parent iteration.
+
+
+Section declaration 2 Component Declaration
+D To declare a Replace component in a .unit file:
+D
+D ```
+D Comp Replace parent Actor .
+D Element path word . * node path where to add
+D Element pad word . * padding (with)
+D Element with word . * what to replace with
+D Element pad2 word . * padding (match)
+D Element match text . * string match pattern
+D ```
+D
+D This creates a non-indexed nested component under Actor.
+
+Section variables 2 Variable fields
+D ```
+D ${path}
+D ${pad}
+D ${with}
+D ${pad2}
+D ${match}
+D ${parent.name}
+D ```
+Section Navigation 2 Command navigation
+D ```
+D Its parent actor
+D ```
+
+
+// ================================================================
+// REFERENCE AND NAVIGATION PATTERNS
+// ================================================================
+
+Artifact reference_resolution_guide workflow overview
+O Multi-pass reference resolution algorithm that handles complex reference chains.
+
+Section resolution_order 2 Resolution Order
+D References resolve in passes until stable:
+D
+D **Pass 1: Direct References**
+D - ref: Direct lookup in global index
+D - link: Lookup in parent's child index
+D
+D **Pass 2+: Derived References**
+D - ref_copy: Copies resolved reference from previous field
+D - ref_child: Looks up child in previously referenced component
+D - up_copy: Walks parent chain to find ancestor
+D
+D The loader repeats passes until error count stops changing (typically 2-4 passes).
+
+Section chaining_pattern 2 Common Chaining Pattern
+D ```
+D Element base_ref    ref       Target    +
+D Element child_ref   ref_child ChildType +
+D ```
+D First field resolves Target by name, second field looks up ChildType within that Target.
+
+Section up_chain_pattern 2 Up-Chain Pattern
+D ```
+D Element context     up_copy   Ancestor  +
+D Element target      ref_child ChildType +
+D ```
+D First field walks parents to find Ancestor, second field looks up ChildType within it.
+

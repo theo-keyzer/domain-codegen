@@ -1,0 +1,85 @@
+// ================================================================
+// artifact.unit — ARTIFACT DOCUMENTATION SYSTEM SCHEMA
+// Focused schema for AI-friendly granular knowledge management
+// ================================================================
+
+Comp Artifact parent . Find
+----------------------------------------------------------------
+* Self-contained knowledge unit optimized for AI consumption
+* Each artifact is 10-30 lines with single clear purpose
+----------------------------------------------------------------
+	Element name        key  .        + Unique artifact identifier
+	Element category    word .        * Optional category word
+	Element topic_type  word .        * Optional type word
+	Element doc         text .        * Not used in definition files
+
+Comp Link parent Artifact FindIn
+----------------------------------------------------------------
+* Typed relationship creating validated knowledge graph
+* Only component requiring strict validation
+----------------------------------------------------------------
+	Element concept     ref  Artifact + Target artifact (must exist)
+	Element relation    ref  Artifact + Relationship type (must exist)
+
+Comp O parent Artifact FindIn
+----------------------------------------------------------------
+* Overview summary (1-3 sentences)
+* Appears after Artifact and Links
+----------------------------------------------------------------
+	Element note        text .        * Overview content
+
+Comp Section parent Artifact FindIn
+----------------------------------------------------------------
+* Optional structure for longer artifacts
+* Uses level for heading hierarchy
+----------------------------------------------------------------
+	Element name        word .        + Section identifier
+	Element level       tree .        + Heading depth (2=h2, 3=h3, 4=h4)
+	Element note        text .        * Section heading text
+
+Comp D parent Section FindIn
+----------------------------------------------------------------
+* Document content preserving markdown
+----------------------------------------------------------------
+	Element note        text .        * Content with markdown formatting
+
+// ================================================================
+// STANDARD RELATION TYPES (as regular Artifacts in definition files)
+// ================================================================
+
+// Artifact prerequisite relation
+//   O Must understand this concept first
+//
+// Artifact related relation  
+//   O Provides additional context without dependency
+//
+// Artifact extension relation
+//   O Builds upon the linked concept
+//
+// Artifact example relation
+//   O Concrete demonstration
+//
+// Artifact contrast relation
+//   O Alternative approach or different solution
+
+// ================================================================
+// DESIGN PRINCIPLES
+// ================================================================
+
+// 1. STRICT WHERE IT MATTERS (graph integrity):
+//    - Link.concept: ref Artifact + (must resolve)
+//    - Link.relation: ref Artifact + (must resolve)
+//
+// 2. FLEXIBLE WHERE IT HELPS (classification):
+//    - category: word (any value, no validation)
+//    - topic_type: word (any value, no validation)
+//
+// 3. GRANULARITY FOR AI:
+//    - Target 10-30 lines per artifact
+//    - Single clear purpose
+//    - Precise context retrieval
+//
+// 4. OPTIONAL METADATA:
+//    - Only create category/type Artifacts when they add value
+//    - Don't create Artifacts that just repeat their name
+//    - Metadata is for filtering and organization, not constraints

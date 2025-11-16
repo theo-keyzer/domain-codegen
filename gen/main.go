@@ -28,11 +28,14 @@ type KpExtra struct {
 }
 func (me KpExtra) GetVar(glob *GlobT, s []string, ln string) (bool, string) {
 	r,ok := me.Names[s[0]]
-	if !ok { r = fmt.Sprintf("?%s?:%s", s[0], ln) }
+//	if !ok { r = fmt.Sprintf("?%s?:%s, Command line arguments", s[0], ln) }
+	if !ok { r = fmt.Sprintf("xxx") }
 	return ok,r
 }
-
-func (me KpExtra) GetLineNo(glob *GlobT, s []string, ln string) (string) {
+func (me KpExtra) DoIts(glob *GlobT, va []string, lno string) int {
+	return 0
+}
+func (me KpExtra) GetLineNo() string {
 	return "Command line arguments"
 }
 
@@ -107,13 +110,32 @@ func LoadData(lns []string, act *ActT, file string) int {
 	return errs
 }
 
+// fnd3 finds a value in the index
+func fnd3(act *ActT, s string, f string, msg string, chk string, lno string, olno string) (bool, int) {
+	if v, exists := act.index[s]; exists {
+		return true, v
+	}
+	
+	if chk == "*" || chk == "?" {
+		return true, -1
+	}
+	if f == chk {
+		return true, -1
+	}
+	if f == "" && chk == "." {
+		return true, -1
+	}
+	
+	fmt.Printf("%s %s (%s) not found %s (%s) > %s\n", msg,f, s, lno,chk,olno)
+	return false, -1
+}
 // fnd2 finds a value in the index
 func fnd2(act *ActT, s string, f string, chk string, lno string, olno string) (bool, int) {
 	if v, exists := act.index[s]; exists {
 		return true, v
 	}
 	
-	if chk == "?" {
+	if chk == "*" || chk == "?" {
 		return true, -1
 	}
 	if f == chk {
@@ -123,7 +145,6 @@ func fnd2(act *ActT, s string, f string, chk string, lno string, olno string) (b
 	fmt.Printf("%s (%s) not found %s (%s) > %s\n", f, s, lno,chk,olno)
 	return false, -1
 }
-// fnd finds a value in the index
 func fnd(act *ActT, s string, f string, chk string, lno string) (bool, int) {
 	if v, exists := act.index[s]; exists {
 		return true, v
@@ -158,34 +179,41 @@ func getws(line string, pos int) (int, string) {
 
 // getw gets the next word
 func getw(line string, pos int) (int, string) {
-	if pos+1 > len(line) {
-		return pos, "E_O_L"
-	}
+    // 1. Initial check: If pos is already at or past the end of the line.
+    if pos >= len(line) {
+        return pos, "E_O_L"
+    }
 
-	// Skip whitespace
-	from := pos
-	for i := pos; i < len(line); i++ {
-		if line[i] != ' ' && line[i] != '\t' {
-			from = i
-			break
-		}
-	}
+    // 2. Skip whitespace
+    from := pos
+    for from < len(line) {
+        if line[from] != ' ' && line[from] != '\t' {
+            break // Found the start of a word
+        }
+        from++
+    }
 
-	if from+1 > len(line) {
-		return pos, "E_O_L"
-	}
+    // 3. Check if only whitespace was found until the end of the line
+    if from >= len(line) {
+        // This handles cases like "word1   " where pos points to the spaces,
+        // or a line with only spaces "   "
+        return len(line), "E_O_L"
+    }
 
-	// Find word end
-	to := from
-	for i := from; i < len(line); i++ {
-		if line[i] == ' ' || line[i] == '\t' {
-			break
-		}
-		to = i
-	}
-
-	return to + 1, line[from : to+1]
+    // 4. Find word end
+    to := from
+    for to < len(line) {
+        if line[to] == ' ' || line[to] == '\t' {
+            break // Found the end of the word (before the whitespace)
+        }
+        to++
+    }
+    
+    // 'to' is now the index of the first character *after* the word 
+    // (either whitespace or len(line))
+    return to, line[from:to]
 }
+
 
 // getsw gets the next word that might be followed by a colon
 func getsw(line string, pos int) (int, string) {
@@ -225,17 +253,4 @@ func getsw(line string, pos int) (int, string) {
 	}
 	return to + 1, line[from : to+1]
 }
-/*
-func refs(act interface{}) bool {
-	// Implementation needed
-	return false
-}
 
-func newAct(glob *GlobT, kname string, s1 string, s2 string) {
-	// Implementation needed
-}
-
-func goAct(glob *GlobT, kp *KpExtra) {
-	// Implementation needed
-}
-*/
