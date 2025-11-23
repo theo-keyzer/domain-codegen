@@ -1,0 +1,62 @@
+----------------------
+Actor main
+
+C ----------------------
+C Actor main
+C ----------------------
+C Cs {
+All Comp comp
+C C
+C C }
+C
+C ----------------------
+C Actor refs .
+C C    "$${._arg}": { "type": "$${kComp}", "id": $${kMe} },
+C
+C ----------------------
+C Actor childs
+C ----------------------
+C Cs $${.1., }$${kMe}
+
+All Comp comp_act
+
+----------------------
+Actor comp
+
+C C ${.1.,}
+C Cs  "${name}": [
+C All ${name} gen_${name}
+C C
+C Cs  ]
+
+----------------------
+Actor comp_childs Comp
+C Cs    "${name}": [
+C Its ${name} childs
+C C ],
+
+----------------------
+Actor comp_act Comp
+
+C ----------------------
+C Actor gen_${name}
+C C $${.1.,}
+C C   {
+C Du refs me
+Du check_parent
+Its Element gen_fields
+Its Comp_parent comp_childs
+
+C C    "payload": $${payload}
+C Cs   }
+
+----------------------
+Actor gen_fields Element type in ref,link,up_copy,ref_child,ref_copy
+
+C Its ${name} refs ${name}
+
+----------------------
+Actor check_parent Comp parent != .
+
+C Its parent refs parent
+

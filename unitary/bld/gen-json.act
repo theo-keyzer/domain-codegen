@@ -1,0 +1,316 @@
+----------------------
+Actor main
+----------------------
+Cs {
+C 
+Cs  "Project": [
+All Project gen_Project
+C
+Cs  ]
+C ,
+Cs  "Domain": [
+All Domain gen_Domain
+C
+Cs  ]
+C ,
+Cs  "Hardware": [
+All Hardware gen_Hardware
+C
+Cs  ]
+C ,
+Cs  "Model": [
+All Model gen_Model
+C
+Cs  ]
+C ,
+Cs  "Layer": [
+All Layer gen_Layer
+C
+Cs  ]
+C ,
+Cs  "Block": [
+All Block gen_Block
+C
+Cs  ]
+C ,
+Cs  "Tensor": [
+All Tensor gen_Tensor
+C
+Cs  ]
+C ,
+Cs  "Op": [
+All Op gen_Op
+C
+Cs  ]
+C ,
+Cs  "Arg": [
+All Arg gen_Arg
+C
+Cs  ]
+C ,
+Cs  "Config": [
+All Config gen_Config
+C
+Cs  ]
+C ,
+Cs  "Kernel": [
+All Kernel gen_Kernel
+C
+Cs  ]
+C ,
+Cs  "EnergyFunction": [
+All EnergyFunction gen_EnergyFunction
+C
+Cs  ]
+C ,
+Cs  "SearchSpace": [
+All SearchSpace gen_SearchSpace
+C
+Cs  ]
+C ,
+Cs  "Dimension": [
+All Dimension gen_Dimension
+C
+Cs  ]
+C ,
+Cs  "Strategy": [
+All Strategy gen_Strategy
+C
+Cs  ]
+C ,
+Cs  "Constraint": [
+All Constraint gen_Constraint
+C
+Cs  ]
+C ,
+Cs  "Metric": [
+All Metric gen_Metric
+C
+Cs  ]
+C ,
+Cs  "Checkpoint": [
+All Checkpoint gen_Checkpoint
+C
+Cs  ]
+C ,
+Cs  "Fusion": [
+All Fusion gen_Fusion
+C
+Cs  ]
+C ,
+Cs  "ControlFlow": [
+All ControlFlow gen_ControlFlow
+C
+Cs  ]
+C
+C }
+
+----------------------
+Actor refs .
+C    "${._arg}": { "type": "${kComp}", "id": ${kMe} },
+
+----------------------
+Actor childs
+----------------------
+Cs ${.1., }${kMe}
+----------------------
+Actor gen_Project
+C ${.1.,}
+C   {
+Du refs me
+Its domain refs domain
+Its model refs model
+Its strategy refs strategy
+Its hardware refs hardware
+C    "payload": ${payload}
+Cs   }
+----------------------
+Actor gen_Domain
+C ${.1.,}
+C   {
+Du refs me
+C    "payload": ${payload}
+Cs   }
+----------------------
+Actor gen_Hardware
+C ${.1.,}
+C   {
+Du refs me
+Its parent_hw refs parent_hw
+Its emulation refs emulation
+Its noise_model refs noise_model
+C    "payload": ${payload}
+Cs   }
+----------------------
+Actor gen_Model
+C ${.1.,}
+C   {
+Du refs me
+Its hardware refs hardware
+Its search_space refs search_space
+Its config refs config
+Cs    "Layer": [
+Its Layer childs
+C ],
+Cs    "Tensor": [
+Its Tensor childs
+C ],
+Cs    "Op": [
+Its Op childs
+C ],
+C    "payload": ${payload}
+Cs   }
+----------------------
+Actor gen_Layer
+C ${.1.,}
+C   {
+Du refs me
+Its parent refs parent
+Its parent_layer refs parent_layer
+C    "payload": ${payload}
+Cs   }
+----------------------
+Actor gen_Block
+C ${.1.,}
+C   {
+Du refs me
+Its model refs model
+C    "payload": ${payload}
+Cs   }
+----------------------
+Actor gen_Tensor
+C ${.1.,}
+C   {
+Du refs me
+Its parent refs parent
+Its producer refs producer
+Its distribution refs distribution
+C    "payload": ${payload}
+Cs   }
+----------------------
+Actor gen_Op
+C ${.1.,}
+C   {
+Du refs me
+Its parent refs parent
+Its hardware refs hardware
+Its energy_fn refs energy_fn
+Its search_space refs search_space
+Its strategy refs strategy
+Its predicate refs predicate
+Its next_op refs next_op
+Its layer refs layer
+Cs    "Arg": [
+Its Arg childs
+C ],
+Cs    "ControlFlow": [
+Its ControlFlow childs
+C ],
+C    "payload": ${payload}
+Cs   }
+----------------------
+Actor gen_Arg
+C ${.1.,}
+C   {
+Du refs me
+Its parent refs parent
+Its model refs model
+Its tensor refs tensor
+C    "payload": ${payload}
+Cs   }
+----------------------
+Actor gen_Config
+C ${.1.,}
+C   {
+Du refs me
+Its schedule refs schedule
+C    "payload": ${payload}
+Cs   }
+----------------------
+Actor gen_Kernel
+C ${.1.,}
+C   {
+Du refs me
+Its hardware refs hardware
+C    "payload": ${payload}
+Cs   }
+----------------------
+Actor gen_EnergyFunction
+C ${.1.,}
+C   {
+Du refs me
+C    "payload": ${payload}
+Cs   }
+----------------------
+Actor gen_SearchSpace
+C ${.1.,}
+C   {
+Du refs me
+Its target_model refs target_model
+Cs    "Dimension": [
+Its Dimension childs
+C ],
+C    "payload": ${payload}
+Cs   }
+----------------------
+Actor gen_Dimension
+C ${.1.,}
+C   {
+Du refs me
+Its parent refs parent
+C    "payload": ${payload}
+Cs   }
+----------------------
+Actor gen_Strategy
+C ${.1.,}
+C   {
+Du refs me
+Its search_space refs search_space
+Its fitness refs fitness
+C    "payload": ${payload}
+Cs   }
+----------------------
+Actor gen_Constraint
+C ${.1.,}
+C   {
+Du refs me
+Its target_hw refs target_hw
+Its model refs model
+Its target_op refs target_op
+C    "payload": ${payload}
+Cs   }
+----------------------
+Actor gen_Metric
+C ${.1.,}
+C   {
+Du refs me
+Its target_hw refs target_hw
+C    "payload": ${payload}
+Cs   }
+----------------------
+Actor gen_Checkpoint
+C ${.1.,}
+C   {
+Du refs me
+Its model refs model
+C    "payload": ${payload}
+Cs   }
+----------------------
+Actor gen_Fusion
+C ${.1.,}
+C   {
+Du refs me
+Its hardware refs hardware
+C    "payload": ${payload}
+Cs   }
+----------------------
+Actor gen_ControlFlow
+C ${.1.,}
+C   {
+Du refs me
+Its parent refs parent
+Its model1 refs model1
+Its model2 refs model2
+Its model3 refs model3
+C    "payload": ${payload}
+Cs   }

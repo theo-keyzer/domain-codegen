@@ -1,0 +1,792 @@
+
+// ================================================================
+// UNIT.UNIT,ARTIFACT.UNIT,ACT.UNIT SCHEMA CONSTRUCTION GUIDE
+// Auto-generated documentation from schema definitions
+// ================================================================
+
+Artifact table-of-contents navigation guide
+O Quick navigation to all components in the schema.
+
+Section components 2 Component Index
+D
+D - [Comp](#comp-component) - 
+D   - [Element](#element-component) - 
+D     - [Opt](#opt-component) - 
+D - [Artifact](#artifact-component) - 
+D   - [Link](#link-component) - 
+D   - [O](#o-component) - 
+D   - [Section](#section-component) - 
+D     - [D](#d-component) - 
+D - [Actor](#actor-component) - 
+D   - [All](#all-component) - 
+D   - [Du](#du-component) - 
+D   - [New](#new-component) - 
+D   - [Refs](#refs-component) - 
+D   - [Var](#var-component) - 
+D   - [Its](#its-component) - 
+D   - [C](#c-component) - 
+D   - [Cs](#cs-component) - 
+D   - [Out](#out-component) - 
+D   - [In](#in-component) - 
+D   - [Break](#break-component) - 
+D   - [Add](#add-component) - Cmd
+D   - [This](#this-component) - 
+D   - [Replace](#replace-component) - 
+
+Artifact element-types-reference quick reference
+O Complete reference for all element type keywords and their behaviors.
+
+Section type_summary 2 Element Type Summary
+D
+D | Type | Scope | Resolution | Navigation |
+D |------|-------|------------|------------|
+D | `key` | Local | Immediate | Field access only |
+D | `word` | Local | Immediate | Field access only |
+D | `text` | Local | Immediate | Field access only |
+D | `number` | Local | Immediate | Field access only |
+D | `ref` | Global | Pass 1 | `Its field actor` |
+D | `link` | Sibling | Pass 1 | `Its field actor` |
+D | `ref_copy` | Previous | Pass 2+ | `Its field actor` |
+D | `ref_child` | Parent→Child | Pass 2+ | `Its field actor` |
+D | `up_copy` | Ancestor | Pass 2+ | `Its field actor` |
+D | `type_of` | Child by type | Pass 2+ | `Its field actor` |
+D | `tree` | Local | Immediate | `Its field.up/down/left/right actor` |
+D
+Section type_resolution_passes 2 Multi-Pass Resolution Details
+D
+D **Pass 1: Direct References**
+D - `ref`: Global lookup by key in Find index
+D - `link`: Parent-scoped lookup by key in FindIn index
+D
+D **Pass 2+: Derived References**
+D - `ref_copy`: Copy pointer from previous resolved field
+D - `ref_child`: Look up child in previously resolved parent
+D - `up_copy`: Walk parent chain to ancestor type
+D - `type_of`: Match child by component type name
+D
+D The loader continues passes until all references resolve or error count stabilizes.
+
+Artifact comp-component structure overview
+
+O Comp Comp parent . Find
+
+O Defines a top-level Comp component with Find searchability, meaning instances can be looked up globally by their key field.
+
+Section element_summary 2 Element Summary
+D
+D | Element | Type | Target | Check | Description |
+D |---------|------|--------|-------|-------------|
+D | name | word | . | + | The unique name of the component (e.g., 'Project'). |
+D | nop | word | . | + | Ignored, place holder for readability  |
+D | parent | ref | Comp | . | The parent component, or '.' for a top-level component. |
+D | find | word | . | * | How the component can be found: 'Find' for top-level, 'FindIn' for nested. |
+D | doc | text | . | * | Documentation string for the component. |
+D
+
+Section variables 2 Variable fields
+D ```
+D ${name}
+D ${nop}
+D ${parent}
+D ${find}
+D ${doc}
+D ${parent.name}
+D ${Comp_parent.name}
+D ${Element_comp.name}
+D ```
+Section Navigation 2 Command navigation
+D ```
+D Its Element actor  [Link to Element](#element-component)
+D Its parent actor  [Link to Comp](#comp-component)
+D Its Comp_parent actor  [Reverse link to Comp](#comp-component)
+D Its Element_comp actor  [Reverse link to Element](#element-component)
+D ```
+
+Artifact element-component structure detail
+
+O Comp Element parent Comp FindIn
+
+O Defines a Element component with FindIn searchability under parent Comp, meaning instances are searchable within their parent's context.
+
+Section element_summary 2 Element Summary
+D
+D | Element | Type | Target | Check | Description |
+D |---------|------|--------|-------|-------------|
+D | name | word | . | + | The name of the element (field). |
+D | type | word | . | + | The storage and data type. |
+D | comp | ref | Comp | . | Component this links to. Use (dot) here for non ref types. |
+D | check | word | . | + | How to check target found for refs and end of line for word |
+D | doc | text | . | * | Documentation string. |
+D
+
+Section variables 2 Variable fields
+D ```
+D ${name}
+D ${type}
+D ${comp}
+D ${check}
+D ${doc}
+D ${parent.name}
+D ${comp.name}
+D ```
+Section Navigation 2 Command navigation
+D ```
+D Its parent actor  [Link to Comp](#comp-component)
+D Its Opt actor  [Link to Opt](#opt-component)
+D Its comp actor  [Link to Comp](#comp-component)
+D ```
+
+Artifact opt-component structure detail
+
+O Comp Opt parent Element FindIn
+
+O Defines a Opt component with FindIn searchability under parent Element, meaning instances are searchable within their parent's context.
+
+Section element_summary 2 Element Summary
+D
+D | Element | Type | Target | Check | Description |
+D |---------|------|--------|-------|-------------|
+D | name | word | . | * | name of value option |
+D | pad | word | . | * | Ignored, separator for alignment |
+D | doc | text | . | * | documentation string |
+D
+
+Section variables 2 Variable fields
+D ```
+D ${name}
+D ${pad}
+D ${doc}
+D ${parent.name}
+D ```
+Section Navigation 2 Command navigation
+D ```
+D Its parent actor  [Link to Element](#element-component)
+D ```
+
+Artifact artifact-component structure overview
+
+O Comp Artifact parent . Find
+
+O Defines a top-level Artifact component with Find searchability, meaning instances can be looked up globally by their key field.
+
+Section element_summary 2 Element Summary
+D
+D | Element | Type | Target | Check | Description |
+D |---------|------|--------|-------|-------------|
+D | name | key | . | + | Unique artifact identifier |
+D | category | word | . | * | Optional category word |
+D | topic_type | word | . | * | Optional type word |
+D | doc | text | . | * | Not used in definition files |
+D
+
+Section variables 2 Variable fields
+D ```
+D ${name}
+D ${category}
+D ${topic_type}
+D ${doc}
+D ${Link_concept.concept}
+D ${Link_relation.concept}
+D ```
+Section Navigation 2 Command navigation
+D ```
+D Its Link actor  [Link to Link](#link-component)
+D Its O actor  [Link to O](#o-component)
+D Its Section actor  [Link to Section](#section-component)
+D Its Link_concept actor  [Reverse link to Link](#link-component)
+D Its Link_relation actor  [Reverse link to Link](#link-component)
+D ```
+
+Artifact link-component structure detail
+
+O Comp Link parent Artifact FindIn
+
+O Defines a Link component with FindIn searchability under parent Artifact, meaning instances are searchable within their parent's context.
+
+Section element_summary 2 Element Summary
+D
+D | Element | Type | Target | Check | Description |
+D |---------|------|--------|-------|-------------|
+D | concept | ref | Artifact | + | Target artifact (must exist) |
+D | relation | ref | Artifact | + | Relationship type (must exist) |
+D
+
+Section variables 2 Variable fields
+D ```
+D ${concept}
+D ${relation}
+D ${parent.name}
+D ${concept.name}
+D ${relation.name}
+D ```
+Section Navigation 2 Command navigation
+D ```
+D Its parent actor  [Link to Artifact](#artifact-component)
+D Its concept actor  [Link to Artifact](#artifact-component)
+D Its relation actor  [Link to Artifact](#artifact-component)
+D ```
+
+Artifact o-component structure detail
+
+O Comp O parent Artifact FindIn
+
+O Defines a O component with FindIn searchability under parent Artifact, meaning instances are searchable within their parent's context.
+
+Section element_summary 2 Element Summary
+D
+D | Element | Type | Target | Check | Description |
+D |---------|------|--------|-------|-------------|
+D | note | text | . | * | Overview content |
+D
+
+Section variables 2 Variable fields
+D ```
+D ${note}
+D ${parent.name}
+D ```
+Section Navigation 2 Command navigation
+D ```
+D Its parent actor  [Link to Artifact](#artifact-component)
+D ```
+
+Artifact section-component structure detail
+
+O Comp Section parent Artifact FindIn
+
+O Defines a Section component with FindIn searchability under parent Artifact, meaning instances are searchable within their parent's context.
+
+Section element_summary 2 Element Summary
+D
+D | Element | Type | Target | Check | Description |
+D |---------|------|--------|-------|-------------|
+D | name | word | . | + | Section identifier |
+D | level | tree | . | + | Heading depth (2=h2, 3=h3, 4=h4) |
+D | note | text | . | * | Section heading text |
+D
+
+Section variables 2 Variable fields
+D ```
+D ${name}
+D ${level}
+D ${note}
+D ${parent.name}
+D ```
+Section Navigation 2 Command navigation
+D ```
+D Its parent actor  [Link to Artifact](#artifact-component)
+D Its D actor  [Link to D](#d-component)
+D ```
+
+Artifact d-component structure detail
+
+O Comp D parent Section FindIn
+
+O Defines a D component with FindIn searchability under parent Section, meaning instances are searchable within their parent's context.
+
+Section element_summary 2 Element Summary
+D
+D | Element | Type | Target | Check | Description |
+D |---------|------|--------|-------|-------------|
+D | note | text | . | * | Content with markdown formatting |
+D
+
+Section variables 2 Variable fields
+D ```
+D ${note}
+D ${parent.name}
+D ```
+Section Navigation 2 Command navigation
+D ```
+D Its parent actor  [Link to Section](#section-component)
+D ```
+
+Artifact actor-component structure overview
+
+O Comp Actor parent . Find
+
+O Defines a top-level Actor component with Find searchability, meaning instances can be looked up globally by their key field.
+
+Section element_summary 2 Element Summary
+D
+D | Element | Type | Target | Check | Description |
+D |---------|------|--------|-------|-------------|
+D | name | word | . | * | of actor |
+D | comp | word | . | * | what it belongs to |
+D | attr | word | . | * | what to check |
+D | eq | word | . | * | to equal |
+D | value | text | . | * | this |
+D
+
+Section variables 2 Variable fields
+D ```
+D ${name}
+D ${comp}
+D ${attr}
+D ${eq}
+D ${value}
+D ${All_actor.what}
+D ${Du_actor.actor}
+D ${Its_actor.what}
+D ${This_actor.path}
+D ```
+Section Navigation 2 Command navigation
+D ```
+D Its All actor  [Link to All](#all-component)
+D Its Du actor  [Link to Du](#du-component)
+D Its New actor  [Link to New](#new-component)
+D Its Refs actor  [Link to Refs](#refs-component)
+D Its Var actor  [Link to Var](#var-component)
+D Its Its actor  [Link to Its](#its-component)
+D Its C actor  [Link to C](#c-component)
+D Its Cs actor  [Link to Cs](#cs-component)
+D Its Out actor  [Link to Out](#out-component)
+D Its In actor  [Link to In](#in-component)
+D Its Break actor  [Link to Break](#break-component)
+D Its Add actor  [Link to Add](#add-component)
+D Its This actor  [Link to This](#this-component)
+D Its Replace actor  [Link to Replace](#replace-component)
+D Its All_actor actor  [Reverse link to All](#all-component)
+D Its Du_actor actor  [Reverse link to Du](#du-component)
+D Its Its_actor actor  [Reverse link to Its](#its-component)
+D Its This_actor actor  [Reverse link to This](#this-component)
+D ```
+
+Artifact all-component structure detail
+
+O Comp All parent Actor E_O_L
+
+O Defines a All component with no indexing under parent Actor. Instances are not searchable but accessible through parent iteration.
+
+Section element_summary 2 Element Summary
+D
+D | Element | Type | Target | Check | Description |
+D |---------|------|--------|-------|-------------|
+D | what | word | . | * | what to look for |
+D | actor | ref | Actor | check | what actor to run for it |
+D | args | text | . | * | arg data value |
+D
+
+Section variables 2 Variable fields
+D ```
+D ${what}
+D ${actor}
+D ${args}
+D ${parent.name}
+D ${actor.name}
+D ```
+Section Navigation 2 Command navigation
+D ```
+D Its parent actor  [Link to Actor](#actor-component)
+D Its actor actor  [Link to Actor](#actor-component)
+D ```
+
+Artifact du-component structure detail
+
+O Comp Du parent Actor E_O_L
+
+O Defines a Du component with no indexing under parent Actor. Instances are not searchable but accessible through parent iteration.
+
+Section element_summary 2 Element Summary
+D
+D | Element | Type | Target | Check | Description |
+D |---------|------|--------|-------|-------------|
+D | actor | ref | Actor | check | what actor to run for it |
+D | args | text | . | * | arg data value |
+D
+
+Section variables 2 Variable fields
+D ```
+D ${actor}
+D ${args}
+D ${parent.name}
+D ${actor.name}
+D ```
+Section Navigation 2 Command navigation
+D ```
+D Its parent actor  [Link to Actor](#actor-component)
+D Its actor actor  [Link to Actor](#actor-component)
+D ```
+
+Artifact new-component structure detail
+
+O Comp New parent Actor E_O_L
+
+O Defines a New component with no indexing under parent Actor. Instances are not searchable but accessible through parent iteration.
+
+Section element_summary 2 Element Summary
+D
+D | Element | Type | Target | Check | Description |
+D |---------|------|--------|-------|-------------|
+D | where | word | . | * | add to dats or acts |
+D | what | word | . | * | what comp to load |
+D | line | text | . | * | load line args |
+D
+
+Section variables 2 Variable fields
+D ```
+D ${where}
+D ${what}
+D ${line}
+D ${parent.name}
+D ```
+Section Navigation 2 Command navigation
+D ```
+D Its parent actor  [Link to Actor](#actor-component)
+D ```
+
+Artifact refs-component structure detail
+
+O Comp Refs parent Actor E_O_L
+
+O Defines a Refs component with no indexing under parent Actor. Instances are not searchable but accessible through parent iteration.
+
+Section element_summary 2 Element Summary
+D
+D | Element | Type | Target | Check | Description |
+D |---------|------|--------|-------|-------------|
+D | where | word | . | * | ref of dats or acts |
+D
+
+Section variables 2 Variable fields
+D ```
+D ${where}
+D ${parent.name}
+D ```
+Section Navigation 2 Command navigation
+D ```
+D Its parent actor  [Link to Actor](#actor-component)
+D ```
+
+Artifact var-component structure detail
+
+O Comp Var parent Actor E_O_L
+
+O Defines a Var component with no indexing under parent Actor. Instances are not searchable but accessible through parent iteration.
+
+Section element_summary 2 Element Summary
+D
+D | Element | Type | Target | Check | Description |
+D |---------|------|--------|-------|-------------|
+D | attr | word | . | * | variable name |
+D | eq | word | . | * | to equal |
+D | value | text | . | * | this |
+D
+
+Section variables 2 Variable fields
+D ```
+D ${attr}
+D ${eq}
+D ${value}
+D ${parent.name}
+D ```
+Section Navigation 2 Command navigation
+D ```
+D Its parent actor  [Link to Actor](#actor-component)
+D ```
+
+Artifact its-component structure detail
+
+O Comp Its parent Actor E_O_L
+
+O Defines a Its component with no indexing under parent Actor. Instances are not searchable but accessible through parent iteration.
+
+Section element_summary 2 Element Summary
+D
+D | Element | Type | Target | Check | Description |
+D |---------|------|--------|-------|-------------|
+D | what | word | . | * | to look for |
+D | actor | ref | Actor | check | what to do |
+D | args | text | . | * | arg data value |
+D
+
+Section variables 2 Variable fields
+D ```
+D ${what}
+D ${actor}
+D ${args}
+D ${parent.name}
+D ${actor.name}
+D ```
+Section Navigation 2 Command navigation
+D ```
+D Its parent actor  [Link to Actor](#actor-component)
+D Its actor actor  [Link to Actor](#actor-component)
+D ```
+
+Artifact c-component structure detail
+
+O Comp C parent Actor E_O_L
+
+O Defines a C component with no indexing under parent Actor. Instances are not searchable but accessible through parent iteration.
+
+Section element_summary 2 Element Summary
+D
+D | Element | Type | Target | Check | Description |
+D |---------|------|--------|-------|-------------|
+D | desc | text | . | * | code to output. |
+D
+
+Section variables 2 Variable fields
+D ```
+D ${desc}
+D ${parent.name}
+D ```
+Section Navigation 2 Command navigation
+D ```
+D Its parent actor  [Link to Actor](#actor-component)
+D ```
+
+Artifact cs-component structure detail
+
+O Comp Cs parent Actor E_O_L
+
+O Defines a Cs component with no indexing under parent Actor. Instances are not searchable but accessible through parent iteration.
+
+Section element_summary 2 Element Summary
+D
+D | Element | Type | Target | Check | Description |
+D |---------|------|--------|-------|-------------|
+D | desc | text | . | * | code to output. |
+D
+
+Section variables 2 Variable fields
+D ```
+D ${desc}
+D ${parent.name}
+D ```
+Section Navigation 2 Command navigation
+D ```
+D Its parent actor  [Link to Actor](#actor-component)
+D ```
+
+Artifact out-component structure detail
+
+O Comp Out parent Actor E_O_L
+
+O Defines a Out component with no indexing under parent Actor. Instances are not searchable but accessible through parent iteration.
+
+Section element_summary 2 Element Summary
+D
+D | Element | Type | Target | Check | Description |
+D |---------|------|--------|-------|-------------|
+D | what | word | . | * | to look for. |
+D | pad | word | . | * | to look for |
+D | desc | text | . | * | code to buffer. |
+D
+
+Section variables 2 Variable fields
+D ```
+D ${what}
+D ${pad}
+D ${desc}
+D ${parent.name}
+D ```
+Section Navigation 2 Command navigation
+D ```
+D Its parent actor  [Link to Actor](#actor-component)
+D ```
+
+Artifact in-component structure detail
+
+O Comp In parent Actor E_O_L
+
+O Defines a In component with no indexing under parent Actor. Instances are not searchable but accessible through parent iteration.
+
+Section element_summary 2 Element Summary
+D
+D | Element | Type | Target | Check | Description |
+D |---------|------|--------|-------|-------------|
+D | flag | word | . | * | set on or off |
+D
+
+Section variables 2 Variable fields
+D ```
+D ${flag}
+D ${parent.name}
+D ```
+Section Navigation 2 Command navigation
+D ```
+D Its parent actor  [Link to Actor](#actor-component)
+D ```
+
+Artifact break-component structure detail
+
+O Comp Break parent Actor E_O_L
+
+O Defines a Break component with no indexing under parent Actor. Instances are not searchable but accessible through parent iteration.
+
+Section element_summary 2 Element Summary
+D
+D | Element | Type | Target | Check | Description |
+D |---------|------|--------|-------|-------------|
+D | what | word | . | * | what to break |
+D | pad | word | . | * | padding (of) |
+D | actor | word | Actor | . | which actor to break |
+D | check | word | . | * | only if not unique |
+D
+
+Section variables 2 Variable fields
+D ```
+D ${what}
+D ${pad}
+D ${actor}
+D ${check}
+D ${parent.name}
+D ```
+Section Navigation 2 Command navigation
+D ```
+D Its parent actor  [Link to Actor](#actor-component)
+D ```
+
+Artifact add-component structure detail
+
+O Comp Add parent Actor .
+
+O Defines a Add component with no indexing under parent Actor. Instances are not searchable but accessible through parent iteration.
+
+Section element_summary 2 Element Summary
+D
+D | Element | Type | Target | Check | Description |
+D |---------|------|--------|-------|-------------|
+D | path | word | . | * | node path where to add |
+D | data | text | . | * | data to add |
+D
+
+Section variables 2 Variable fields
+D ```
+D ${path}
+D ${data}
+D ${parent.name}
+D ```
+Section Navigation 2 Command navigation
+D ```
+D Its parent actor  [Link to Actor](#actor-component)
+D ```
+
+Artifact this-component structure detail
+
+O Comp This parent Actor E_O_L
+
+O Defines a This component with no indexing under parent Actor. Instances are not searchable but accessible through parent iteration.
+
+Section element_summary 2 Element Summary
+D
+D | Element | Type | Target | Check | Description |
+D |---------|------|--------|-------|-------------|
+D | path | word | . | * | node path |
+D | actor | ref | Actor | check | what to do |
+D | args | text | . | * | arg data value |
+D
+
+Section variables 2 Variable fields
+D ```
+D ${path}
+D ${actor}
+D ${args}
+D ${parent.name}
+D ${actor.name}
+D ```
+Section Navigation 2 Command navigation
+D ```
+D Its parent actor  [Link to Actor](#actor-component)
+D Its actor actor  [Link to Actor](#actor-component)
+D ```
+
+Artifact replace-component structure detail
+
+O Comp Replace parent Actor E_O_L
+
+O Defines a Replace component with no indexing under parent Actor. Instances are not searchable but accessible through parent iteration.
+
+Section element_summary 2 Element Summary
+D
+D | Element | Type | Target | Check | Description |
+D |---------|------|--------|-------|-------------|
+D | path | word | . | * | node path where to add |
+D | pad | word | . | * | padding (with) |
+D | with | word | . | * | what to replace with |
+D | pad2 | word | . | * | padding (match) |
+D | match | text | . | * | string match pattern |
+D
+
+Section variables 2 Variable fields
+D ```
+D ${path}
+D ${pad}
+D ${with}
+D ${pad2}
+D ${match}
+D ${parent.name}
+D ```
+Section Navigation 2 Command navigation
+D ```
+D Its parent actor  [Link to Actor](#actor-component)
+D ```
+
+Artifact reference-resolution-guide workflow overview
+O Multi-pass reference resolution algorithm that handles complex reference chains.
+
+Section resolution_order 2 Resolution Order
+D References resolve in passes until stable:
+D
+D **Pass 1: Direct References**
+D - `ref`: Direct lookup in global index
+D - `link`: Lookup in parent's child index
+D
+D **Pass 2+: Derived References**
+D - `ref_copy`: Copies resolved reference from previous field
+D - `ref_child`: Looks up child in previously referenced component
+D - `up_copy`: Walks parent chain to find ancestor
+D
+D The loader repeats passes until error count stops changing (typically 2-4 passes).
+
+Section chaining_pattern 2 Common Chaining Pattern
+D ```
+D Element base_ref    ref       Target    +
+D Element child_ref   ref_child ChildType +
+D ```
+D First field resolves Target by name, second field looks up ChildType within that Target.
+
+Section up_chain_pattern 2 Up-Chain Pattern
+D ```
+D Element context     up_copy   Ancestor  +
+D Element target      ref_child ChildType +
+D ```
+D First field walks parents to find Ancestor, second field looks up ChildType within it.
+
+Section common_patterns 2 Common Design Patterns
+D
+D **Pattern 1: Direct Reference**
+D ```
+D Element target ref ComponentType +
+D ```
+D Simple global lookup.
+D
+D **Pattern 2: Reference Chain**
+D ```
+D Element parent_ref   ref       Parent +
+D Element child_ref    ref_child Child  +
+D ```
+D Two-level lookup: resolve parent, then find child within parent.
+D
+D **Pattern 3: Ancestor Lookup**
+D ```
+D Element ancestor  up_copy   Ancestor +
+D Element target    ref_child Target   +
+D ```
+D Navigate up hierarchy to find ancestor, then look up child within it.
+D
+D **Pattern 4: Reference Reuse**
+D ```
+D Element original  ref      Target +
+D Element copy      ref_copy Target +
+D ```
+D Resolve once, copy pointer multiple times for efficiency.
+D
+D **Pattern 5: Sibling Link**
+D ```
+D Element sibling link SiblingType +
+D ```
+D Reference sibling component under same parent.
+D
+

@@ -306,8 +306,9 @@ Comp AutoTuneExtension parent AutoTuneConfig FindIn  // Ref tsu-auto.unit
 ----------------------------------------------------------------
 * Extensions for variational/multi-state tuning
 ----------------------------------------------------------------
-	Element autotune          key   . + ID
-	Element multi_objective   ref   MultiObjective * Pareto for q vs. time
-	Element desc              text  . * Description
+	Element autotune           key       . + ID
+	Element evolution_strategy ref       EvolutionStrategy *
+	Element multi_objective    ref_child MultiObjective * Pareto for q vs. time
+	Element desc               text      . * Description
 
 

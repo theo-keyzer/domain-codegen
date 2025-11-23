@@ -133,15 +133,16 @@ Comp AnalogOp parent Operation FindIn
 ----------------------------------------------------------------
 * Analog compute operations (crossbar MVP, etc.)
 ----------------------------------------------------------------
-	Element analog_type   word  . + crossbar_mvp, capacitor_mac, vcsel_mac
-	Element array_ref     word  . + Reference to memristor/analog array
-	Element pulse_protocol word . * Voltage pulse scheme
-	Element adc_bits      word  . * ADC resolution
-	Element dac_bits      word  . * DAC resolution
-	Element non_ideal     word  . * true to include drift, noise, saturation
-	Element programming_time word . * Time to update weights (µs)
-	Element desc          text  . * Description
-	Element array_target  ref  AnalogHardware + Target analog array (NOT word!)
+	Element analog_type   word      . + crossbar_mvp, capacitor_mac, vcsel_mac
+	Element array_ref     word      . + Reference to memristor/analog array
+	Element pulse_protocol word     . * Voltage pulse scheme
+	Element adc_bits      word      . * ADC resolution
+	Element dac_bits      word      . * DAC resolution
+	Element non_ideal     word      . * true to include drift, noise, saturation
+	Element programming_time word   . * Time to update weights (µs)
+	Element desc          text      . * Description
+	Element hardware      ref       Hardware       + Target hardware
+	Element array_target  ref_child AnalogHardware + Target analog array (NOT word!)
 
 Comp QuantumOp parent Operation FindIn
 ----------------------------------------------------------------
@@ -706,29 +707,31 @@ Comp Simulator parent . Find
 ----------------------------------------------------------------
 * Multi-fidelity, multi-physics simulator
 ----------------------------------------------------------------
-	Element sim_id        key   . + Simulator identifier
-	Element components    text  . + Components to simulate
-	Element fidelity      word  . + cycle_accurate, functional, analytical
-	Element solver        word  . + event_driven, ode, quasi_static, monte_carlo
+	Element sim_id        key       . + Simulator identifier
+	Element components    text      . + Components to simulate
+	Element fidelity      word      . + cycle_accurate, functional, analytical
+	Element solver        word      . + event_driven, ode, quasi_static, monte_carlo
 	Element time_scale    word      . + Simulation timestep
 	Element energy_tracker word     . * true/false
 	Element fault_injection word    . * Reference to FaultModel
 	Element desc          text      . * Description
 	Element project_ref   ref       Project      * Target project
 	Element target_graph  ref_child ComputeGraph * Graph to simulate
-	Element fault_models  ref_child FaultModel   * Fault models to apply
+	Element fault_models  ref       FaultModel   * Fault models to apply
 
 Comp SimulationLevel parent Simulator FindIn
 ----------------------------------------------------------------
 * Multi-fidelity simulation configuration
 ----------------------------------------------------------------
-	Element component     word  . + Component to configure
-	Element fidelity      word  . + cycle_accurate, functional, analytical
-	Element speed_factor  word  . * Speedup vs. cycle-accurate (e.g., 1000×)
-	Element accuracy      word  . * RMSE vs. hardware
-	Element calibration_data text . * Hardware trace for tuning
-	Element desc          text  . * Description
-	Element target_component ref Operation + Component to configure
+	Element component     word         . + Component to configure
+	Element fidelity      word         . + cycle_accurate, functional, analytical
+	Element speed_factor  word         . * Speedup vs. cycle-accurate (e.g., 1000×)
+	Element accuracy      word         . * RMSE vs. hardware
+	Element calibration_data text      . * Hardware trace for tuning
+	Element desc          text         . * Description
+	Element project          ref       Project    + Parent simulator
+	Element sim_graph        ref_child ComputeGraph + Graph being simulated
+	Element target_component ref_child Operation + Component to configure
 
 Comp AdaptiveFidelity parent Simulator FindIn
 ----------------------------------------------------------------

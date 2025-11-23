@@ -1,0 +1,129 @@
+// ================================================================
+// COGNITIVE DOMAIN SCHEMA — cog-doc.unit (Final)
+// ================================================================
+// Design Philosophy:
+//  • Minimal structural components (only core graph topology)
+//  • Domain richness via 'type' tags + undefined payload fields
+//  • Citation as explicit child component (not ref field)
+//  • 100% compatible with existing Omni Linker
+// ================================================================
+
+// ----------------------------------------------------------------
+// AGENT: The Executing Persona
+// ----------------------------------------------------------------
+Comp Agent          parent .          Find
+    Element agent_id      key     .       +   // e.g., "agent_session_abc"
+    Element persona       text    .       *   // System prompt / role definition
+    Element tools         ref     Tool    *   // Available capabilities
+    Element token_budget  number  .       *   // Context window limit
+    Element doc           text    .       *
+
+// ----------------------------------------------------------------
+// OBJECTIVE: Goal Structure
+// ----------------------------------------------------------------
+Comp Objective      parent Agent      FindIn
+    Element objective_id  key     .       +   // Unique goal identifier
+    Element parent_obj    link    Objective *   // Hierarchical sub-goals
+    Element status        word    .       +   // active | suspended | completed | failed | abandoned
+    Element priority      number  .       *   // 0.0–1.0 (urgency)
+    Element doc           text    .       *
+
+    Opt active            *   // Currently being worked on
+    Opt suspended         *   // Paused
+    Opt completed         *   // Successfully achieved
+    Opt failed            *   // Could not achieve
+    Opt abandoned         *   // Explicitly given up
+
+// ----------------------------------------------------------------
+// MEMORY: Grounded Knowledge Store
+// ----------------------------------------------------------------
+Comp Memory         parent Agent      FindIn
+    Element memory_id     key     .       +   // e.g., "mem_8f3c1d"
+    Element type          word    .       *   // semantic | episodic | working | tool_result | meta
+    Element source        word    .       *   // user | web | self | tool | training
+    Element timestamp     number  .       *   // Unix milliseconds
+    Element confidence    number  .       *   // 0.0–1.0 reliability score
+    Element embedding     ref     Vector  *   // Optional: for semantic retrieval
+    Element invalidated_by link   Thought *   // Which thought proved this false
+    Element doc           text    .       *
+
+    Opt semantic          *   // Facts, knowledge, definitions
+    Opt episodic          *   // Specific events "I did X at time Y"
+    Opt working           *   // Temporary scratchpad
+    Opt tool_result       *   // Output from tool execution
+    Opt meta              *   // Self-knowledge about reasoning
+
+// ----------------------------------------------------------------
+// THOUGHT: Reasoning Node
+// ----------------------------------------------------------------
+Comp Thought        parent Objective  FindIn
+    Element thought_id    key     .       +   // e.g., "t_00047"
+    Element type          word    .       *   // reasoning | hypothesis | reflection | constraint | plan_step | synthesis
+    Element prev          link    Thought *   // Linear chain predecessor
+    Element branches      link    Thought *   // Tree-of-Thoughts children
+    Element parent_branch link    Thought *   // If this is a branch, parent thought
+    Element confidence    number  .       *   // 0.0–1.0 self-assessed certainty
+    Element doc           text    .       *
+
+    // Type taxonomy (defines semantic role via single tag)
+    Opt reasoning         *   // Standard chain-of-thought step
+    Opt hypothesis        *   // Proposition being tested (prior/posterior in payload)
+    Opt reflection        *   // Meta-cognition about reasoning quality
+    Opt constraint        *   // Boundary condition or rule (hard/soft in payload)
+    Opt plan_step         *   // Explicit step in multi-step strategy
+    Opt synthesis         *   // Integration of multiple thoughts
+    Opt question          *   // Self-posed question needing answer
+    Opt error_recovery    *   // Backtracking or correction
+
+// ----------------------------------------------------------------
+// CITATION: Explicit Grounding Link (Child of Thought)
+// ----------------------------------------------------------------
+Comp Citation       parent Thought    FindIn
+    Element citation_id   key     .       +   // e.g., "c_001", "c_002"
+    Element memory        ref     Memory  +   // Exactly one Memory per citation (MANDATORY)
+    Element role          word    .       *   // supports | contradicts | background | quote | evidence_for | evidence_against
+    Element quote         text    .       *   // Optional: direct excerpt from memory (max 15 words)
+    Element doc           text    .       *
+
+    Opt supports          *   // This memory supports the thought's conclusion
+    Opt contradicts       *   // This memory conflicts with the thought
+    Opt background        *   // Contextual information
+    Opt quote             *   // Direct quotation (follow copyright rules)
+    Opt evidence_for      *   // Evidence supporting a hypothesis
+    Opt evidence_against  *   // Evidence refuting a hypothesis
+    Opt invalidates       *   // This citation proves the thought false
+
+// ----------------------------------------------------------------
+// ACTION: External Execution
+// ----------------------------------------------------------------
+Comp Action         parent Thought    FindIn
+    Element action_id     key     .       +   // e.g., "act_search_001"
+    Element tool          ref     Tool    +   // Which capability to invoke
+    Element args          text    .       *   // JSON parameters or ~~~ code block
+    Element result_mem    ref     Memory  *   // Pre-declared result storage location
+    Element status        word    .       *   // pending | executing | success | error | timeout
+    Element doc           text    .       *
+
+    Opt pending           *   // Queued
+    Opt executing         *   // Currently running
+    Opt success           *   // Completed successfully
+    Opt error             *   // Failed with error
+    Opt timeout           *   // Exceeded time limit
+
+// ----------------------------------------------------------------
+// TOOL: Available Capabilities
+// ----------------------------------------------------------------
+Comp Tool           parent .          Find
+    Element tool_id       key     .       +   // e.g., "web_search"
+    Element name          word    .       +   // Human-readable name
+    Element schema        text    .       *   // Function signature or JSON schema
+    Element doc           text    .       *
+
+// ----------------------------------------------------------------
+// VECTOR: Embedding for Semantic Search
+// ----------------------------------------------------------------
+Comp Vector         parent .          Find
+    Element vector_id     key     .       +   // Unique identifier
+    Element dimensions    number  .       *   // Vector size (e.g., 1536)
+    Element values        text    .       *   // Comma-separated floats or base64
+    Element doc           text    .       *

@@ -29,7 +29,6 @@ type KpExtra struct {
 func (me KpExtra) GetVar(glob *GlobT, s []string, ln string) (bool, string) {
 	r,ok := me.Names[s[0]]
 	if !ok { r = fmt.Sprintf("?%s?:%s, Command line arguments", s[0], ln) }
-//	if !ok { r = fmt.Sprintf("xxx") }
 	return ok,r
 }
 func (me KpExtra) DoIts(glob *GlobT, va []string, lno string) int {
@@ -52,7 +51,7 @@ func main() {
 	glob.Collect = make(map[string]interface{})
 	// Load files and check for errors
 	glob.LoadErrs += loadFiles(args[0], &glob.Acts)
-	glob.LoadErrs += loadFiles(args[1], &glob.Dats)
+	glob.LoadErrs += loadFilesh(args[1], &glob.Dats)
 
 	if len(glob.Acts.ApActor) > 0 {
 		kp := &KpExtra{
@@ -74,6 +73,39 @@ func main() {
 	}
 }
 
+func loadFilesh(files string, act *ActT) int {
+	act.index = make(map[string]int) 
+	errs := 0
+	fileList := strings.Split(files, ",")
+	
+	for _, file := range fileList {
+		components, err := ParseRioFile(file)
+		if err != nil {
+			fmt.Printf("Error reading h file %s: %v\n", file, err)
+			errs = errs + 1
+			continue
+		}
+		for _, comp := range components {
+			lno := fmt.Sprintf("%s:%d", file, comp.LineNumber)
+			Loadh(act, comp.Type, "", 7, lno,comp.Fields)
+		}
+		// components, err := ParseMLFile("ml_ml.txt")
+		/*
+		content, err := os.ReadFile(file)
+		if err != nil {
+			fmt.Printf("Error reading file %s: %v\n", file, err)
+			errs = errs + 1
+			continue
+		}
+		*/
+//		Loadh(act, "", "", 7, "v:8",components)
+//		lines := strings.Split(string(content), "\n")
+//		errs += LoadDatah(lines, act, file,components)
+	}
+	
+	errs += refs(act)
+	return errs
+}
 func loadFiles(files string, act *ActT) int {
 	act.index = make(map[string]int) 
 	errs := 0

@@ -1,0 +1,202 @@
+// ================================================================
+// omni.unit — The One Universal Schema (v1.1 — November 2025)
+// Classical · NAS · MoE · ODE · Thermodynamic · Quantum · Photonic · Neuromorphic · Molecular
+// Zero inline code. Everything is a file path (stored as text).
+// Only keys + pure relations + one payload bag.
+// ================================================================
+
+Comp Project parent . Find
+----------------------------------------------------------------
+* Top-level container
+----------------------------------------------------------------
+    Element project       key   . + Project name/ID
+    Element domain        ref   Domain   * Primary domain (optional)
+    Element model         ref   Model    + Root model/graph
+    Element strategy      ref   Strategy * Default optimization strategy
+    Element hardware      ref   Hardware * Default target hardware
+    Element desc          text  . * Description
+
+Comp Domain parent . Find
+----------------------------------------------------------------
+* Knowledge domain tag (daml, net5, nexus, tsu, custom…)
+----------------------------------------------------------------
+    Element name          key   . + Domain identifier
+    Element desc          text  . * Human name/description
+
+Comp Hardware parent . Find
+----------------------------------------------------------------
+* Any execution substrate — GPU, TPU, TSU, QPU, photonic chip, analog array…
+----------------------------------------------------------------
+    Element hardware      key   . + Unique name (gpu_a100, tsu_v1, ibmq_oslo)
+    Element parent_hw     ref   Hardware * Optional hierarchy (rack → node → card)
+    Element emulation     ref   Hardware * Reference to emulator hardware
+    Element noise_model   ref   Constraint * Stochastic/Quantum noise reference
+    Element payload       text  . * JSON/YAML: arch, memory_gb, bandwidth…
+
+Comp Model parent . Find
+----------------------------------------------------------------
+* The compute graph / neural architecture / PGM / quantum circuit
+----------------------------------------------------------------
+    Element model         key   . + Model identifier
+    Element hardware      ref   Hardware * Preferred substrate
+    Element search_space  ref   SearchSpace * NAS search space (optional)
+    Element config        ref   Config * Inference/runtime configuration
+    Element code          text  . * Optional: main driver file path
+    Element payload       text  . * type, dataset, num_classes, pgm_schema…
+
+Comp Layer parent Model FindIn
+----------------------------------------------------------------
+* Hierarchical grouping (cells, blocks, experts, circuit blocks)
+----------------------------------------------------------------
+    Element layer         key   . + Layer name
+    Element parent_layer  link  Layer * Nested layer support
+    Element payload       text  . * layer_type, repeat, reduction…
+
+Comp Block parent . Find
+----------------------------------------------------------------
+* NET5 universal reusable block template
+----------------------------------------------------------------
+    Element block         key   . + Block identifier
+    Element model         ref   Model * Reference to sub-model structure
+    Element payload       text  . * block_type, params, noise_model, energy…
+
+Comp Tensor parent Model FindIn
+----------------------------------------------------------------
+* Data carrier — classical, spiking events, qubit states, analog voltages…
+----------------------------------------------------------------
+    Element tensor        key   . + Tensor name (e.g. input, hidden_3, qubits)
+    Element producer      link  Op * Operation producing this tensor
+    Element distribution  ref   EnergyFunction * Probabilistic semantics (optional)
+    Element payload       text  . * shape, dtype, layout, symbolic, role…
+
+Comp Op parent Model FindIn
+----------------------------------------------------------------
+* The One True Universal Operation — replaces 70+ legacy subtypes
+----------------------------------------------------------------
+    Element op            key   . + Unique operation name
+
+    // Direct root refs only (no chains)
+    Element hardware      ref   Hardware     * Target substrate for this op
+    Element energy_fn     ref   EnergyFunction * Physics energy (optional)
+    Element search_space  ref   SearchSpace  * NAS/tuning context (optional)
+    Element strategy      ref   Strategy     * Meta-optimisation / simulation strategy
+
+    // Sibling links (same parent Model)
+    Element predicate     link  Tensor       * Dynamic condition (optional)
+    Element next_op       link  Op           * Explicit DAG edge (optional)
+    Element layer         link  Layer        * Containing layer (optional)
+
+    // Code is always a file path (stored as text)
+    Element code          text  . * Path to implementation: kernels/matmul.cu, etc.
+
+    // Everything else
+    Element payload       text  . * JSON/YAML blob: op_type, num_heads, gate_type,
+                                    temperature, top_k, flops, memory_bytes…
+
+    Element desc          text  . * Human description
+
+Comp Arg parent Op FindIn
+----------------------------------------------------------------
+* Input/output/parameter binding
+----------------------------------------------------------------
+    Element arg           key       .      + Argument name
+    Element role          word      .      + input | output | parameter
+    Element model         up_copy   Model  * Context navigation to parent Model
+    Element tensor        ref_child Tensor + Connected tensor (sibling under Model)
+
+Comp Config parent . Find
+----------------------------------------------------------------
+* Runtime/inference configuration
+----------------------------------------------------------------
+    Element config        key   . + Config identifier
+    Element schedule      ref   Strategy * Execution schedule
+    Element payload       text  . * batch_size, precision, state_transfer…
+
+Comp Kernel parent . Find
+----------------------------------------------------------------
+* Legacy — kept only for backward compatibility
+* In new designs: just use Op.code file path directly
+----------------------------------------------------------------
+    Element kernel        key   . + Kernel name
+    Element hardware      ref   Hardware * Target hardware
+    Element code          text  . * Path to kernel file
+
+Comp EnergyFunction parent . Find
+----------------------------------------------------------------
+* Energy landscape for thermodynamic / annealing / quantum ops
+----------------------------------------------------------------
+    Element energy_fn     key   . + Name
+    Element code          text  . * Optional: energy function source path
+    Element payload       text  . * expression, variables, temperature…
+
+Comp SearchSpace parent . Find
+----------------------------------------------------------------
+* NAS / architecture / hyper-parameter search space
+----------------------------------------------------------------
+    Element space         key   . + Search space ID
+    Element target_model  ref   Model * Model being tuned
+    Element payload       text  . * algorithm hints, constraints…
+
+Comp Dimension parent SearchSpace FindIn
+----------------------------------------------------------------
+* A single tunable dimension within a search space
+----------------------------------------------------------------
+    Element dimension     key   . + Dimension name (e.g. temperature, num_heads)
+    Element payload       text  . * type, range, scale, choices…
+
+Comp Strategy parent . Find
+----------------------------------------------------------------
+* Optimisation, simulation, search, or execution strategy
+----------------------------------------------------------------
+    Element strategy      key   . + Name (darts, evolution, maml, cycle_accurate_sim)
+    Element search_space  ref   SearchSpace * Target search space
+    Element fitness       ref   Metric * Fitness metric
+    Element code          text  . * Strategy implementation file path
+    Element payload       text  . * learning rates, budgets, fidelity…
+
+Comp Constraint parent . Find
+----------------------------------------------------------------
+* Hard or soft constraints (power, memory, fidelity, determinism…)
+----------------------------------------------------------------
+    Element constraint_id key       .        + ID
+    Element target_hw     ref       Hardware * Constrained hardware (optional)
+    Element model         ref       Model    * Context navigation to parent Model
+    Element target_op     ref_child Op       * Constrained operation (optional)
+    Element payload       text      .        * condition, severity, target, noise_model…
+
+Comp Metric parent . Find
+----------------------------------------------------------------
+* Telemetry & fitness metrics
+----------------------------------------------------------------
+    Element metric        key   . + Name
+    Element target_hw     ref   Hardware * Component measured (optional)
+    Element payload       text  . * unit, target_value…
+
+Comp Checkpoint parent . Find
+----------------------------------------------------------------
+* Versioned snapshot
+----------------------------------------------------------------
+    Element checkpoint_id key   . + ID
+    Element model         ref   Model * Model snapshot belongs to
+    Element payload       text  . * state path, timestamp
+
+Comp Fusion parent . Find
+----------------------------------------------------------------
+* Fusion patterns for kernel optimization (NEXUS)
+----------------------------------------------------------------
+    Element fusion        key   . + Pattern identifier
+    Element hardware      ref   Hardware * Target hardware
+    Element payload       text  . * pattern_type, ops_fused, strategy…
+
+Comp ControlFlow parent Op FindIn
+----------------------------------------------------------------
+* Branching/looping logic within operations
+----------------------------------------------------------------
+    Element control       key      .      + Control flow identifier
+    Element model1        up_copy  Model  * Context navigation to parent Model
+    Element predicate     ref_cild Tensor * Condition tensor
+    Element model2        up_copy  Model  * Context navigation to parent Model
+    Element branch_true   ref_cild Op     * True branch target
+    Element model3        up_copy  Model  * Context navigation to parent Model
+    Element branch_false  ref_cild Op     * False branch target
+    Element payload       text     .      * loop_count, condition_type…
