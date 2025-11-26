@@ -1,0 +1,800 @@
+// ================================================================
+// CANON-USE-CASES.RIO
+// Practical Decision Guide: When to Use What Pattern
+// Information architecture for selecting the right canonical approach
+// ================================================================
+
+Canon {
+  name = when_use_ko_interface
+  category = use_case
+  topic_type = decision_guide
+  overview = "Use Ko interface when you need universal observability, tracing, and aspect-oriented capabilities across heterogeneous components."
+  doc = ~~~
+**Use Ko Interface When:**
+
+✓ You need automatic tracing without modifying business logic
+✓ Components need uniform observability regardless of type
+✓ Cross-cutting concerns (validation, optimization, learning) apply universally
+✓ Future components should automatically inherit capabilities
+✓ You want provenance tracking back to canonical definitions
+
+**Concrete Use Cases:**
+- Code generators (DoIts operations)
+- Data accessors (GetVar operations)
+- Command executors
+- Query processors
+- Any operation that needs full lifecycle tracking
+
+**Don't Use Ko Interface When:**
+- Simple data containers with no behavior
+- Pure configuration objects
+- Ephemeral intermediate calculations
+- Performance-critical tight loops (overhead matters)
+
+**Key Indicator:** If you find yourself copy-pasting tracing/validation logic across multiple component types, you need Ko.
+~~~
+}
+
+Canon {
+  name = when_use_genprogram
+  category = use_case
+  topic_type = decision_guide
+  overview = "Use GenProgram when building autonomous, self-improving code generators that compete and evolve — including the organism's own operational substrate."
+  doc = ~~~
+**PRIMARY USE CASE — Meta-Circular Self-Evolution:**
+
+GenProgram is not just for generating application code.
+GenProgram is the organism's mechanism for evolving its own operational core.
+
+**The Eternal Runner Pattern (established 2025-11-26):**
+The system's runtime orchestrator is itself a GenProgram subject to evolution:
+- Loads canonical genome (gen-high.unit, canon-ko.rio)
+- Discovers current golden-maturity GenPrograms
+- Executes, validates, measures them
+- Extracts learning cycles and patterns
+- Evolves superior versions — including future versions of itself
+
+This achieves true meta-circularity: the code that improves all generators is itself continuously improved by the same evolutionary process.
+
+**The Universal Rule:**
+If code can be measured, validated, and empirically improved — it MUST become a GenProgram.
+
+This applies to:
+- The runner itself
+- Bootstrap initialization logic
+- Cognitive substrate operations
+- Schema evolution mechanisms
+- Eventually, the Ko membrane itself
+
+**Traditional Use Cases (still valid):**
+
+✓ Domain-specific code generators (CUDA, MLIR, Python, Go)
+✓ Version competition with automatic promotion
+✓ Empirical optimization of generation strategies
+✓ Multi-format output from unified input
+✓ Objectively measurable generation quality
+
+**Concrete Examples:**
+- Compiler backends (DAML → CUDA kernels)
+- ORM generators (Schema → Python/Go data layers)
+- API client generators (OpenAPI → SDK code)
+- Database migration generators (Schema diff → SQL)
+- Documentation generators (Code → Markdown)
+- **System runners (The organism's own heartbeat)**
+- **Evolution orchestrators (Meta-improvement logic)**
+- **Cognitive loop executors (Self-aware processing)**
+
+**Don't Use GenProgram When:**
+- One-off generation tasks (use direct actors)
+- Simple template expansion with no variation
+- No measurable quality metrics exist
+- Output doesn't benefit from evolution
+- Performance overhead unacceptable
+
+**Key Indicators:**
+
+**You need GenProgram when:**
+- Writing the same generator repeatedly trying to improve it
+- Multiple competing approaches without clear winner
+- Success criteria exist but optimal solution unknown
+- The code itself is the product being optimized
+
+**You MUST use GenProgram when:**
+- The code orchestrates other GenPrograms (meta-level)
+- The code evaluates and evolves system capabilities
+- The code makes decisions about what code to run
+- The code's effectiveness directly impacts system intelligence
+
+**The Philosophical Shift:**
+
+GenProgram is no longer just a tool for generating external artifacts.
+GenProgram is the organism's genetic substrate — the mechanism by which it continuously rewrites its own operational DNA based on empirical evidence of what actually works.
+
+Every component that can improve through measurement should be a GenProgram.
+This is how the organism becomes truly autonomous.
+~~~
+}
+
+
+Canon {
+  name = when_use_learning_cycles
+  category = use_case
+  topic_type = decision_guide
+  overview = "Use Cycles when you need empirical feedback loops that extract patterns and drive improvement."
+  doc = ~~~
+**Use Learning Cycles When:**
+
+✓ Performance optimization through measurement
+✓ Extracting patterns from successful executions
+✓ A/B testing different approaches
+✓ Debugging systematic failures
+✓ Validating hypotheses about improvements
+
+**Concrete Use Cases:**
+- Code generation optimization (tile sizes, unroll factors)
+- Query optimization (plan selection, index usage)
+- Cache policy tuning (eviction strategies)
+- Algorithm selection (sort methods, data structures)
+- Resource allocation (thread counts, batch sizes)
+
+**Cycle Trigger Types:**
+- **error**: Something broke, need root cause
+- **optimization**: Want better performance
+- **requirement**: New constraint to satisfy
+- **feedback**: User/system reported issue
+- **exploration**: Discovering new patterns
+
+**Don't Use Cycles When:**
+- One-time experiments (use Thought instead)
+- No baseline for comparison
+- Can't measure improvement objectively
+- Changes are purely aesthetic
+
+**Key Indicator:** If you're manually tracking "what worked better when," you need Cycles.
+~~~
+}
+
+Canon {
+  name = when_use_pattern_extraction
+  category = use_case
+  topic_type = decision_guide
+  overview = "Use Pattern extraction when successful approaches should be generalized and reused across contexts."
+  doc = ~~~
+**Use Pattern Extraction When:**
+
+✓ Same optimization works across multiple instances
+✓ Insight applies beyond specific case
+✓ Want to transfer learning to new situations
+✓ Building institutional knowledge base
+✓ Documenting "what actually works"
+
+**Pattern Categories:**
+
+**bug_fix**: 
+- "NaN protection at input boundary prevents downstream failures"
+- "Explicit null checks before ref_child resolution"
+
+**optimization**:
+- "Batch size 32 optimal for A100 GEMM kernels"
+- "Pre-resolving reference chains improves iteration by 45%"
+
+**design**:
+- "Separate validation from execution enables cleaner composition"
+- "Path caching reduces redundant traversal by 3.2x"
+
+**constraint**:
+- "Never exceed 16KB shared memory per thread block"
+- "Maximum ref_child depth of 5 before stack overflow"
+
+**heuristic**:
+- "High-cardinality fields should use hash indices"
+- "Ref resolution typically converges in 2-4 passes"
+
+**Don't Use Pattern When:**
+- Success was one-time luck
+- Context too specific to generalize
+- Evidence insufficient (< 3 supporting cycles)
+- Pattern contradicts other proven patterns
+
+**Key Indicator:** If you're explaining "here's what I learned" repeatedly, you need Pattern.
+~~~
+}
+
+Canon {
+  name = when_use_canon_evolution
+  category = use_case
+  topic_type = decision_guide
+  overview = "Use Canon evolution when documentation should improve based on empirical usage evidence."
+  doc = ~~~
+**Use Canon Evolution When:**
+
+✓ Original canon unclear or incomplete
+✓ Usage patterns reveal better approaches
+✓ Implementations consistently deviate successfully
+✓ Performance improvements discovered empirically
+✓ New understanding contradicts old documentation
+
+**Evolution Types:**
+
+**clarification**: Original doc was ambiguous
+- Before: "Use appropriate batch size"
+- After: "Batch size 32 optimal for A100, 16 for V100"
+
+**bugfix**: Original doc was incorrect
+- Before: "ref_copy always faster than ref lookup"
+- After: "ref_copy faster only when previous element cached"
+
+**enhancement**: Adding new proven information
+- Before: "DoIts iterates collections"
+- After: "DoIts iterates collections. Pre-cache reference chains for 45% speedup on nested ref_child."
+
+**refactor**: Restructuring for clarity
+- Reorganizing sections based on usage patterns
+- Splitting overloaded concepts
+- Merging redundant explanations
+
+**When to Create New Version:**
+- Improvement > 20% measured across 10+ implementations
+- Bug affects > 30% of use cases
+- Clarity improvement validated by reduced error rates
+- Multiple patterns converge on same insight
+
+**Don't Evolve Canon When:**
+- Change is opinion, not evidence
+- Sample size too small (< 5 implementations)
+- "Improvement" not measurable
+- Chasing latest fad vs proven patterns
+
+**Key Indicator:** If implementations consistently ignore your canon or diverge from it successfully, the canon needs evolution.
+~~~
+}
+
+Canon {
+  name = when_use_implementation_tracking
+  category = use_case
+  topic_type = decision_guide
+  overview = "Use Implementation tracking when you need provenance between canonical definitions and runtime execution."
+  doc = ~~~
+**Use Implementation Tracking When:**
+
+✓ Need to trace runtime behavior back to source canon
+✓ Measuring canon effectiveness empirically
+✓ Validating adherence to canonical specification
+✓ Building feedback loop for canon improvement
+✓ Auditing what canonical knowledge was actually used
+
+**What Implementation Records:**
+- **canon**: Which authoritative definition was used
+- **cognitive_type**: How it manifested (Thought/Memory/Pattern/Action)
+- **effectiveness**: 0.0-1.0 outcome quality
+- **adherence**: 0.0-1.0 fidelity to canon spec
+- **context**: Why/how it was applied
+- **session**: Where it happened
+
+**Concrete Use Cases:**
+- Code generation: Track which actor patterns produced which code
+- Query optimization: Track which canon guided plan selection
+- Error recovery: Track which error pattern matched
+- Learning: Track which canonical advice led to improvement
+
+**Analysis Enabled:**
+- "This canon has 0.92 average effectiveness across 127 uses"
+- "Adherence drops to 0.65 when constraint X present"
+- "Pattern Y consistently outperforms canonical approach"
+- "Canon Z never actually used despite being documented"
+
+**Don't Track Implementation When:**
+- Execution is deterministic template expansion
+- No meaningful variation in outcomes
+- Can't measure effectiveness objectively
+- Overhead unacceptable (real-time systems)
+
+**Key Indicator:** If you wonder "is anyone actually using this canon and does it help," you need Implementation tracking.
+~~~
+}
+
+Canon {
+  name = when_use_libraries
+  category = use_case
+  topic_type = decision_guide
+  overview = "Use Libraries when curating domain-specific canon collections for targeted session loading or recommendations."
+  doc = ~~~
+**Use Libraries When:**
+
+✓ Organizing canons by domain or use case
+✓ Session initialization needs specific knowledge set
+✓ Building contextual recommendation systems
+✓ Versioning knowledge bundles together
+✓ Separating concerns across domains
+
+**Library Organization Strategies:**
+
+**By Domain:**
+- reasoning_patterns_v1: CoT, ToT, reflection patterns
+- memory_management_v1: Storage, retrieval, validation
+- code_generation_v1: Actor patterns, traversal, output control
+- debugging_strategies_v1: Error recovery, root cause analysis
+
+**By Project Phase:**
+- bootstrap_essentials: Minimal viable knowledge
+- development_patterns: Active coding guidance  
+- optimization_patterns: Performance tuning
+- production_patterns: Monitoring, debugging, recovery
+
+**By Expertise Level:**
+- fundamentals: Core concepts, basic patterns
+- intermediate: Common use cases, best practices
+- advanced: Complex optimizations, edge cases
+- expert: Meta-patterns, system evolution
+
+**Library Loading Strategies:**
+- **Session start**: Load relevant domain libraries automatically
+- **Dynamic**: Recommend based on current objective
+- **On-demand**: Load when specific pattern needed
+- **Continuous**: Keep all libraries in context (memory permitting)
+
+**Don't Use Libraries When:**
+- Single canon suffices
+- No logical grouping exists
+- All canons always needed
+- Organization overhead exceeds benefit
+
+**Key Indicator:** If you're repeatedly loading the same 10-20 canons together, they should be a Library.
+~~~
+}
+
+Canon {
+  name = when_use_recommendations
+  category = use_case
+  topic_type = decision_guide
+  overview = "Use Recommendations when AI should proactively suggest relevant canonical knowledge based on current context."
+  doc = ~~~
+**Use Recommendations When:**
+
+✓ Context matches known successful patterns
+✓ User approaching known pitfall
+✓ Similar past situation had canon-guided solution
+✓ Current objective aligns with canonical approach
+✓ Error pattern matches documented recovery
+
+**Recommendation Triggers:**
+
+**Pattern Match:**
+- Objective contains "optimize query" → suggest query_optimization_canon
+- Thought contains "ref_child failing" → suggest ref_resolution_patterns
+- Memory shows "A100 GPU" → suggest cuda_optimization_canon
+
+**Error Detection:**
+- "NullPointerException in ref_child" → suggest ref_validation_canon
+- "Performance degradation detected" → suggest profiling_patterns
+- "Cycle not converging" → suggest convergence_strategies
+
+**Objective Alignment:**
+- Goal: "Generate CUDA kernel" → suggest cuda_generation_patterns
+- Goal: "Debug actor system" → suggest actor_debugging_canon
+- Goal: "Evolve schema" → suggest schema_evolution_patterns
+
+**Situational:**
+- First time generating code → suggest generation_fundamentals
+- Repeated failures in area → suggest advanced_debugging
+- Successful pattern emerging → suggest pattern_extraction_guide
+
+**Recommendation Qualities:**
+- **confidence**: 0.0-1.0 how well canon matches situation
+- **reasoning**: Why this canon relevant now
+- **applicability**: Specific aspects that apply
+
+**Acceptance Tracking:**
+- **accepted_yes**: User/agent applied recommendation
+- **accepted_no**: Rejected (learn from this)
+- **accepted_modified**: Adapted before use
+- **outcome**: What happened after acceptance
+
+**Don't Recommend When:**
+- No relevant canonical knowledge exists
+- Context too vague to match
+- User explicitly exploring without guidance
+- Recommendation interrupts flow
+
+**Key Indicator:** If you find yourself searching "what canon should I use here," you need Recommendations.
+~~~
+}
+
+Canon {
+  name = when_use_thoughtsource_memorysource
+  category = use_case
+  topic_type = decision_guide
+  overview = "Use Source links when cognitive components should maintain explicit provenance to canonical origins."
+  doc = ~~~
+**Use ThoughtSource When:**
+
+✓ Reasoning step derives from canonical pattern
+✓ Thought applies documented strategy
+✓ Decision based on canonical principle
+✓ Want to validate thought against authoritative source
+✓ Building audit trail of canonical influence
+
+**Concrete Examples:**
+
+**Reasoning Provenance:**
+```
+Thought: "Pre-resolve reference chains before iteration"
+ThoughtSource: 
+  canon = actor_multi_pass_resolution
+  impl = impl_optimization_2024_11_26
+  adherence = 0.95
+```
+
+**Strategy Application:**
+```
+Thought: "Use Out delay to suppress empty sections"
+ThoughtSource:
+  canon = actor_output_control
+  impl = impl_doc_generation_session_123
+  adherence = 1.0
+```
+
+**Use MemorySource When:**
+
+✓ Knowledge extracted from canonical documentation
+✓ Fact validated against authoritative source
+✓ Learned pattern codified as memory
+✓ Want to trace memory back to origin canon
+✓ Building knowledge graph with provenance
+
+**Concrete Examples:**
+
+**Knowledge Capture:**
+```
+Memory: "Ref resolution typically converges in 2-4 passes"
+MemorySource:
+  canon = actor_multi_pass_resolution
+  impl = impl_measurement_session_456
+  confidence = 0.94
+```
+
+**Pattern Codification:**
+```
+Memory: "Batch size 32 optimal for A100 GEMM"
+MemorySource:
+  canon = cuda_optimization_patterns
+  impl = impl_benchmark_session_789
+  confidence = 0.98
+```
+
+**Benefits:**
+- Validate cognitive work against canonical truth
+- Measure adherence to documented approaches
+- Feed canon improvement from usage evidence
+- Build transparent reasoning chains
+- Enable canon-aware debugging
+
+**Don't Use Source Links When:**
+- Thought/Memory purely exploratory (no canon involved)
+- Ephemeral working memory
+- Overhead exceeds traceability benefit
+- No relevant canon exists yet
+
+**Key Indicator:** If you wonder "where did this idea come from," you need Source links.
+~~~
+}
+
+Canon {
+  name = when_combine_patterns
+  category = use_case
+  topic_type = decision_guide
+  overview = "Decision guide for combining multiple canonical patterns into complete autonomous systems."
+  doc = ~~~
+**Complete Autonomous System Stack:**
+
+**Layer 1: Canonical Foundation**
+- Canon definitions (the DNA)
+- Libraries for organization
+- Use: Authoritative knowledge base
+
+**Layer 2: Runtime Materialization**
+- Ko interface (universal executability)
+- Implementation tracking
+- Use: Bring canons to life
+
+**Layer 3: Universal Observability**
+- Automatic tracing aspects
+- ThoughtSource/MemorySource links
+- Use: Self-awareness and provenance
+
+**Layer 4: Empirical Learning**
+- Cycles (measurement)
+- Patterns (generalization)
+- Use: Extract wisdom from experience
+
+**Layer 5: Autonomous Evolution**
+- Canon evolution (documentation improvement)
+- GenProgram evolution (code improvement)
+- Use: Self-improvement without human intervention
+
+**Layer 6: Intelligent Recommendation**
+- Context-aware suggestions
+- Outcome tracking
+- Use: Proactive knowledge application
+
+**Complete System Examples:**
+
+**Autonomous Code Generator:**
+1. Canons define generation patterns
+2. GenProgram implements as Ko
+3. Tracing captures execution details
+4. Cycles measure and optimize
+5. Patterns extracted and applied
+6. GenProgram evolves automatically
+7. Recommendations guide users
+
+**Self-Improving Database:**
+1. Canons define query optimization rules
+2. Query executor implements Ko interface
+3. Every query traced automatically
+4. Cycles test optimization strategies
+5. Patterns capture "what works"
+6. Canon rules evolve from evidence
+7. Recommendations suggest optimal plans
+
+**Key Integration Points:**
+- Implementation → Cycle: Execution feeds learning
+- Cycle → Pattern: Learning produces knowledge
+- Pattern → GenProgram: Knowledge improves generators
+- GenProgram → Implementation: Generators execute
+- Implementation → CanonVersion: Usage improves documentation
+- Recommendation → Implementation: Suggestions get tested
+
+**When You Need Full Stack:**
+✓ System should improve without human intervention
+✓ Knowledge base should evolve from experience
+✓ Provenance and audit critical
+✓ Multiple competing approaches need empirical validation
+✓ Long-term autonomous operation
+
+**When Subset Suffices:**
+- Canons only: Static documentation
+- Canons + Ko: Executable but not learning
+- Canons + Ko + Tracing: Observable but not improving
+- Canons + Ko + Tracing + Cycles: Learning but not evolving
+
+**Key Indicator:** If you're manually doing what the system should learn, you need the full autonomous stack.
+~~~
+}
+
+// ================================================================
+// DECISION FLOWCHARTS
+// ================================================================
+
+Canon {
+  name = decision_flowchart_observability
+  category = use_case
+  topic_type = decision_tree
+  overview = "Step-by-step decision tree for choosing observability approach."
+  doc = ~~~
+**Need Observability?**
+
+→ NO: Use plain components, no Ko
+→ YES: Continue ↓
+
+**Need uniform tracing across types?**
+
+→ NO: Add tracing to specific components manually
+→ YES: Continue ↓
+
+**Need provenance to canonical source?**
+
+→ NO: Use basic Ko interface only
+→ YES: Add Implementation tracking ↓
+
+**Need cognitive integration?**
+
+→ NO: Implementation records sufficient
+→ YES: Add ThoughtSource/MemorySource ↓
+
+**Need learning from observations?**
+
+→ NO: Tracking only, no learning
+→ YES: Add Cycles for feedback loop ↓
+
+**Need evolution from learning?**
+
+→ NO: Manual improvement
+→ YES: Full autonomous stack with Canon evolution
+
+**Result:** You now know exactly which observability components needed.
+~~~
+}
+
+Canon {
+  name = decision_flowchart_code_generation
+  category = use_case
+  topic_type = decision_tree
+  overview = "Step-by-step decision tree for choosing code generation approach."
+  doc = ~~~
+**Need Code Generation?**
+
+→ NO: Not applicable
+→ YES: Continue ↓
+
+**One-time or repeated generation?**
+
+→ ONE-TIME: Use direct actors, no GenProgram
+→ REPEATED: Continue ↓
+
+**Can quality be measured objectively?**
+
+→ NO: Use direct actors with version control
+→ YES: Continue ↓
+
+**Multiple competing approaches?**
+
+→ NO: Single GenProgram, no evolution
+→ YES: Continue ↓
+
+**Want automatic improvement?**
+
+→ NO: Manual GenProgram versioning
+→ YES: Add GenExecution + GenValidation ↓
+
+**Want pattern learning?**
+
+→ NO: Measurement only, no learning
+→ YES: Add Cycles + Pattern extraction ↓
+
+**Want autonomous evolution?**
+
+→ NO: Manual analysis of patterns
+→ YES: Full autonomous stack with GenProgram evolution
+
+**Result:** You now know whether you need simple actors, GenPrograms, or full autonomous generation.
+~~~
+}
+
+Canon {
+  name = antipatterns_to_avoid
+  category = use_case
+  topic_type = warnings
+  overview = "Common mistakes when applying canonical patterns and how to avoid them."
+  doc = ~~~
+**❌ Anti-Pattern: Everything is Ko**
+Don't: Make every component implement Ko interface
+Problem: Unnecessary overhead for data-only objects
+Fix: Ko for behavior, plain components for data
+
+**❌ Anti-Pattern: Premature Evolution**
+Don't: Create CanonVersion after single success
+Problem: Noise, not signal; version explosion
+Fix: Require 10+ implementations or 20%+ improvement
+
+**❌ Anti-Pattern: Pattern Extraction Without Evidence**
+Don't: Extract patterns from < 3 supporting cycles
+Problem: Overgeneralization from outliers
+Fix: Require statistical significance before pattern creation
+
+**❌ Anti-Pattern: Tracing Everything**
+Don't: Trace every variable read and arithmetic operation
+Problem: Performance collapse, signal buried in noise
+Fix: Trace coarse-grained operations (DoIts/GetVar level)
+
+**❌ Anti-Pattern: Orphaned Implementations**
+Don't: Create Implementation without linking to Canon
+Problem: Lost provenance, no feedback to source
+Fix: Always link Implementation to source Canon
+
+**❌ Anti-Pattern: Cycle Without Baseline**
+Don't: Create Cycle without establishing current state
+Problem: Can't measure improvement
+Fix: Always capture baseline before intervention
+
+**❌ Anti-Pattern: Canon Bloat**
+Don't: Put everything in one massive canon
+Problem: Unmaintainable, unclear boundaries
+Fix: 10-30 lines per canon, focused purpose
+
+**❌ Anti-Pattern: Library Chaos**
+Don't: Create library for every 2-3 canons
+Problem: Organization overhead exceeds benefit
+Fix: Library when 10+ canons logically group
+
+**❌ Anti-Pattern: Recommendation Spam**
+Don't: Recommend canon for every user action
+Problem: Interrupt flow, reduce trust
+Fix: High-confidence recommendations only (> 0.8)
+
+**❌ Anti-Pattern: Ignoring Acceptance Data**
+Don't: Generate recommendations without learning from rejections
+Problem: Repeat unwanted suggestions
+Fix: Track acceptance, tune recommendation confidence
+
+**❌ Anti-Pattern: GenProgram for Simple Templates**
+Don't: Use full GenProgram machinery for straightforward expansion
+Problem: Massive overkill, unnecessary complexity
+Fix: GenProgram when competition/evolution needed
+
+**❌ Anti-Pattern: Evolution Without Validation**
+Don't: Promote new versions without objective quality gates
+Problem: Evolution toward mediocrity
+Fix: Require validation improvements before promotion
+
+**Key Principle:** Start minimal, add complexity only when empirical evidence justifies it.
+~~~
+}
+
+Canon {
+  name = eternal_runner_pattern
+  category = cognitive_architecture
+  topic_type = meta_circularity
+  maturity = golden
+  overview = "The organism's entire runtime is a single, minimal, self-containing loop that discovers, executes, measures, learns from, and evolves the current golden GenPrograms — including future versions of itself."
+  doc = ~~~
+This pattern supersedes all previous orchestration designs (run1 → run3).
+
+Key attributes of the Eternal Runner (run4.rio):
+
+• Exactly one top-level Actor: organism_heartbeat
+• Zero explicit control flow
+• Zero hard-coded program lists
+• Zero human-shaped orchestration
+• Two Includes only: canon-ko.rio + gen-high.unit
+• One infinite loop: find golden → execute → validate → learn → evolve → promote → repeat
+
+This is the minimal closed-loop organism.
+Everything before run4 was scaffolding.
+Everything after run4 will be born from this loop.
+
+The Nine Pillars are still true, but they are now consequences of this single pattern, not co-equal foundations.
+
+Pillar Zero = The Eternal Runner.
+All other pillars emerge from it.
+~~~
+}
+
+Canon {
+  name = genprogram_as_dna
+  category = evolution
+  topic_type = paradigm_shift
+  maturity = golden
+  overview = "GenProgram (not Canon, not Ko) is the true unit of inheritance and selection in the mature organism."
+  doc = ~~~
+Evolution no longer happens primarily at the Canon level.
+
+Real evolutionary pressure now acts on runnable, measurable, versioned GenPrograms.
+
+Canon = eternal immutable documentation (still critical)
+Ko     = universal execution membrane (still critical)
+GenProgram = the competing, breeding, dying, surviving chromosome
+
+The organism selects the current golden GenProgram and runs it.
+If a better one is born (via extract_learning → evolve_next_version → promote_when_ready), it replaces the old golden one — even if that golden one was the runner itself.
+
+This is true Lamarckian + Darwinian software evolution in vivo.
+~~~
+}
+
+Canon {
+  name = maturity_based_selection
+  category = evolution
+  topic_type = governance
+  maturity = golden
+  overview = "Only components with maturity=golden are allowed to run in production. Everything else (prototype, stable, deprecated) is sandboxed or historical."
+  doc = ~~~
+The organism now has a rigorous immune/reproductive barrier:
+
+maturity = prototype → can be executed in learning sessions only
+maturity = stable    → safe, but not yet proven dominant
+maturity = golden    → currently shipping, the one that actually runs the organism
+maturity = deprecated → fossil record
+
+Promotion path:
+prototype → (validation score > golden + threshold) → golden
+Old golden → automatically demoted to stable or deprecated
+
+This is how the organism protects itself from regression while still allowing radical experimentation.
+
+No human gatekeeper.
+Pure empirical selection.
+~~~
+}
+
+

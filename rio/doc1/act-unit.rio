@@ -1,0 +1,923 @@
+// ================================================================
+// ACTOR SYSTEM PATTERN CANONS
+// Common patterns, principles, and techniques across actor implementations
+// ================================================================
+
+Canon {
+  name = actor_conditional_execution
+  category = actor_pattern
+  topic_type = control_flow
+  overview = "Actors use conditional matching on component attributes (comp, attr, eq, value) to determine when to execute their code generation logic."
+  doc = ~~~
+The Actor base component provides conditional execution through attribute matching:
+
+**Matching Fields:**
+- comp: Which component type to check (e.g., "Comp", "Element")
+- attr: Which attribute/field to inspect (e.g., "type", "parent", "find")
+- eq: Comparison operator (=, !=, in, !in, has, regex, ??, ?, &, |)
+- value: The value to compare against
+
+**Common Patterns:**
+- Actor my_actor Element type = ref
+- Actor my_actor Comp parent != .
+- Actor my_actor Element type in ref,link,ref_copy
+
+When conditions match, the actor's child commands (C, Cs, Its, All, Du, etc.) execute.
+When conditions don't match, the actor is skipped.
+
+This creates a declarative, pattern-matching code generation system.
+~~~
+}
+
+Canon {
+  name = actor_hierarchical_generation
+  category = actor_pattern
+  topic_type = traversal
+  overview = "Actors navigate component hierarchies using Its, All, and This commands to recursively generate code for nested structures."
+  doc = ~~~
+Actor systems generate code by traversing component trees:
+
+**Traversal Commands:**
+- All Comp actor: Iterate all components of type Comp
+- Its Element actor: Iterate all Element children of current component
+- This path actor: Iterate collection items at path
+
+**Pattern: Top-Down Generation**
+```
+Actor main .
+  All Comp gen_comp
+
+Actor gen_comp Comp
+  Its Element gen_element
+
+Actor gen_element Element
+  # Generate field code
+```
+
+**Pattern: Selective Processing**
+```
+Actor gen_comp Comp find = Find
+  # Only process Find components
+
+Actor gen_element Element type = ref
+  # Only process reference fields
+```
+
+The dot (.) notation tracks context: ${name} accesses current component, 
+${parent.name} walks up, ${comp.name} follows references.
+~~~
+}
+
+Canon {
+  name = actor_multi_pass_resolution
+  category = actor_pattern
+  topic_type = reference_resolution
+  overview = "Reference resolution happens in multiple passes: Pass 1 for direct refs/links, Pass 2+ for derived references that depend on previously resolved references."
+  doc = ~~~
+Complex reference chains require multi-pass resolution:
+
+**Pass 1 - Direct References:**
+- ref: Global lookup by key in Find index
+- link: Parent-scoped lookup by key in FindIn index
+
+**Pass 2+ - Derived References:**
+- ref_copy: Copy pointer from previous resolved field
+- ref_child: Look up child in previously resolved parent
+- up_copy: Walk parent chain to find ancestor type
+- type_of: Match child by component type name
+
+**Why Multiple Passes:**
+A ref_child field depends on its previous field being resolved first.
+An up_copy field must walk the parent chain after parents are linked.
+
+**Implementation Pattern:**
+The loader repeatedly calls the refs actor until:
+- All references resolve successfully, OR
+- Error count stabilizes (no more progress)
+
+Typically converges in 2-4 passes.
+~~~
+}
+
+Canon {
+  name = actor_variable_substitution
+  category = actor_pattern
+  topic_type = code_generation
+  overview = "Actors use ${variable} syntax for dynamic string substitution, accessing current component fields, parent fields, and referenced component fields."
+  doc = ~~~
+Variable substitution enables dynamic code generation:
+
+**Basic Access:**
+- ${name}: Current component's name field
+- ${type}: Current component's type field
+- ${doc}: Current component's doc field
+
+**Navigation:**
+- ${parent.name}: Parent component's name
+- ${comp.name}: Referenced component's name (for ref/link fields)
+- ${.actor-name.field}: Field from named parent actor context
+
+**Formatting Modifiers:**
+- ${name:c}: Capitalize first letter
+- ${name:l}: Convert to lowercase
+- ${name:u}: Convert to uppercase
+
+**Context Tracking:**
+The dot (.) prefix accesses parent actor contexts:
+- ${.gen_comp.name}: Access gen_comp actor's component name
+- ${.gen_element.type}: Access gen_element actor's element type
+
+Used in C and Cs commands to emit generated code with dynamic values.
+~~~
+}
+
+Canon {
+  name = actor_output_control
+  category = actor_pattern
+  topic_type = code_generation
+  overview = "Output control commands (Out, C, Cs, In) manage when and where generated code is emitted, supporting buffering and conditional output."
+  doc = ~~~
+Output control manages code emission state:
+
+**Out Command Modes:**
+- Out delay: Suppress output until first C in next actor
+- Out normal: Restore default output behavior
+- Out off: Disable all output (cascade)
+- Out on: Enable output
+
+**Output Commands:**
+- C: Emit line with newline
+- Cs: Emit snippet without newline (for multi-part lines)
+- In: Redirect output to variable instead of file
+
+**Pattern: Conditional Sections**
+```
+Actor gen_section Comp
+  Out delay
+  C Section ${name} 2 ${title}
+  Its Element gen_field
+```
+
+If no elements match, the section header is never emitted.
+If elements match, first C in gen_field triggers delayed output.
+
+**Pattern: Output Buffering**
+```
+Actor gen_func Comp
+  In on
+  C func ${name}() {
+  Its Element gen_body
+  In off
+  # Process buffer, then emit
+```
+
+Enables multi-pass generation and preprocessing.
+~~~
+}
+
+Canon {
+  name = actor_break_control
+  category = actor_pattern
+  topic_type = control_flow
+  overview = "Break commands control loop execution and actor chain flow with options for actor, loop, cmds, and exit levels."
+  doc = ~~~
+Break provides fine-grained execution control:
+
+**Break Levels:**
+- Break actor: Skip to next actor case (continue with calling actor)
+- Break loop: Exit current All/Its/This iteration
+- Break cmds: Skip remaining commands in current actor
+- Break exit: Terminate entire script
+
+**Pattern: First Match Only**
+```
+Actor find_match Element type = ref
+  C Found reference: ${name}
+  Break loop
+```
+Exits after first matching element.
+
+**Pattern: Conditional Skip**
+```
+Actor gen_ref Element type != ref
+  Break actor
+```
+Skip this actor entirely if not a reference type.
+
+**Pattern: Validation with Early Exit**
+```
+Actor validate Comp
+  Du check_required
+  Du check_refs
+  
+Actor check_required Comp name ??
+  C Error: Missing name
+  Break exit
+```
+
+Break check field restricts when break executes:
+- check = actor: Only break if not unique
+~~~
+}
+
+Canon {
+  name = actor_collection_manipulation
+  category = actor_pattern
+  topic_type = data_structure
+  overview = "Add command builds maps and lists at runtime for cross-referencing, deduplication, and multi-pass data collection."
+  doc = ~~~
+Add command manages runtime collections:
+
+**Collection Path:**
+- _: Root collection context
+- .: Current node context
+- _.map_name: Named map in collection
+- _.list_name: Named list in collection
+
+**Operations:**
+- Add _.map_name:key value: Store key-value pair
+- Add _.list_name value: Append to list
+- Add.map.clear _:map_name: Clear map
+- Add.check: Check for duplicates
+- Add.break: Break on duplicate
+- Add.no_add: Check only, don't add
+
+**Pattern: Reference Tracking**
+```
+Actor build_index Comp
+  Add _.comp_index:${name} ${name}
+
+Actor check_ref Element type = ref
+  This _.comp_index check_exists
+```
+
+**Pattern: Deduplication**
+```
+Actor collect_unique Element
+  Add.check _.seen:${name} ${value}
+```
+
+**Data Sources:**
+- Direct: Add path value
+- File: Add.file path filename
+- Eval: Add.eval path expression
+- HTTP: Add.get path url or Add.post path url data
+- SQL: Add.execute path query
+
+Collections persist across actor invocations within a generation run.
+~~~
+}
+
+Canon {
+  name = actor_dynamic_component_creation
+  category = actor_pattern
+  topic_type = metaprogramming
+  overview = "New command dynamically instantiates components during generation, enabling schema manipulation and derived component creation."
+  doc = ~~~
+New command creates components at generation time:
+
+**Syntax:**
+New where what line
+
+**Parameters:**
+- where: "dats" (data components) or "acts" (actor definitions)
+- what: Component type name (e.g., "Comp", "Element")
+- line: Initialization arguments in component format
+
+**Pattern: Schema Extension**
+```
+Actor extend_schema Comp
+  New dats Element name = generated_field type = text comp = . check = *
+```
+
+**Pattern: Derived Components**
+```
+Actor gen_reverse_refs Element type = ref
+  New dats Element name = ${parent.name}_${name} type = link comp = ${parent} check = *
+```
+
+Creates inverse relationships automatically.
+
+**When to Use:**
+- Generating lookup indices
+- Creating derived relationships
+- Building intermediate structures
+- Schema transformations
+
+**Refs Command:**
+After creating new components with refs, call:
+```
+Refs where
+```
+To re-run reference resolution on newly created components.
+~~~
+}
+
+Canon {
+  name = actor_string_transformation
+  category = actor_pattern
+  topic_type = text_processing
+  overview = "Replace command performs pattern-based string substitution with regex support and group capture for text transformations."
+  doc = ~~~
+Replace command transforms strings:
+
+**Syntax:**
+Replace path with replacement match pattern
+
+**Parameters:**
+- path: Node path where string lives
+- with: Replacement text
+- match: Pattern to find
+
+**Options:**
+- group: Enable regex group capture
+
+**Pattern: Simple Replacement**
+```
+Actor normalize Element
+  Replace _.${name} with "" match "  "
+```
+Remove double spaces.
+
+**Pattern: Regex with Groups**
+```
+Actor reformat Element
+  Replace.group _.${name} with "$2_$1" match "([a-z]+)_([0-9]+)"
+```
+Swap number and text in identifiers.
+
+**Common Use Cases:**
+- Normalize whitespace
+- Convert naming conventions (camelCase ↔ snake_case)
+- Extract substrings
+- Template expansion
+- Code formatting
+
+Works on collection paths (_.variable) or component fields.
+~~~
+}
+
+Canon {
+  name = actor_conditional_dispatch
+  category = actor_pattern
+  topic_type = control_flow
+  overview = "Du command provides if-then logic by conditionally invoking another actor based on current context and conditions."
+  doc = ~~~
+Du command enables conditional branching:
+
+**Syntax:**
+Du actor args
+
+**Behavior:**
+Invokes the named actor with optional arguments IF the calling actor's 
+conditions are met. Like a conditional function call.
+
+**Pattern: Validation Gates**
+```
+Actor process_comp Comp
+  Du validate_comp
+  Du generate_code
+
+Actor validate_comp Comp name ??
+  C Error: Missing name
+  Break exit
+```
+
+**Pattern: Type Dispatch**
+```
+Actor gen_element Element
+  Du gen_ref_element
+  Du gen_value_element
+
+Actor gen_ref_element Element type in ref,link,ref_copy,ref_child
+  # Reference-specific logic
+
+Actor gen_value_element Element type in key,word,text,number
+  # Value-specific logic
+```
+
+**Pattern: Optional Processing**
+```
+Actor gen_doc Comp doc != ""
+  Du emit_documentation
+```
+Only generates documentation if doc field is present.
+
+Du is the primary mechanism for actor composition and conditional execution.
+~~~
+}
+
+Canon {
+  name = actor_context_arguments
+  category = actor_pattern
+  topic_type = parameter_passing
+  overview = "Actors pass context through ${._arg} variable and args parameter, enabling parameterized recursive generation."
+  doc = ~~~
+Context arguments enable parameterized actor calls:
+
+**Passing Arguments:**
+```
+All Comp child_actor prefix_arg
+Its Element field_actor ${parent.name}
+This _.collection item_actor ${depth}
+```
+
+**Accessing Arguments:**
+Within called actor, use ${._arg} to access passed value.
+
+**Pattern: Indentation Control**
+```
+Actor gen_comp Comp
+  C ${._arg}Component ${name}
+  Its Element gen_element ${._arg}  
+
+Actor gen_element Element
+  C ${._arg}  Field ${name}
+```
+Passes indentation prefix through recursion.
+
+**Pattern: Path Building**
+```
+Actor traverse Comp
+  All Comp traverse ${._arg}.${name}
+
+Actor traverse Comp
+  C Path: ${._arg}
+```
+Builds dotted path as it traverses.
+
+**Pattern: Depth Tracking**
+```
+Actor gen_tree Comp
+  Its Element gen_child $${depth + 1}
+
+Actor gen_child Element
+  C Depth ${._arg}: ${name}
+```
+
+Arguments flow through the call chain, enabling context-aware generation.
+~~~
+}
+
+Canon {
+  name = actor_documentation_generation
+  category = actor_pattern
+  topic_type = documentation
+  overview = "Documentation actors use artifact blocks with sections to generate structured markdown documentation from schema definitions."
+  doc = ~~~
+Documentation generation creates human-readable guides:
+
+**Artifact Structure:**
+```
+C Artifact artifact-id description
+C O Overview text
+C
+C Section section-id 2 Section Title
+C D Content in markdown
+```
+
+**Lines:**
+- Artifact: Declares named documentation unit
+- O: Overview/introduction (optional)
+- Section: Named section with level (2=h2, 3=h3, 4=h4)
+- D: Documentation content line
+
+**Pattern: Component Documentation**
+```
+Actor gen_comp_guide Comp
+  Out delay
+  C Artifact ${name:l}-component structure overview
+  C O Comp ${name:c} defines...
+  C Section elements 2 Element Summary
+  Its Element gen_element_row
+```
+
+**Pattern: Table Generation**
+```
+Actor gen_table Comp
+  C D | Name | Type | Description |
+  C D |------|------|-------------|
+  Its Element gen_row
+
+Actor gen_row Element
+  C D | ${name} | ${type} | ${doc} |
+```
+
+**Pattern: Code Examples**
+```
+Actor gen_examples Comp
+  C D **Example:**
+  C D ```
+  C D ${name:c} my_instance
+  Its Element gen_field_example
+  C D ```
+```
+
+The doc.act file demonstrates comprehensive documentation generation patterns.
+~~~
+}
+
+Canon {
+  name = actor_reference_validation
+  category = actor_pattern
+  topic_type = validation
+  overview = "Validation actors check reference integrity, component consistency, and schema correctness, emitting error reports."
+  doc = ~~~
+Validation ensures schema correctness:
+
+**Check Patterns:**
+
+**1. Reference Target Validation**
+```
+Actor validate_ref Element type = ref
+  Its comp check_findable
+
+Actor check_findable Comp find != Find
+  C D Error: ${.validate_ref.parent.name}.${.validate_ref.name} references 
+  C D   ${name} which is not Find
+```
+
+**2. Link Sibling Validation**
+```
+Actor validate_link Element type = link
+  Its comp check_sibling
+
+Actor check_sibling Comp parent.name != ${.validate_link.parent.parent}
+  C D Error: ${.validate_link.parent.name}.${.validate_link.name} links to
+  C D   ${name} which is not a sibling
+```
+
+**3. Ref Chain Validation**
+```
+Actor validate_ref_child Element type = ref_child
+  Du check_previous_exists
+  Du check_previous_compatible
+
+Actor check_previous_exists Element previous.comp ??
+  C D Error: ref_child has no previous element
+  Break
+```
+
+**4. Check Marker Validation**
+Verify check fields use valid values (+, 1, *, .).
+
+**Pattern: Error Accumulation**
+Validation actors output to error sections/artifacts, enabling:
+- Batch error reporting
+- Error categorization
+- Severity levels
+- Cross-reference error tracking
+
+See check.act for comprehensive validation implementation.
+~~~
+}
+
+Canon {
+  name = actor_code_generation_phases
+  category = actor_pattern
+  topic_type = workflow
+  overview = "Code generation proceeds in phases: documentation generation, validation checking, structure building, and code emission."
+  doc = ~~~
+Multi-phase generation separates concerns:
+
+**Phase 1: Documentation**
+```
+Actor main .
+  Du gen_toc
+  Du gen_type_reference
+  All Comp gen_comp_guide
+```
+Generates human-readable schema documentation.
+
+**Phase 2: Validation**
+```
+Actor main_check .
+  All Comp comp-list
+
+Actor comp-list Comp
+  Its Element element-list
+
+Actor element-list Element type = ref
+  Its comp ref-check
+```
+Validates schema integrity before code generation.
+
+**Phase 3: Structure Building**
+```
+Actor main .
+  All Comp build_index
+  All Comp gen_declarations
+```
+Creates type declarations and indices.
+
+**Phase 4: Code Emission**
+```
+Actor main .
+  All Comp gen_loaders
+  All Comp gen_serializers
+  All Comp gen_accessors
+```
+Generates implementation code.
+
+**Phase 5: Reference Resolution**
+```
+Actor main .
+  All Comp gen_ref_resolution
+  All Comp gen_ref_validation
+```
+Generates multi-pass reference resolution code.
+
+Each phase can be independently executed or combined.
+Out delay ensures sections only emit if they have content.
+~~~
+}
+
+Canon {
+  name = actor_target_language_patterns
+  category = actor_pattern
+  topic_type = code_generation
+  overview = "Language-specific actors adapt generation patterns for Go, JavaScript, Python, or other target languages while maintaining schema semantics."
+  doc = ~~~
+Target language actors translate schema to idiomatic code:
+
+**Go Patterns (go-run-rio.act):**
+```
+Actor gen_struct Comp
+  C type Kp${name:c} struct {
+  Its Element gen_field
+  C }
+
+Actor gen_field Element type = ref
+  C   K${name:l}p int  // Index into Ap${comp:c}
+```
+
+**JavaScript Patterns (gen-act.act):**
+```
+Actor gen_class Comp
+  C   "${name}": [
+  All ${name} gen_instance
+  C   ]
+
+Actor gen_instance Comp
+  C     { "type": "${kComp}", "id": ${kMe} }
+```
+
+**Common Adaptations:**
+- Type mapping: word→string, number→int/float, ref→pointer/index
+- Naming conventions: ${name:c} (PascalCase), ${name:l} (snake_case)
+- Collection types: arrays vs lists vs slices
+- Reference semantics: pointers vs indices vs objects
+
+**Pattern: Conditional Language Features**
+```
+Actor gen_field Element type = ref
+  Du gen_go_field
+  Du gen_js_field
+
+Actor gen_go_field Element
+  C   K${name:l}p int
+
+Actor gen_js_field Element  
+  C   "${name:l}": null
+```
+
+Target language actors preserve schema semantics while generating 
+idiomatic, type-safe code for each platform.
+~~~
+}
+
+// ================================================================
+// ACTOR SYSTEM DESIGN PRINCIPLES
+// ================================================================
+
+Canon {
+  name = actor_declarative_generation
+  category = actor_principle
+  topic_type = design_philosophy
+  overview = "Actor systems use declarative pattern matching rather than imperative control flow, making code generation logic explicit and maintainable."
+  doc = ~~~
+Declarative generation separates WHAT from HOW:
+
+**Imperative Approach (Don't Do This):**
+```
+for each component {
+  if component.type == "ref" {
+    if component.parent == "." {
+      generate_global_ref()
+    } else {
+      generate_local_ref()
+    }
+  }
+}
+```
+
+**Declarative Approach (Actor System):**
+```
+Actor gen_ref Element type = ref
+  Du gen_global_ref
+  Du gen_local_ref
+
+Actor gen_global_ref Element parent = .
+  # Generate global reference
+
+Actor gen_local_ref Element parent != .
+  # Generate local reference
+```
+
+**Benefits:**
+- Self-documenting: Actor conditions state requirements explicitly
+- Composable: Actors are independent, reusable units
+- Extensible: Add new patterns without modifying existing ones
+- Testable: Each actor is an isolated, verifiable unit
+- Maintainable: Logic location is predictable by pattern
+
+**Pattern Matching Expressiveness:**
+- Equality: attr = value
+- Inequality: attr != value
+- Membership: attr in value1,value2,value3
+- Exclusion: attr !in value1,value2
+- Presence: attr ??
+- Regex: attr regex pattern
+
+Conditions compose naturally, creating precise pattern specifications.
+~~~
+}
+
+Canon {
+  name = actor_single_responsibility
+  category = actor_principle
+  topic_type = design_philosophy
+  overview = "Each actor should have one clear purpose - one pattern match, one generation task, one validation check."
+  doc = ~~~
+Single Responsibility Principle for actors:
+
+**Good: Focused Actors**
+```
+Actor gen_ref_field Element type = ref
+  C   K${name:l}p int
+
+Actor gen_link_field Element type = link
+  C   K${name:l}p int
+
+Actor gen_value_field Element type in key,word,text
+  C   K${name:l} string
+```
+
+**Bad: Overloaded Actor**
+```
+Actor gen_field Element
+  # If ref...
+  # Else if link...
+  # Else if key...
+  # Else if word...
+  # ...50 lines of conditions
+```
+
+**Benefits:**
+- Clarity: Name describes exact purpose
+- Reusability: Small actors compose easily
+- Debuggability: Failures localize to specific pattern
+- Extensibility: Add cases without modifying existing actors
+
+**When to Split an Actor:**
+- Different conditions require different logic
+- Actor body exceeds ~10-15 lines
+- Multiple unrelated generation tasks
+- Complex nested conditionals
+
+**When to Keep Together:**
+- Tightly coupled operations
+- Sequence that must be atomic
+- Shared complex state
+
+Small, focused actors are the building blocks of maintainable generation systems.
+~~~
+}
+
+Canon {
+  name = actor_separation_of_concerns
+  category = actor_principle
+  topic_type = design_philosophy
+  overview = "Separate documentation, validation, structure, and code generation into distinct actor chains with clear boundaries."
+  doc = ~~~
+Organize actors by concern:
+
+**Documentation Actors:**
+```
+Actor gen_toc .
+Actor gen_comp_guide Comp
+Actor gen_element_guide Element
+Actor gen_reference_guide .
+```
+Generate human-readable documentation from schema.
+
+**Validation Actors:**
+```
+Actor main_check .
+Actor validate_refs Element type = ref
+Actor check_findable Comp find != Find
+```
+Check schema consistency and correctness.
+
+**Structure Actors:**
+```
+Actor gen_struct Comp
+Actor gen_field Element
+Actor gen_index Comp find = Find
+```
+Generate type declarations and data structures.
+
+**Code Actors:**
+```
+Actor gen_loader Comp
+Actor gen_serializer Comp
+Actor gen_accessor Element
+```
+Generate implementation code.
+
+**Benefits:**
+- Independent execution: Run docs without validation
+- Parallel development: Different concerns, different developers
+- Selective generation: Only generate what's needed
+- Clear dependencies: Validation before code, structures before accessors
+
+**Anti-Pattern: Mixed Concerns**
+```
+Actor gen_everything Comp
+  # Generate docs
+  # Validate refs
+  # Generate struct
+  # Generate loader
+  # All in one actor
+```
+
+Keep concerns separated for maintainability and flexibility.
+~~~
+}
+
+Canon {
+  name = actor_composition_over_inheritance
+  category = actor_principle
+  topic_type = design_philosophy
+  overview = "Compose complex behavior from simple actors using Du, All, Its, and This rather than building monolithic hierarchies."
+  doc = ~~~
+Build systems by composing small actors:
+
+**Composition Pattern:**
+```
+Actor process_schema .
+  Du validate_schema
+  Du build_indices
+  Du generate_code
+
+Actor validate_schema .
+  All Comp validate_comp
+
+Actor validate_comp Comp
+  Du check_name
+  Du check_parent
+  Its Element validate_element
+
+Actor validate_element Element
+  Du check_type
+  Du check_target
+```
+
+**Benefits:**
+- Flexibility: Reorder operations easily
+- Reusability: Small actors used in multiple contexts
+- Testability: Test individual atoms
+- Clarity: Call chain reveals workflow
+
+**Pattern: Pipeline**
+```
+Actor main .
+  Du phase_1
+  Du phase_2
+  Du phase_3
+```
+
+**Pattern: Conditional Processing**
+```
+Actor process Comp
+  Du process_if_findable
+  Du process_if_nested
+
+Actor process_if_findable Comp find = Find
+  # Only runs for Find components
+```
+
+**Pattern: Recursive Composition**
+```
+Actor traverse Comp
+  All Comp traverse
+  Its Element process
+```
+
+**Anti-Pattern: Monolithic Actor**
+Don't create one giant actor that does everything.
+Instead, create focused actors and compose them.
+
+Composition creates flexible, maintainable generation systems.
+~~~
+}

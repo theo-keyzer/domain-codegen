@@ -1,0 +1,795 @@
+// ================================================================
+// UNIT SCHEMA CANONS - Core Meta-Schema Components
+// ================================================================
+
+Canon {
+  name = comp_component
+  category = meta_schema
+  topic_type = component_definition
+  overview = "Defines a class or entity with name, parent, and searchability. The foundational building block of the unit schema system."
+  doc = ~~~
+Comp defines the structure of data types in the system. Each Comp has:
+- A unique name identifying the component type
+- A parent component (or '.' for top-level)
+- A find mode controlling how instances are located
+- Optional documentation
+
+Find modes:
+- Find: Top-level components searchable by name or key
+- FindIn: Nested components searchable within parent context
+- '.': No indexing, not directly searchable
+~~~
+}
+
+Canon {
+  name = comp_element
+  category = meta_schema
+  topic_type = field_definition
+  overview = "Defines a field within a component, specifying its name, type, linkage, validation rules, and documentation."
+  doc = ~~~
+Element defines individual fields within a Comp. Each Element has:
+- A name identifying the field
+- A type determining storage and behavior
+- A comp reference for ref types
+- A check constraint for validation
+- Optional documentation
+
+Elements are the data-carrying members of components.
+~~~
+}
+
+Canon {
+  name = comp_opt
+  category = meta_schema
+  topic_type = enumeration_value
+  overview = "Defines allowable values for an element, adding semantic meaning and documentation to enumerated options."
+  doc = ~~~
+Opt provides named options for elements, typically used with 'word' type fields.
+Each Opt represents one valid value with optional documentation explaining its meaning.
+
+Opts create type-safe enumerations within the schema.
+~~~
+}
+
+// ================================================================
+// ELEMENT TYPE SYSTEM CANONS
+// ================================================================
+
+Canon {
+  name = element_type_key
+  category = element_type
+  topic_type = data_type
+  overview = "Primary index field for finding and uniquely identifying component instances."
+  doc = "Key type elements serve as the unique identifier for Find/FindIn components. Used for lookups and references."
+}
+
+Canon {
+  name = element_type_word
+  category = element_type
+  topic_type = data_type
+  overview = "Single word value, typically used for enumerations, flags, or short identifiers."
+  doc = "Word type elements store a single token without spaces. Often paired with Opt definitions for type-safe enumerations."
+}
+
+Canon {
+  name = element_type_text
+  category = element_type
+  topic_type = data_type
+  overview = "String extending to end of line, used for descriptions, documentation, or multi-word content."
+  doc = "Text type elements capture all remaining content on a line, supporting spaces and longer-form text."
+}
+
+Canon {
+  name = element_type_number
+  category = element_type
+  topic_type = data_type
+  overview = "Numeric value supporting both storage and ordering operations."
+  doc = "Number type elements store numeric data and can be used for sorting, indexing, and calculations."
+}
+
+Canon {
+  name = element_type_tree
+  category = element_type
+  topic_type = data_type
+  overview = "Numeric value enabling hierarchical tree navigation and depth tracking."
+  doc = "Tree type elements store depth or level information, enabling parent-child tree traversal operations."
+}
+
+Canon {
+  name = element_type_ref
+  category = element_type
+  topic_type = reference_type
+  overview = "Direct reference to a top-level Find component instance by its key."
+  doc = "Ref type elements create hard references to other components. The comp field specifies the target component type."
+}
+
+Canon {
+  name = element_type_link
+  category = element_type
+  topic_type = reference_type
+  overview = "Reference to a sibling component within the same parent context."
+  doc = "Link type elements reference other instances at the same level in the hierarchy, enabling peer relationships."
+}
+
+Canon {
+  name = element_type_type_of
+  category = element_type
+  topic_type = reference_type
+  overview = "Reference by type name to a child component of a specific type."
+  doc = "Type_of elements enable polymorphic references, selecting child components based on their type."
+}
+
+Canon {
+  name = element_type_up_copy
+  category = element_type
+  topic_type = derived_reference
+  overview = "Copies component ID from parent chain upward for use by subsequent ref_copy or ref_child elements."
+  doc = "Up_copy walks up the parent hierarchy to capture an ID, setting context for derived references that follow."
+}
+
+Canon {
+  name = element_type_ref_copy
+  category = element_type
+  topic_type = derived_reference
+  overview = "Derived reference copying the reference value from the previous ref/link element's field."
+  doc = "Ref_copy elements automatically populate by copying a reference from an earlier element in the same component."
+}
+
+Canon {
+  name = element_type_ref_child
+  category = element_type
+  topic_type = derived_reference
+  overview = "Derived reference looking up child components within the target of the previous element."
+  doc = "Ref_child elements navigate into the component referenced by the prior element, accessing its children."
+}
+
+// ================================================================
+// ELEMENT CHECK CONSTRAINT CANONS
+// ================================================================
+
+Canon {
+  name = element_check_dot
+  category = element_check
+  topic_type = validation_rule
+  overview = "Error if target not found when target is not dot (.)."
+  doc = "Dot check enforces reference validity unless the target is explicitly '.' (null/none)."
+}
+
+Canon {
+  name = element_check_plus
+  category = element_check
+  topic_type = validation_rule
+  overview = "Error if target not found or if word field is empty (end of line)."
+  doc = "Plus check mandates the presence of either a valid reference target or a non-empty word value."
+}
+
+Canon {
+  name = element_check_one
+  category = element_check
+  topic_type = validation_rule
+  overview = "Error if target not found OR if multiple targets found - enforces exactly one match."
+  doc = "One check ensures singular reference resolution, rejecting both missing and ambiguous targets."
+}
+
+Canon {
+  name = element_check_star
+  category = element_check
+  topic_type = validation_rule
+  overview = "No error checking - target may be missing, word may be empty."
+  doc = "Star check disables validation, allowing optional references and optional word values."
+}
+
+// ================================================================
+// ELEMENT COMP TARGET CANONS
+// ================================================================
+
+Canon {
+  name = element_comp_dot
+  category = element_comp
+  topic_type = reference_target
+  overview = "Dot (.) as comp value indicates non-reference types or self-reference context."
+  doc = "When comp is '.', the element is not a reference type (used for key, word, text, number, tree)."
+}
+
+Canon {
+  name = element_comp_typed
+  category = element_comp
+  topic_type = reference_target
+  overview = "Comp field specifies the target component type for ref/link/type_of/up_copy/ref_copy/ref_child elements."
+  doc = "For reference types, comp names the Comp that this element points to, enabling type-safe linking."
+}
+
+// ================================================================
+// ACTOR SYSTEM CANONS
+// ================================================================
+
+Canon {
+  name = comp_actor
+  category = code_generation
+  topic_type = component_definition
+  overview = "Base type for code generator actors - routines that transform component definitions into executable code."
+  doc = ~~~
+Actor is the base component for all code generation directives. Actors are grouped by name and 
+invoked by the generator to produce source code, documentation, or other artifacts.
+
+Actors check conditions (comp, attr, eq, value) to determine when to execute.
+~~~
+}
+
+Canon {
+  name = comp_all
+  category = actor_type
+  topic_type = iteration_actor
+  overview = "Actor that iterates over all components of a specified type, invoking another actor for each."
+  doc = ~~~
+All actor implements for-each iteration over components. For each component matching 'what',
+it calls the referenced 'actor' with optional 'args'.
+
+Used for generating repetitive code structures across multiple components.
+~~~
+}
+
+Canon {
+  name = comp_du
+  category = actor_type
+  topic_type = conditional_actor
+  overview = "Conditional actor that invokes another actor based on condition evaluation."
+  doc = "Du actor provides if-then logic, calling its referenced actor only when conditions are met."
+}
+
+Canon {
+  name = comp_new
+  category = actor_type
+  topic_type = instantiation_actor
+  overview = "Creates and adds new component instances during code generation."
+  doc = ~~~
+New actor dynamically instantiates components, either in data structures (dats) or actor 
+definitions (acts), using provided line arguments.
+~~~
+}
+
+Canon {
+  name = comp_refs
+  category = actor_type
+  topic_type = validation_actor
+  overview = "Re-runs reference resolution after loading new definitions."
+  doc = "Refs actor triggers reference validation passes, ensuring all ref/link elements resolve correctly after schema changes."
+}
+
+Canon {
+  name = comp_var
+  category = actor_type
+  topic_type = state_actor
+  overview = "Sets generator variable to specified value for use in subsequent actors."
+  doc = "Var actor manages generator state, storing values in named variables accessible by later code generation steps."
+}
+
+Canon {
+  name = comp_its
+  category = actor_type
+  topic_type = traversal_actor
+  overview = "Invokes actor for each child or reference of current component definition."
+  doc = ~~~
+Its actor traverses component relationships, calling an actor for each child component or 
+reference relationship. Used for hierarchical code generation.
+~~~
+}
+
+Canon {
+  name = comp_c
+  category = actor_type
+  topic_type = output_actor
+  overview = "Outputs code line to generated file with automatic newline."
+  doc = "C actor emits a complete line of code to the output stream, the primary mechanism for code generation."
+}
+
+Canon {
+  name = comp_cs
+  category = actor_type
+  topic_type = output_actor
+  overview = "Outputs code snippet without newline, for inline code construction."
+  doc = "Cs actor emits code fragments without line breaks, enabling multi-part line assembly."
+}
+
+Canon {
+  name = comp_out
+  category = actor_type
+  topic_type = control_actor
+  overview = "Controls output state: delay, normal, off, or on modes with optional padding and buffering."
+  doc = ~~~
+Out actor manages code generation output state:
+- delay: suppress output until next C actor
+- normal: restore default output behavior
+- off: disable all output
+- on: enable output
+
+Supports padding and description buffering for formatted output.
+~~~
+}
+
+Canon {
+  name = comp_in
+  category = actor_type
+  topic_type = control_actor
+  overview = "Redirects output to the 'ins' variable instead of file stream."
+  doc = "In actor captures generated code into a variable for later use or processing, enabling multi-pass generation."
+}
+
+Canon {
+  name = comp_break
+  category = actor_type
+  topic_type = control_flow_actor
+  overview = "Breaks out of actor loops or command chains to control execution flow."
+  doc = ~~~
+Break actor provides loop and execution control:
+- actor: continue with calling actor (break actor case)
+- loop: continue after All/Its (break loop chain)
+- cmds: continue with actor case (break command list)
+- exit: terminate script
+
+Optional 'check' field restricts break to non-unique cases only.
+~~~
+}
+
+Canon {
+  name = comp_add
+  category = actor_type
+  topic_type = collection_actor
+  overview = "Adds items to collections (maps/lists) with options for nodes, JSON, files, URLs, and database queries."
+  doc = ~~~
+Add actor manages collection manipulation:
+- Supports string data, nodes, JSON, maps, lists
+- Can clear collections
+- Can check for duplicates
+- Can break on duplicates
+- Supports file input, eval, HTTP, and SQL data sources
+
+Path navigation uses '_.' for collection root and '.' for current node.
+~~~
+}
+
+Canon {
+  name = comp_this
+  category = actor_type
+  topic_type = traversal_actor
+  overview = "Invokes actor for each child or item in a collection, supporting map/list navigation."
+  doc = "This actor extends Its with collection support, iterating over map entries and list items in addition to component children."
+}
+
+Canon {
+  name = comp_replace
+  category = actor_type
+  topic_type = string_actor
+  overview = "String replacement with pattern matching, supporting grouped replacements."
+  doc = "Replace actor performs pattern-based string substitution at specified node paths, with optional group capture support."
+}
+
+// ================================================================
+// COGNITIVE DOMAIN CANONS
+// ================================================================
+
+Canon {
+  name = comp_agent
+  category = cognitive
+  topic_type = component_definition
+  overview = "The executing persona with identity, capabilities, and resource constraints."
+  doc = ~~~
+Agent represents an AI system instance with:
+- Unique identity (agent_id)
+- Persona definition (system prompt/role)
+- Available tools and capabilities
+- Token budget (context window limit)
+
+Agents are the top-level actors in cognitive sessions.
+~~~
+}
+
+Canon {
+  name = comp_objective
+  category = cognitive
+  topic_type = component_definition
+  overview = "Goal structure with status, priority, and hierarchical sub-goal support."
+  doc = ~~~
+Objective represents goals and sub-goals:
+- Hierarchical structure (parent_obj links)
+- Status tracking (active, suspended, completed, failed, abandoned)
+- Priority scoring (0.0-1.0)
+
+Objectives organize agent work and track progress.
+~~~
+}
+
+Canon {
+  name = comp_memory
+  category = cognitive
+  topic_type = component_definition
+  overview = "Grounded knowledge store with type, source, confidence, and temporal tracking."
+  doc = ~~~
+Memory stores validated knowledge:
+- Type: semantic, episodic, working, tool_result, meta
+- Source: user, web, self, tool, training
+- Confidence: 0.0-1.0 reliability score
+- Timestamp: when created
+- Optional embedding for semantic retrieval
+- Invalidation tracking
+
+Memories are the knowledge foundation for reasoning.
+~~~
+}
+
+Canon {
+  name = comp_thought
+  category = cognitive
+  topic_type = component_definition
+  overview = "Reasoning node in chain-of-thought or tree-of-thought structures with type and confidence."
+  doc = ~~~
+Thought represents reasoning steps:
+- Type: reasoning, hypothesis, reflection, constraint, plan_step, synthesis, question, error_recovery
+- Tree structure: level, prev (chain), branches (tree), parent_branch
+- Confidence: 0.0-1.0 self-assessed certainty
+
+Thoughts form the reasoning graph connecting objectives to conclusions.
+~~~
+}
+
+Canon {
+  name = comp_citation
+  category = cognitive
+  topic_type = component_definition
+  overview = "Explicit grounding link connecting thoughts to memory sources with role and optional quotes."
+  doc = ~~~
+Citation grounds thoughts in evidence:
+- Links one Thought to one Memory (mandatory)
+- Role: supports, contradicts, background, quote, evidence_for, evidence_against, invalidates
+- Optional quote (max 15 words, copyright-safe)
+
+Citations make reasoning transparent and verifiable.
+~~~
+}
+
+Canon {
+  name = comp_action
+  category = cognitive
+  topic_type = component_definition
+  overview = "External execution request with tool, arguments, result tracking, and status."
+  doc = ~~~
+Action represents tool invocations:
+- Tool reference (what capability)
+- Arguments (JSON or code block)
+- Result storage (result_mem)
+- Status: pending, executing, success, error, timeout
+
+Actions connect cognition to external capabilities.
+~~~
+}
+
+Canon {
+  name = comp_tool
+  category = cognitive
+  topic_type = component_definition
+  overview = "Available capability definition with name and schema specification."
+  doc = "Tool defines agent capabilities, specifying function signatures or JSON schemas for invocation."
+}
+
+Canon {
+  name = comp_vector
+  category = cognitive
+  topic_type = component_definition
+  overview = "Embedding representation for semantic search with dimensions and values."
+  doc = "Vector stores high-dimensional embeddings for semantic similarity search over memories and knowledge."
+}
+
+// ================================================================
+// SESSION MANAGEMENT CANONS
+// ================================================================
+
+Canon {
+  name = comp_session
+  category = session
+  topic_type = component_definition
+  overview = "Container for cognitive work with agent, continuity chain, status, and timestamps."
+  doc = ~~~
+Session represents a complete cognitive work unit:
+- Agent who performed the work
+- Parent session for continuity
+- Status: active, paused, completed, failed, abandoned
+- Timestamp tracking
+
+Sessions enable persistence and resumption of agent work.
+~~~
+}
+
+Canon {
+  name = comp_snapshot
+  category = session
+  topic_type = component_definition
+  overview = "Captures session state at a point in time with objectives, thoughts, and memories."
+  doc = ~~~
+Snapshot preserves session state:
+- Trigger: manual, auto, error, milestone
+- Captured objectives, thoughts, memories
+- Timestamp
+
+Snapshots enable checkpointing and rollback.
+~~~
+}
+
+Canon {
+  name = comp_restoration
+  category = session
+  topic_type = component_definition
+  overview = "Tracks what was loaded from previous sessions with source and relevance."
+  doc = ~~~
+Restoration documents session continuity:
+- Source session and memory
+- New memory created in current session
+- Relevance score (0.0-1.0)
+
+Restorations make session continuity explicit and traceable.
+~~~
+}
+
+Canon {
+  name = comp_crossref
+  category = session
+  topic_type = component_definition
+  overview = "Bidirectional linking between cognitive components and external systems."
+  doc = ~~~
+CrossRef connects cognitive and external domains:
+- Cognitive component (type + ID)
+- External component (type + ID)
+- Relationship: generates, validates, executes, measures, invalidates, references
+- Confidence: 0.0-1.0
+
+CrossRefs enable validation and integration with external systems.
+~~~
+}
+
+Canon {
+  name = comp_cycle
+  category = session
+  topic_type = component_definition
+  overview = "Tracks learning through iteration with hypothesis, baseline, intervention, and outcome."
+  doc = ~~~
+Cycle documents learning loops:
+- Trigger: error, optimization, requirement, feedback, exploration
+- Hypothesis being tested
+- Baseline state
+- Intervention (what changed)
+- Outcome (measured result)
+- Improvement (quantified delta)
+
+Cycles enable empirical learning and schema evolution.
+~~~
+}
+
+Canon {
+  name = comp_pattern
+  category = session
+  topic_type = component_definition
+  overview = "Extracted reusable knowledge with category, evidence, confidence, and applicability."
+  doc = ~~~
+Pattern captures generalizable insights:
+- Category: bug_fix, optimization, design, constraint, heuristic
+- Evidence from learning cycles
+- Confidence: 0.0-1.0
+- Applicability conditions
+
+Patterns enable knowledge transfer across sessions.
+~~~
+}
+
+Canon {
+  name = comp_evolution
+  category = session
+  topic_type = component_definition
+  overview = "Tracks schema and domain changes over time with motivation and driving sessions."
+  doc = ~~~
+Evolution documents schema changes:
+- Target schema (cog, session, omni, etc.)
+- Change type: add_component, add_element, add_opt, deprecate, rename
+- Motivation from patterns
+- Driving sessions
+
+Evolution makes schema development explicit and traceable.
+~~~
+}
+
+Canon {
+  name = comp_metric
+  category = session
+  topic_type = component_definition
+  overview = "Quantitative performance tracking with measurement method, value, and target."
+  doc = "Metric captures measurable aspects of session performance, enabling data-driven optimization."
+}
+
+Canon {
+  name = comp_artifact
+  category = session
+  topic_type = component_definition
+  overview = "External files or data produced or consumed by sessions with type, format, and role."
+  doc = ~~~
+Artifact tracks external resources:
+- Type: file, url, database, stream
+- Format: json, rio, py, cu, md, etc.
+- Role: input, output, intermediate, reference
+- Size, hash, timestamp
+
+Artifacts link sessions to their external products and dependencies.
+~~~
+}
+
+// ================================================================
+// CANON SYSTEM CANONS
+// ================================================================
+
+Canon {
+  name = comp_canon
+  category = canon_system
+  topic_type = component_definition
+  overview = "Self-contained authoritative knowledge unit optimized for AI consumption with 10-30 line scope."
+  doc = ~~~
+Canon defines foundational knowledge:
+- Unique name (key identifier)
+- Category and topic_type for organization
+- Overview: 1-3 sentence summary
+- Doc: detailed explanation
+
+Canons are the authoritative source, overruling derived schemas during bootstrap and recovery.
+~~~
+}
+
+Canon {
+  name = comp_link
+  category = canon_system
+  topic_type = component_definition
+  overview = "Typed relationship creating validated knowledge graph between Canons."
+  doc = ~~~
+Link creates semantic relationships:
+- Concept: target Canon
+- Relation: relationship type Canon
+
+Links must reference existing Canons, creating a validated knowledge graph.
+~~~
+}
+
+Canon {
+  name = comp_section
+  category = canon_system
+  topic_type = component_definition
+  overview = "Optional structure for longer Canons with name, level, title, and markdown content."
+  doc = ~~~
+Section provides structure within Canons:
+- Name: section identifier
+- Level: heading depth (2=h2, 3=h3, 4=h4)
+- Title: section heading
+- Content: markdown body
+
+Sections organize longer canonical documents.
+~~~
+}
+
+Canon {
+  name = comp_canonmeta
+  category = canon_system
+  topic_type = component_definition
+  overview = "Runtime metadata for Canons: executable status, maturity, usage count, and effectiveness."
+  doc = ~~~
+CanonMeta tracks Canon lifecycle:
+- Executable: yes, no, partial
+- Maturity: draft, stable, deprecated
+- Usage count: implementation frequency
+- Avg effectiveness: measured performance
+
+CanonMeta enables data-driven Canon curation.
+~~~
+}
+
+Canon {
+  name = comp_implementation
+  category = canon_system
+  topic_type = component_definition
+  overview = "Records when a Canon gets instantiated in cognitive runtime with fidelity and effectiveness tracking."
+  doc = ~~~
+Implementation bridges Canon and execution:
+- Canon being implemented
+- Cognitive type and ID
+- Session context
+- Effectiveness: 0.0-1.0 outcome
+- Adherence: 0.0-1.0 fidelity to Canon
+
+Implementations provide empirical feedback on canonical knowledge.
+~~~
+}
+
+Canon {
+  name = comp_thoughtsource
+  category = canon_system
+  topic_type = component_definition
+  overview = "Links Thought components back to source Canon and Implementation."
+  doc = "ThoughtSource makes thought provenance explicit, connecting reasoning steps to authoritative documentation."
+}
+
+Canon {
+  name = comp_memorysource
+  category = canon_system
+  topic_type = component_definition
+  overview = "Links Memory components back to source Canon and Implementation."
+  doc = "MemorySource grounds memories in canonical knowledge, enabling validation and evolution."
+}
+
+Canon {
+  name = comp_patternsource
+  category = canon_system
+  topic_type = component_definition
+  overview = "Links Pattern components back to source Canon and all Implementations."
+  doc = "PatternSource connects extracted patterns to their canonical origins and empirical evidence."
+}
+
+Canon {
+  name = comp_canonversion
+  category = canon_system
+  topic_type = component_definition
+  overview = "Tracks Canon evolution with version chain, change type, motivation, and improvement metrics."
+  doc = ~~~
+CanonVersion documents Canon refinement:
+- Version identifier
+- Previous version link (chain)
+- Change type: clarification, bugfix, enhancement, refactor
+- Motivation and evidence
+- Measured improvement
+
+Versions enable empirical Canon evolution while preserving history.
+~~~
+}
+
+Canon {
+  name = comp_canoncycle
+  category = canon_system
+  topic_type = component_definition
+  overview = "Specialized learning cycle tracking Canon-driven improvement with baseline, issues, and resulting version."
+  doc = ~~~
+CanonCycle links empirical evidence to Canon evolution:
+- Baseline Canon version
+- Implementation instances
+- Discovered issues
+- Proposed changes
+- New version
+
+CanonCycles make documentation improvement systematic and data-driven.
+~~~
+}
+
+Canon {
+  name = comp_library
+  category = canon_system
+  topic_type = component_definition
+  overview = "Curated collection of Canons organized by domain and purpose for session loading or dynamic query."
+  doc = ~~~
+Library organizes Canons:
+- Domain: reasoning, memory, planning, debugging, etc.
+- Purpose: what this collection supports
+- Canons: member canonical documents
+- Maintainer and version
+
+Libraries enable modular knowledge management.
+~~~
+}
+
+Canon {
+  name = comp_recommendation
+  category = canon_system
+  topic_type = component_definition
+  overview = "AI-suggested Canon based on current context with confidence, reasoning, and outcome tracking."
+  doc = ~~~
+Recommendation captures intelligent suggestions:
+- Situation: pattern match triggering suggestion
+- Canon: recommended documentation
+- Confidence: 0.0-1.0 recommendation strength
+- Reasoning: why this Canon fits
+- Accepted: yes, no, modified
+- Outcome and implementation
+
+Recommendations enable context-aware knowledge application.
+~~~
+}

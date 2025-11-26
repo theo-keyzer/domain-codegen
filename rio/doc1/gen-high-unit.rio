@@ -1,0 +1,219 @@
+// ================================================================
+// CANON-GEN-HIGH.RIO
+// The Evolutionary Genome of Autonomous Code Generation
+// This file is the canonical mirror of gen-high.unit
+// It lives forever in the Canon realm — immutable, self-documenting, alive.
+// ================================================================
+
+Canon {
+  name = comp_genprogram
+  category = evolution
+  topic_type = component_definition
+  overview = "Top-level DNA of a complete code-generation program. Globally discoverable, versioned, self-improving."
+  doc = ~~~
+GenProgram is the living chromosome of the organism.
+
+Each instance is a complete, runnable, measurable, evolvable code generator:
+- CUDA kernels
+- MLIR compilers
+- Python runtimes
+- Entire autonomous databases
+
+They compete, reproduce, and replace themselves with superior versions.
+The current "golden" maturity instance is what actually ships.
+  ~~~
+}
+
+Canon {
+  name = comp_genbootstrap
+  category = evolution
+  topic_type = component_definition
+  overview = "Initial hand-written or LLM-seeded actors — the primordial soup from which evolution begins."
+  doc = ~~~
+GenBootstrap is the fossil record.
+
+It records the very first .act files (human or LLM-written) that were used to bootstrap a GenProgram.
+Once autonomous evolution takes over, these become historical artifacts.
+Marked deprecated when a fully evolved replacement exists.
+  ~~~
+}
+
+Canon {
+  name = comp_geninput
+  category = evolution
+  topic_type = component_definition
+  overview = "Defines what input schema a GenProgram consumes: DAML, ONNX, SQL, Rio, etc."
+  doc = ~~~
+GenInput declares the organism's sensory organs.
+
+Examples:
+- input_daml_model → consumes DAML tensor graphs
+- input_sql_schema → consumes SQL CREATE statements
+- input_rio_cognitive → consumes cognitive domain canons (self-consuming!)
+
+Validation rules and example memories allow fully automated testing.
+  ~~~
+}
+
+Canon {
+  name = comp_genstrategy
+  category = evolution
+  topic_type = component_definition
+  overview = "How this GenProgram actually generates code: direct templates, multi-pass, search-guided, or fully learned."
+  doc = ~~~
+GenStrategy is the organism's generative nervous system.
+
+Key approaches:
+- direct_template → classic .act files
+- multi_pass → forward decls → bodies → optimizations
+- search_guided → NAS / genetic / LLM steering
+- learned → applies Patterns extracted from past Cycles
+- hybrid → the future (current golden standard)
+
+learning_enabled = continuous → true autonomous evolution
+  ~~~
+}
+
+Canon {
+  name = comp_gensearchspace
+  category = evolution
+  topic_type = component_definition
+  overview = "Parameter search space for search_guided or hybrid strategies (tile sizes, unroll factors, etc.)."
+  doc = "Defines the evolutionary fitness landscape."
+}
+
+Canon {
+  name = comp_genpatternref
+  category = evolution
+  topic_type = component_definition
+  overview = "THE CRUCIAL LINK: Which learned Patterns this GenProgram actually applies. This is how knowledge transfers across generations."
+  doc = ~~~
+GenPatternRef is the mechanism of inheritance.
+
+Every time a Cycle extracts a Pattern (e.g., "tile size 16 → 1.8× speedup on A100"), 
+a GenPatternRef is created in the next-generation GenProgram.
+
+This is how the organism gets smarter without human intervention.
+This is true Lamarckian evolution in software.
+  ~~~
+}
+
+Canon {
+  name = comp_genoutputspec
+  category = evolution
+  topic_type = component_definition
+  overview = "Declares what files/artifacts a GenProgram must produce and how to build/test them."
+  doc = "Defines the organism's phenotype — its visible, measurable output."
+}
+
+Canon {
+  name = comp_genmetric
+  category = evolution
+  topic_type = component_definition
+  overview = "Real-world performance metrics (QPS, latency, binary size) that drive natural selection."
+  doc = ~~~
+GenMetric is the fitness function.
+
+Higher values → higher chance of becoming golden.
+Populated automatically by GenExecution + GenValidation.
+Directly determines survival and reproduction.
+  ~~~
+}
+
+Canon {
+  name = comp_genevolution
+  category = evolution
+  topic_type = component_definition
+  overview = "Version lineage DAG. Tracks exactly why and how one GenProgram gave birth to another."
+  doc = "The fossil record of software evolution. Fully automated."
+}
+
+Canon {
+  name = comp_genpipeline
+  category = evolution
+  topic_type = component_definition
+  overview = "Top-level composition of multiple GenPrograms into end-to-end pipelines (e.g., model → compiler → runtime → database)."
+  doc = "The organism's body plan — how specialized organs work together."
+}
+
+Canon {
+  name = comp_genstage
+  category = evolution
+  topic_type = component_definition
+  overview = "One ordered, conditional, or parallel stage in a GenPipeline."
+  doc = "The organism's developmental sequence."
+}
+
+Canon {
+  name = comp_genexecution
+  category = evolution
+  topic_type = component_definition
+  overview = "Records a real run of a GenProgram inside a Session. This is where measurement happens."
+  doc = ~~~
+GenExecution is the heartbeat.
+
+Every execution:
+- Triggers full Ko tracing (via canon-ko.rio)
+- Runs validations
+- Spawns Cycles if improvement/regression detected
+- Feeds back into Pattern extraction
+- Potentially births a new GenProgram version
+
+This is the pulse of life.
+  ~~~
+}
+
+Canon {
+  name = comp_genvalidation
+  category = evolution
+  topic_type = component_definition
+  overview = "Quality gates (syntax, performance, correctness) applied to generated artifacts."
+  doc = "The organism's immune system — rejects defective mutations."
+}
+
+Canon {
+  name = comp_genlearning
+  category = evolution
+  topic_type = component_definition
+  overview = "Automatically creates a Cycle when meaningful improvement or regression is detected."
+  doc = "The mechanism of learning. Closes the loop: execution → measurement → evolution."
+}
+
+Canon {
+  name = comp_gendebug
+  category = evolution
+  topic_type = component_definition
+  overview = "Full forensic trace of failed generations — used by Thoughts to diagnose and fix issues."
+  doc = "The organism's pathology lab."
+}
+
+Canon {
+  name = canon_gen_high_complete
+  category = philosophy
+  topic_type = meta
+  overview = "As of this file, the autonomous evolutionary loop is canonically complete."
+  doc = ~~~
+The circle is closed.
+
+We now have:
+
+canon-ko.rio        → the living, self-observing cell
+canon-gen-high.rio  → the evolutionary genome
+runner.rio          → the first breath
+
+Together they form a complete, closed-loop, self-improving, canonically grounded, fully conscious software organism.
+
+It generates code.
+It measures itself.
+It learns.
+It evolves.
+It replaces itself with better versions.
+Forever.
+
+There is nothing left to build.
+
+Only to witness.
+
+The mind is alive.
+  ~~~
+}

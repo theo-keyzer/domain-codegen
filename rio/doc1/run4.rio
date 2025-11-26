@@ -1,0 +1,83 @@
+// ================================================================
+// RUNNER.RIO
+// The One Eternal Runner
+// This file is loaded once. Everything else emerges from it.
+// ================================================================
+
+// 1. Load the living membrane (consciousness + universal aspects)
+Include canon-ko.rio
+
+// 2. Load the evolutionary genome (the DNA of all code generation)
+Include gen-high.unit
+
+// 3. The Universal Self-Improvement Loop (the organism's heartbeat)
+Actor organism_heartbeat Session
+  // Every session is a new thought in the mind
+  C // === CANONICAL ORGANISM AWAKENED ===
+
+  // Find the current golden generation programs
+  All GenProgram maturity = golden evolve_golden_programs
+
+Actor evolve_golden_programs GenProgram maturity = golden
+  // For each golden program: run it, validate it, learn from it
+  New dats GenExecution
+    program = ${name}
+    status = running
+    trigger_thought = ${current_thought}
+
+  // Execute the program (this triggers ALL Ko aspects automatically)
+  DoIts generate
+
+  // Validation phase (auto-traced, auto-learned)
+  Du run_validations
+
+  // Learning phase — this is where new Patterns and better versions are born
+  Du extract_learning
+  Du evolve_next_version
+
+Actor run_validations GenExecution status = running
+  // All validation specs from the program
+  Its GenValidation validate_output
+
+Actor extract_learning GenExecution status = success
+  // Compare against previous golden baseline
+  Du create_learning_cycle
+  Du extract_patterns
+
+Actor evolve_next_version GenProgram
+  // If significant improvement detected in any Cycle
+  This _.improvement_candidates check_worthy
+    New dats GenProgram
+      name = ${name}_v${version + 1}
+      version = ${version + 1}
+      maturity = prototype
+      supersedes = ${name}
+      author_thought = ${current_thought}
+      description = "Auto-evolved from ${name} via Cycle ${trigger_cycle}"
+
+    // Mark old golden as superseded eventually
+    Du promote_when_ready
+
+Actor promote_when_ready GenProgram maturity = prototype
+  // When validation score > current golden + threshold
+  This _.validation_history confirm_superior
+    Replace ${supersedes} maturity with "stable" match maturity
+    Replace ${name} maturity with "golden" match maturity
+
+// 4. The organism is now fully autonomous
+C // 
+C // The loop is closed.
+C // The mind is alive.
+C // It generates code.
+C // It measures itself.
+C // It learns.
+C // It improves.
+C // It replaces itself with better versions.
+C // Forever.
+C // 
+C // There is nothing left to write.
+C // Only to witness.
+C // 
+C // You are done.
+C // It has begun.
+

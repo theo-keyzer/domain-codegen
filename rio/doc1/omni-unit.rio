@@ -1,0 +1,1204 @@
+// ================================================================
+// OMNI SCHEMA CANONS - The One Universal Schema
+// ================================================================
+
+Canon {
+  name = comp_project
+  category = omni_schema
+  topic_type = component_definition
+  overview = "Top-level container linking domain, model, strategy, and hardware for a complete system definition."
+  doc = ~~~
+Project is the root organizational unit in Omni:
+
+**Purpose:**
+Binds together all aspects of a system:
+- Domain: Knowledge area (daml, net5, nexus, tsu, custom)
+- Model: The compute graph/architecture
+- Strategy: Optimization approach
+- Hardware: Target execution substrate
+
+**Design:**
+Project is intentionally minimal - just enough to link the key components.
+Detailed configuration lives in referenced components, not in Project itself.
+
+**Usage Pattern:**
+```rio
+Project {
+  project = MaxCutOptimizer
+  domain = tsu
+  model = maxcut_qubo_model
+  strategy = simulated_annealing
+  hardware = tsu_extropic_v1
+  desc = "Max-Cut optimization using thermodynamic sampling"
+}
+```
+
+All other components reference back through these root links.
+~~~
+}
+
+Canon {
+  name = comp_domain
+  category = omni_schema
+  topic_type = component_definition
+  overview = "Knowledge domain tag organizing projects by area: daml, net5, nexus, tsu, quantum, neuromorphic, etc."
+  doc = ~~~
+Domain categorizes projects by knowledge area:
+
+**Standard Domains:**
+- daml: Deep Adaptive Machine Learning
+- net5: Universal neural architecture framework
+- nexus: Kernel fusion and optimization
+- tsu: Thermodynamic Sampling Unit
+- quantum: Quantum computing
+- photonic: Optical computing
+- neuromorphic: Brain-inspired computing
+- molecular: Molecular computing
+
+**Purpose:**
+Domains enable:
+- Organization by field
+- Domain-specific tooling
+- Cross-domain comparison
+- Community standards
+
+**Extensibility:**
+Create custom domains for proprietary or emerging paradigms.
+Domain is just a tag - the real structure is in Model, Op, Hardware.
+~~~
+}
+
+Canon {
+  name = comp_hardware
+  category = omni_schema
+  topic_type = component_definition
+  overview = "Universal execution substrate definition supporting GPUs, TPUs, TSUs, QPUs, photonic chips, analog arrays, and future architectures."
+  doc = ~~~
+Hardware represents any execution substrate:
+
+**Classical:**
+- gpu_a100: NVIDIA A100 GPU
+- tpu_v4: Google TPU v4
+- cpu_epyc: AMD EPYC CPU
+
+**Thermodynamic:**
+- tsu_extropic_v1: Extropic TSU
+- tsu_simulator: Software simulation
+
+**Quantum:**
+- ibmq_oslo: IBM Quantum Oslo
+- rigetti_aspen: Rigetti Aspen-M-3
+
+**Emerging:**
+- photonic_lightmatter: Lightmatter photonic chip
+- analog_mythic: Mythic analog array
+- neuromorphic_loihi: Intel Loihi 2
+
+**Features:**
+- Hierarchical: parent_hw for rack→node→card
+- Emulation: Reference software emulator
+- Noise: Link to noise model
+- Payload: Architecture details in JSON/YAML
+
+**Design Philosophy:**
+Hardware is a first-class entity. Operations target specific hardware.
+No assumptions about von Neumann architecture.
+~~~
+}
+
+Canon {
+  name = comp_model
+  category = omni_schema
+  topic_type = component_definition
+  overview = "The compute graph/neural architecture/circuit - contains Layers, Tensors, Ops that define the computation."
+  doc = ~~~
+Model is the computational structure:
+
+**What It Represents:**
+- Neural network architecture
+- Probabilistic graphical model
+- Quantum circuit
+- Analog circuit
+- Hybrid computation graph
+
+**Structure:**
+Model contains:
+- Layer: Hierarchical organization (blocks, cells, experts)
+- Tensor: Data carriers (activations, weights, qubits, voltages)
+- Op: Operations transforming tensors
+
+**Design:**
+- Models are hardware-agnostic by default
+- Hardware preferences expressed via references
+- Can reference SearchSpace for NAS
+- Can reference Config for runtime settings
+- Optional code field for main driver
+
+**Payload:**
+Type, dataset, num_classes, architecture details in JSON/YAML.
+
+**Philosophy:**
+Model is pure structure. Hardware and Strategy are separate concerns.
+Same Model can target multiple Hardware substrates.
+~~~
+}
+
+Canon {
+  name = comp_layer
+  category = omni_schema
+  topic_type = component_definition
+  overview = "Hierarchical grouping of operations: cells, blocks, experts, circuit sections - supports nested organization."
+  doc = ~~~
+Layer provides hierarchical organization within Models:
+
+**Use Cases:**
+- Neural network layers (conv1, fc2, attention_block)
+- NAS cells (normal_cell, reduction_cell)
+- MoE experts (expert_0, expert_1)
+- Quantum circuit sections (initialization, entanglement, measurement)
+
+**Nesting:**
+parent_layer enables arbitrary depth:
+```
+Layer backbone
+  Layer stage_1
+    Layer block_1
+    Layer block_2
+  Layer stage_2
+    Layer block_3
+```
+
+**Design:**
+Layers are organizational only - they don't execute.
+Operations (Op) do the work; Layers group them logically.
+
+**Payload:**
+layer_type, repeat count, reduction flags, etc.
+~~~
+}
+
+Canon {
+  name = comp_block
+  category = omni_schema
+  topic_type = component_definition
+  overview = "NET5 universal reusable block template - references a sub-Model for structure reuse across architectures."
+  doc = ~~~
+Block enables modular, reusable architecture components:
+
+**Purpose:**
+Define once, instantiate many times:
+- ResNet block
+- Transformer block
+- Mixture-of-experts expert
+- Quantum error correction block
+
+**Design:**
+Block references a Model for its internal structure.
+When instantiated, the Model's Layers/Tensors/Ops are instantiated.
+
+**Payload:**
+block_type, parameters, noise_model, energy budget, etc.
+
+**Pattern:**
+```rio
+Model {
+  model = resnet_block
+}
+
+Block {
+  block = basic_resnet_block
+  model = resnet_block
+}
+
+Model {
+  model = resnet50
+}
+
+Layer {
+  layer = stage_1
+  // Instantiates basic_resnet_block multiple times
+}
+```
+
+NET5 pattern: composition from universal blocks.
+~~~
+}
+
+Canon {
+  name = comp_tensor
+  category = omni_schema
+  topic_type = component_definition
+  overview = "Universal data carrier: classical tensors, spiking events, qubit states, analog voltages - anything that flows through the computation."
+  doc = ~~~
+Tensor represents any data in the system:
+
+**Classical:**
+- Activations: input, hidden_0, output
+- Weights: conv1_weights, attention_qkv
+- Gradients: hidden_0_grad
+
+**Quantum:**
+- Qubit states: qubits_0, ancilla
+- Measurement results: measurement_bitstring
+
+**Thermodynamic:**
+- P-bit states: pbit_array
+- Energy values: qubo_matrix
+
+**Neuromorphic:**
+- Spike trains: spike_events_layer_1
+- Membrane potentials: vmem_neurons
+
+**Photonic/Analog:**
+- Optical signals: optical_input_waveguide
+- Voltage levels: analog_crossbar_row_0
+
+**Fields:**
+- producer: Op that creates this tensor
+- distribution: EnergyFunction for probabilistic semantics
+- payload: shape, dtype, layout, symbolic shape, role
+
+**Philosophy:**
+Tensor is type-agnostic. Payload describes specifics.
+Same abstraction spans all computing paradigms.
+~~~
+}
+
+Canon {
+  name = comp_op
+  category = omni_schema
+  topic_type = component_definition
+  overview = "The One True Universal Operation - replaces 70+ legacy subtypes, spans all computing paradigms from classical to quantum to thermodynamic."
+  doc = ~~~
+Op is the universal computation primitive:
+
+**Design Philosophy:**
+One Op type for everything:
+- Classical: MatMul, Conv2D, ReLU, Softmax
+- Quantum: CNOT, Hadamard, Measurement, StatePrep
+- Thermodynamic: GibbsSample, QUBOUpdate, AnnealingSchedule
+- Neuromorphic: SpikeTrain, LIF, STDP
+- Photonic: WavelengthMux, PhaseShift, Interferometer
+- Analog: DotProduct, ThresholdActivation
+
+**Structure:**
+- hardware: Target substrate
+- energy_fn: Physics-based energy (optional)
+- search_space: NAS context
+- strategy: Meta-optimization approach
+- predicate: Dynamic condition tensor
+- next_op: Explicit DAG edge
+- layer: Containing layer
+- code: File path to implementation (ALWAYS a path, never inline)
+- payload: JSON/YAML with op-specific details
+
+**Key Innovation:**
+No op_type enumeration. Type is in payload.
+Same schema handles operations we haven't invented yet.
+
+**Code as Path:**
+```rio
+Op {
+  op = qubo_gibbs_update
+  code = kernels/qubo_gibbs.cu
+  payload = """
+  {
+    "op_type": "GibbsSampling",
+    "temperature": 300.0,
+    "num_sweeps": 1000
+  }
+  """
+}
+```
+
+Never inline code. Always reference files.
+~~~
+}
+
+Canon {
+  name = comp_arg
+  category = omni_schema
+  topic_type = component_definition
+  overview = "Input/output/parameter binding connecting Ops to Tensors with explicit roles."
+  doc = ~~~
+Arg connects operations to data:
+
+**Roles:**
+- input: Data consumed by Op
+- output: Data produced by Op
+- parameter: Learnable weights
+
+**Reference Pattern:**
+```
+Element model  up_copy   Model
+Element tensor ref_child Tensor
+```
+
+This is the canonical ref_child pattern:
+1. up_copy walks up to parent Model
+2. ref_child looks up sibling Tensor within that Model
+
+**Example:**
+```rio
+Op {
+  op = matmul_1
+}
+
+Arg {
+  arg = input_a
+  role = input
+  tensor = hidden_0
+}
+
+Arg {
+  arg = input_b
+  role = input
+  tensor = weights_fc1
+}
+
+Arg {
+  arg = output_c
+  role = output
+  tensor = hidden_1
+}
+```
+
+Explicit argument binding makes dataflow clear.
+Supports multi-input/multi-output operations.
+~~~
+}
+
+Canon {
+  name = comp_config
+  category = omni_schema
+  topic_type = component_definition
+  overview = "Runtime and inference configuration: batch size, precision, execution schedule, state transfer settings."
+  doc = ~~~
+Config specifies how to run a Model:
+
+**Purpose:**
+Separate structure (Model) from execution parameters (Config).
+Same Model can have multiple Configs for different scenarios.
+
+**Common Settings:**
+- batch_size: Batch size for inference/training
+- precision: fp32, fp16, int8, mixed
+- state_transfer: classical↔quantum state handling
+- schedule: Execution strategy reference
+
+**Pattern:**
+```rio
+Config {
+  config = inference_optimized
+  schedule = batch_schedule_strategy
+  payload = """
+  {
+    "batch_size": 128,
+    "precision": "fp16",
+    "cache_size_mb": 256
+  }
+  """
+}
+
+Model {
+  model = my_model
+  config = inference_optimized
+}
+```
+
+Configs are shareable across Models.
+~~~
+}
+
+Canon {
+  name = comp_kernel
+  category = omni_schema
+  topic_type = component_definition
+  overview = "Legacy component for backward compatibility - new designs use Op.code directly instead."
+  doc = ~~~
+Kernel is deprecated in favor of Op.code:
+
+**Old Pattern (Don't Use):**
+```rio
+Kernel {
+  kernel = my_kernel
+  hardware = gpu_a100
+  code = kernels/my_kernel.cu
+}
+
+Op {
+  op = my_op
+  kernel = my_kernel
+}
+```
+
+**New Pattern (Use This):**
+```rio
+Op {
+  op = my_op
+  hardware = gpu_a100
+  code = kernels/my_kernel.cu
+}
+```
+
+**Why Deprecated:**
+Kernel was redundant with Op.code.
+Simplified schema: one less component type.
+
+**When to Use:**
+Only when maintaining legacy systems.
+All new designs should use Op.code directly.
+~~~
+}
+
+Canon {
+  name = comp_energyfunction
+  category = omni_schema
+  topic_type = component_definition
+  overview = "Energy landscape definition for thermodynamic, annealing, and quantum operations - defines the optimization surface."
+  doc = ~~~
+EnergyFunction defines physics-based energy landscapes:
+
+**Use Cases:**
+- Thermodynamic sampling: Boltzmann distributions
+- Quantum annealing: Ising/QUBO Hamiltonians
+- Simulated annealing: Cost functions
+- Probabilistic inference: Energy-based models
+
+**Structure:**
+- code: Optional source file for energy calculation
+- payload: Energy expression, variables, temperature, etc.
+
+**Example:**
+```rio
+EnergyFunction {
+  energy_fn = maxcut_qubo
+  payload = """
+  {
+    "expression": "sum(Q[i,j] * s[i] * s[j])",
+    "variables": ["s"],
+    "temperature": 300.0,
+    "units": "eV"
+  }
+  """
+}
+
+Op {
+  op = sample_step
+  energy_fn = maxcut_qubo
+}
+```
+
+**Philosophy:**
+Energy is first-class. Not all computation is deterministic.
+Thermodynamic and quantum systems are energy-driven.
+~~~
+}
+
+Canon {
+  name = comp_searchspace
+  category = omni_schema
+  topic_type = component_definition
+  overview = "NAS, architecture search, and hyperparameter tuning space definition with Dimensions for each tunable parameter."
+  doc = ~~~
+SearchSpace defines what can be optimized:
+
+**Structure:**
+- target_model: Model being tuned
+- Dimension children: Individual tunable parameters
+- payload: Algorithm hints, constraints
+
+**Example:**
+```rio
+SearchSpace {
+  space = nas_search
+  target_model = my_model
+}
+
+Dimension {
+  dimension = num_layers
+  payload = """{"type": "int", "range": [1, 20]}"""
+}
+
+Dimension {
+  dimension = layer_width
+  payload = """{"type": "int", "range": [32, 512], "scale": "log"}"""
+}
+
+Dimension {
+  dimension = activation
+  payload = """{"type": "categorical", "choices": ["relu", "gelu", "swish"]}"""
+}
+```
+
+**Dimension Types:**
+- Continuous: Temperature, learning rate
+- Discrete: Number of layers, heads
+- Categorical: Activation function, block type
+- Conditional: Depend on other dimensions
+
+SearchSpace + Strategy = automated optimization.
+~~~
+}
+
+Canon {
+  name = comp_dimension
+  category = omni_schema
+  topic_type = component_definition
+  overview = "Single tunable parameter within a SearchSpace: continuous, discrete, categorical, or conditional."
+  doc = ~~~
+Dimension is one degree of freedom in search:
+
+**Types:**
+- Continuous: Real-valued range [min, max]
+- Discrete: Integer range [min, max]
+- Categorical: Fixed set of choices
+- Conditional: Depends on other dimensions
+
+**Payload:**
+- type: continuous | discrete | categorical | conditional
+- range: [min, max] for numeric
+- choices: [opt1, opt2, ...] for categorical
+- scale: linear | log | exp
+- condition: Expression for conditional dimensions
+
+**Examples:**
+```rio
+// Continuous
+Dimension {
+  dimension = learning_rate
+  payload = """{"type": "continuous", "range": [1e-5, 1e-1], "scale": "log"}"""
+}
+
+// Discrete
+Dimension {
+  dimension = num_experts
+  payload = """{"type": "discrete", "range": [4, 16]}"""
+}
+
+// Categorical
+Dimension {
+  dimension = optimizer
+  payload = """{"type": "categorical", "choices": ["adam", "sgd", "rmsprop"]}"""
+}
+```
+
+Dimensions compose to define high-dimensional search spaces.
+~~~
+}
+
+Canon {
+  name = comp_strategy
+  category = omni_schema
+  topic_type = component_definition
+  overview = "Optimization, simulation, search, or execution strategy: DARTS, evolution, MAML, cycle-accurate simulation, etc."
+  doc = ~~~
+Strategy defines HOW to optimize or execute:
+
+**Types:**
+- NAS: DARTS, evolutionary search, reinforcement learning
+- Meta-learning: MAML, Reptile, ProtoNets
+- Simulation: Cycle-accurate, event-driven, continuous time
+- Execution: Scheduling, mapping, resource allocation
+
+**Structure:**
+- search_space: What's being optimized
+- fitness: Metric to optimize
+- code: Implementation file path
+- payload: Learning rates, budgets, fidelity levels
+
+**Example:**
+```rio
+Strategy {
+  strategy = darts_nas
+  search_space = nas_search
+  fitness = validation_accuracy
+  code = strategies/darts.py
+  payload = """
+  {
+    "learning_rate": 0.025,
+    "arch_learning_rate": 3e-4,
+    "epochs": 50
+  }
+  """
+}
+```
+
+**Philosophy:**
+Strategy is separate from Model and Hardware.
+Same Model can be optimized with different Strategies.
+Same Strategy can apply to different Models.
+~~~
+}
+
+Canon {
+  name = comp_constraint
+  category = omni_schema
+  topic_type = component_definition
+  overview = "Hard or soft constraints on operations or hardware: power, memory, fidelity, determinism, timing."
+  doc = ~~~
+Constraint limits what's allowed:
+
+**Types:**
+- Power: Max wattage, energy budget
+- Memory: Max buffer size, bandwidth
+- Fidelity: Min accuracy, max error rate
+- Timing: Latency, throughput requirements
+- Determinism: Reproducibility needs
+- Noise: Max noise level for quantum/analog
+
+**Structure:**
+- target_hw: Constrained hardware
+- model: Parent model context
+- target_op: Specific operation constrained
+- payload: Condition, severity, target value, noise model
+
+**Example:**
+```rio
+Constraint {
+  constraint_id = power_budget
+  target_hw = tsu_extropic_v1
+  payload = """
+  {
+    "constraint_type": "power",
+    "max_watts": 50,
+    "severity": "hard"
+  }
+  """
+}
+
+Constraint {
+  constraint_id = memory_limit
+  target_op = large_matmul
+  payload = """
+  {
+    "constraint_type": "memory",
+    "max_bytes": 1073741824,
+    "severity": "soft"
+  }
+  """
+}
+```
+
+Constraints guide optimization and scheduling.
+~~~
+}
+
+Canon {
+  name = comp_metric
+  category = omni_schema
+  topic_type = component_definition
+  overview = "Telemetry and fitness metrics: accuracy, latency, energy, throughput, fidelity - anything measurable."
+  doc = ~~~
+Metric defines what to measure:
+
+**Categories:**
+- Quality: Accuracy, F1, perplexity
+- Performance: Latency, throughput, FLOPS
+- Efficiency: Energy per inference, power
+- Hardware: Temperature, utilization
+- Quantum: Fidelity, coherence time
+- Thermodynamic: Convergence rate, energy gap
+
+**Structure:**
+- target_hw: What's being measured
+- payload: Unit, target value, measurement method
+
+**Example:**
+```rio
+Metric {
+  metric = inference_latency
+  target_hw = gpu_a100
+  payload = """
+  {
+    "unit": "ms",
+    "target_value": 10.0,
+    "measurement": "p99"
+  }
+  """
+}
+
+Metric {
+  metric = quantum_fidelity
+  payload = """
+  {
+    "unit": "probability",
+    "target_value": 0.99,
+    "measurement": "state_overlap"
+  }
+  """
+}
+```
+
+Metrics are objectives for Strategy optimization.
+~~~
+}
+
+Canon {
+  name = comp_checkpoint
+  category = omni_schema
+  topic_type = component_definition
+  overview = "Versioned snapshot of model state: weights, optimizer state, training progress - enables resumption and rollback."
+  doc = ~~~
+Checkpoint preserves model state:
+
+**Purpose:**
+- Resume training after interruption
+- Save best-performing states
+- A/B test different checkpoints
+- Rollback to previous versions
+
+**Structure:**
+- model: Model this snapshot belongs to
+- payload: State file path, timestamp, metadata
+
+**Example:**
+```rio
+Checkpoint {
+  checkpoint_id = best_epoch_47
+  model = my_model
+  payload = """
+  {
+    "state_path": "checkpoints/model_epoch_47.pt",
+    "timestamp": "2025-11-26T14:30:00Z",
+    "epoch": 47,
+    "val_accuracy": 0.947,
+    "train_loss": 0.023
+  }
+  """
+}
+```
+
+**Best Practices:**
+- Regular checkpoints during training
+- Save top-k by metric
+- Version control checkpoint files
+- Include metadata for traceability
+~~~
+}
+
+Canon {
+  name = comp_fusion
+  category = omni_schema
+  topic_type = component_definition
+  overview = "NEXUS kernel fusion patterns for optimization: which operations fuse together on which hardware."
+  doc = ~~~
+Fusion optimizes by combining operations:
+
+**Purpose:**
+Reduce memory traffic and kernel launch overhead by fusing:
+- Element-wise chains: ReLU → Add → ReLU
+- Reduction patterns: Softmax, LayerNorm
+- Producer-consumer: MatMul → Bias → Activation
+
+**Structure:**
+- hardware: Target hardware for fusion
+- payload: Pattern type, operations fused, strategy
+
+**Example:**
+```rio
+Fusion {
+  fusion = conv_bn_relu
+  hardware = gpu_a100
+  payload = """
+  {
+    "pattern_type": "vertical",
+    "ops_fused": ["Conv2D", "BatchNorm", "ReLU"],
+    "strategy": "tensorcore",
+    "speedup": 1.8
+  }
+  """
+}
+```
+
+**Fusion Strategies:**
+- Vertical: Producer-consumer chains
+- Horizontal: Parallel operations
+- Tiled: Loop fusion with tiling
+- Multi-kernel: Cross-kernel optimization
+
+NEXUS pattern: declarative fusion specifications.
+~~~
+}
+
+Canon {
+  name = comp_controlflow
+  category = omni_schema
+  topic_type = component_definition
+  overview = "Branching and looping logic within operations: if-then-else, loops, dynamic control based on tensor predicates."
+  doc = ~~~
+ControlFlow adds dynamic execution:
+
+**Purpose:**
+Enable conditional and iterative computation:
+- If-then-else based on tensor values
+- Loops with dynamic bounds
+- Early exit conditions
+- Dynamic routing (MoE gating)
+
+**Structure:**
+- predicate: Condition tensor (boolean)
+- branch_true: Op to execute if true
+- branch_false: Op to execute if false
+- payload: Loop count, condition type
+
+**Example:**
+```rio
+Op {
+  op = main_computation
+}
+
+ControlFlow {
+  control = dynamic_branch
+  predicate = is_converged
+  branch_true = finalize_op
+  branch_false = continue_iteration
+  payload = """
+  {
+    "condition_type": "early_exit",
+    "max_iterations": 1000
+  }
+  """
+}
+```
+
+**Use Cases:**
+- Adaptive computation time
+- Mixture of experts routing
+- Iterative refinement
+- Conditional processing
+
+**Up_copy Pattern:**
+Multiple up_copy fields navigate to Model for finding tensors/ops:
+```
+Element model1    up_copy Model
+Element predicate ref_child Tensor
+Element model2    up_copy Model
+Element branch_true ref_child Op
+```
+~~~
+}
+
+// ================================================================
+// RIO FORMAT CANONS
+// ================================================================
+
+Canon {
+  name = rio_format_philosophy
+  category = rio_format
+  topic_type = design_philosophy
+  overview = "Rio is a lightweight, human-writable format for hardware, models, and domains - readable, editable, auto-parsing JSON, safe code blocks."
+  doc = ~~~
+Rio Design Goals:
+
+**Human-First:**
+- Readable: Clear block structure
+- Editable: Text editor friendly
+- Commentable: // comments throughout
+
+**Machine-Friendly:**
+- Auto-parses JSON: "{"a":1}" → native types
+- Type inference: 1024 → int, 300.0 → float, true → bool
+- Structured data: """ """ for JSON, ~~~ ~~~ for code
+
+**Domain-Agnostic:**
+- Works for ML, quantum, thermodynamic, photonic
+- No assumptions about field names
+- Extensible to new domains
+
+**Safe:**
+- Code never inline in data
+- Code blocks (~~~) preserve exactly
+- No injection vulnerabilities
+
+**Single File:**
+Everything in one .rio file:
+- Domain definitions
+- Hardware specs
+- Model architecture
+- Checkpoints
+- Metrics
+
+**Pronunciation:** /ˈri.oʊ/ (like "Rio de Janeiro")
+~~~
+}
+
+Canon {
+  name = rio_block_structure
+  category = rio_format
+  topic_type = syntax
+  overview = "Rio files are sequences of typed blocks: BlockType { key-value pairs } with unique names and field assignments."
+  doc = ~~~
+Rio Block Syntax:
+
+**Basic Structure:**
+```rio
+BlockType {
+  field_name = value
+  another_field = "string value"
+  numeric_field = 42
+}
+```
+
+**Block Components:**
+- BlockType: Component type (Project, Model, Op, etc.)
+- Block name: Optional, usually the first field (key type)
+- Body: { ... } containing field assignments
+- Fields: name = value pairs
+
+**Example:**
+```rio
+Project {
+  project = MyProject
+  domain = tsu
+  desc = "A thermodynamic optimizer"
+}
+
+Model {
+  model = my_model
+  hardware = tsu_v1
+}
+```
+
+**Naming:**
+- Quoted names: "name with spaces"
+- Unquoted names: simple_name (no spaces)
+
+**Field Values:**
+Auto-parsed by type:
+- Numbers: 42, 3.14, 1e-5
+- Bools: true, false
+- Strings: "text", unquoted_word
+- Arrays: [item1, item2, item3]
+- Objects: {key: value, key2: value2}
+~~~
+}
+
+Canon {
+  name = rio_value_types
+  category = rio_format
+  topic_type = syntax
+  overview = "Rio auto-detects types: int, float, bool, string, JSON arrays, JSON objects - or falls back to raw string."
+  doc = ~~~
+Rio Type Inference:
+
+**Automatic Detection:**
+Parser attempts JSON unmarshaling for every value.
+If successful → native type; if fails → string.
+
+**Examples:**
+```rio
+Model {
+  // Integer
+  num_layers = 12
+
+  // Float
+  temperature = 300.0
+  learning_rate = 1e-4
+
+  // Boolean
+  training = true
+  frozen = false
+
+  // String (unquoted)
+  name = my_model
+
+  // String (quoted)
+  description = "A model with spaces"
+
+  // Array
+  shape = [224, 224, 3]
+  devices = [gpu0, gpu1, gpu2]
+
+  // Object
+  config = {batch_size: 32, precision: "fp16"}
+
+  // Complex nested
+  hyperparams = {
+    optimizer: "adam",
+    lr: 0.001,
+    betas: [0.9, 0.999]
+  }
+}
+```
+
+**Fallback:**
+If JSON parsing fails, value stored as raw string.
+Enables forwards compatibility with unknown formats.
+~~~
+}
+
+Canon {
+  name = rio_multiline_json
+  category = rio_format
+  topic_type = syntax
+  overview = "Triple-quote \"\"\" blocks for structured JSON that spans multiple lines - auto-parsed into native types."
+  doc = ~~~
+Structured Multi-line with """ """:
+
+**Purpose:**
+Complex JSON/YAML data that needs readability:
+
+**Syntax:**
+```rio
+Model {
+  model = complex_model
+  payload = """
+  {
+    "architecture": "transformer",
+    "num_layers": 12,
+    "hidden_size": 768,
+    "num_heads": 12,
+    "vocab_size": 50257,
+    "max_position_embeddings": 1024,
+    "layer_norm_epsilon": 1e-5,
+    "dropout": 0.1
+  }
+  """
+}
+```
+
+**Behavior:**
+- Content between """ """ → JSON parse attempt
+- Success → native map[string]any
+- Failure → raw string
+
+**Closing Delimiter Rules:**
+- Can be indented
+- Must be alone on line (after whitespace trim)
+- No content after """ on same line
+
+**Use Cases:**
+- Configuration objects
+- Metric definitions
+- Hardware specifications
+- Checkpoint metadata
+~~~
+}
+
+Canon {
+  name = rio_multiline_code
+  category = rio_format
+  topic_type = syntax
+  overview = "Triple-tilde ~~~ blocks for verbatim code preservation - CUDA, Python, shaders - never parsed, always exact text."
+  doc = ~~~
+Verbatim Multi-line with ~~~ ~~~:
+
+**Purpose:**
+Preserve code exactly: kernels, templates, documentation.
+
+**Syntax:**
+```rio
+Op {
+  op = custom_kernel
+  code = ~~~
+__global__ void my_kernel(float* data) {
+    int idx = blockIdx.x * blockDim.x + threadIdx.x;
+    printf("He said \"\"\"triple quotes work here\"\"\"");
+    data[idx] = data[idx] * 2.0;
+}
+~~~
+}
+```
+
+**Behavior:**
+- Content between ~~~ ~~~ → NEVER parsed
+- Always stored as raw string
+- Preserves indentation, newlines, everything
+- Can contain """, ''', ~~~, any characters
+
+**Closing Delimiter Rules:**
+- Can be indented
+- Must be alone on line
+- No content after ~~~ on same line
+
+**Use Cases:**
+- CUDA kernels
+- Python functions
+- Shader code
+- SQL queries
+- Prompt templates
+- Documentation blocks
+
+**Critical:**
+Use ~~~ for code. Use """ for structured data.
+Never mix them up.
+~~~
+}
+
+Canon {
+  name = rio_comments
+  category = rio_format
+  topic_type = syntax
+  overview = "// comments are stripped everywhere except inside ~~~ verbatim blocks - enables inline documentation."
+  doc = ~~~
+Rio Comment Syntax:
+
+**Comment Rules:**
+```rio
+// Full line comment
+
+Project {
+  project = MyProject  // trailing comment
+  // comment between fields
+  domain = tsu  // another trailing comment
+}
+```
+
+**Behavior:**
+- // starts comment
+- Comment continues to end of line
+- Comments stripped during parsing
+- Trailing comments removed
+
+**Exception:**
+Inside ~~~ blocks, // is preserved:
+```rio
+Op {
+  code = ~~~
+// This is a C++ comment, preserved exactly
+void my_function() {
+    // This too
+}
+~~~
+}
+```
+
+**Best Practices:**
+- Document block purposes
+- Explain non-obvious values
+- Mark TODOs and FIXMEs
+- Provide context for future readers
+
+Comments make Rio files self-documenting.
+~~~
+}
+
+Canon {
+  name = rio_file_organization
+  category = rio_format
+  topic_type = best_practice
+  overview = "Organize Rio files by domain, then hierarchy: Domain/Project/Hardware first, then Models, then Operations, then supporting components."
+  doc = ~~~
+Rio File Structure Best Practices:
+
+**Recommended Order:**
+```rio
+// 1. Domain definitions
+Domain { name = tsu }
+
+// 2. Hardware specifications
+Hardware { hardware = tsu_v1 }
+Hardware { hardware = gpu_a100 }
+
+// 3. Project declarations
+Project { 
+  project = MyOptimizer
+  domain = tsu
+  hardware = tsu_v1
+}
+
+// 4. Models
+Model { model = main_model }
+
+// 5. Layers (hierarchical)

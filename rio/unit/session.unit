@@ -1,0 +1,178 @@
+// ================================================================
+// SESSION.UNIT — Persistence Extension for Cognitive Domain
+// ================================================================
+// Design: Extends cog.unit with session management and learning
+// Philosophy: Same minimal structure + payload pattern
+// Evolution: Schema can evolve independently of core cog
+// ================================================================
+
+// ----------------------------------------------------------------
+// SESSION: Container for Cognitive Work
+// ----------------------------------------------------------------
+Comp Session  parent . Find
+    Element session_id     key       .       +   // e.g., "sess_2024_11_23_001"
+    Element agent_id       ref       Agent   +   // Which agent ran this session
+    Element agent_id2      ref_share Agent   -
+    Element parent_session ref       Session *   // Previous session (continuity chain)
+    Element timestamp      number    .       +   // Session start (Unix ms)
+    Element status         word      .       +   // active | paused | completed | failed | abandoned
+    Element doc            text      .       *
+
+    Opt active            *   // Currently running
+    Opt paused            *   // Suspended, can resume
+    Opt completed         *   // Finished successfully
+    Opt failed            *   // Terminated with errors
+    Opt abandoned         *   // User canceled
+
+// ----------------------------------------------------------------
+// SNAPSHOT: Captures Session State at a Point in Time
+// ----------------------------------------------------------------
+Comp Snapshot       parent Session   FindIn
+    Element snapshot_id  key       .         +   // e.g., "snap_checkpoint_001"
+    Element timestamp    number    .         +   // When snapshot was taken
+    Element trigger      word      .         *   // manual | auto | error | milestone
+    Element session      up_copy   Session   -
+    Element agent_id     ref_copy  Agent     -
+    Element objectives   ref_child Objective *   // Active objectives at this time
+    Element thoughts     ref_child Thought   *   // Recent thought chain
+    Element agent_id2    ref_share Agent     -
+    Element memories     ref_child Memory    *   // Working memory set
+    Element doc          text      .         *
+
+    Opt manual            *   // User-triggered save
+    Opt auto              *   // Periodic checkpoint
+    Opt error             *   // Saved before failure
+    Opt milestone         *   // Major achievement
+
+// ----------------------------------------------------------------
+// RESTORATION: Tracks What Was Loaded from Previous Sessions
+// ----------------------------------------------------------------
+Comp Restoration parent Session FindIn
+    Element restoration_id key       .       +   // e.g., "restore_001"
+    Element source_session ref       Session +   // Which session data came from
+    Element agent_id       ref_copy  Agent   -
+    Element source_memory  ref_child Memory  +   // Original memory being restored
+    Element session        up_copy   Session -
+    Element agent_id2      ref_copy  Agent   -
+    Element restored_as    ref_child Memory  +   // New memory created in current session
+    Element relevance      number    .       *   // 0.0–1.0 why this was selected
+    Element doc            text      .       *
+
+// ----------------------------------------------------------------
+// CROSSREF: Bidirectional Cog ↔ External System Linking
+// ----------------------------------------------------------------
+Comp CrossRef       parent Session   FindIn
+    Element xref_id       key     .       +   // e.g., "xref_001"
+    Element cog_type      word    .       +   // Agent | Objective | Thought | Memory | Action
+    Element cog_id        text    .       +   // ID of cognitive component
+    Element external_type text    .       *   // External system/schema name
+    Element external_id   text    .       *   // External component ID
+    Element relationship  word    .       +   // generates | validates | executes | measures | invalidates
+    Element confidence    number  .       *   // 0.0–1.0 strength of link
+    Element timestamp     number  .       +   // When link established
+    Element doc           text    .       *
+
+    Opt generates         *   // Cog created external (Thought → Model)
+    Opt validates         *   // External confirms cog (Test → Objective)
+    Opt executes          *   // External runs cog plan (Runtime → Action)
+    Opt measures          *   // External quantifies cog (Metric → Memory)
+    Opt invalidates       *   // External disproves cog (Error → Thought)
+    Opt references        *   // General citation
+
+// ----------------------------------------------------------------
+// CYCLE: Tracks Learning Through Iteration
+// ----------------------------------------------------------------
+Comp Cycle  parent Session FindIn
+    Element cycle_id      key       .         + // e.g., "cycle_error_recovery_001"
+    Element trigger       word      .         + // error | optimization | requirement | feedback
+    Element session       up_copy   Session   -
+    Element agent_id      ref_copy  Agent     -
+    Element objective     ref_child Objective * // Objective of Thought
+    Element hypothesis    ref_child Thought   * // Hypothesis being tested (if any)
+    Element agent_id2     ref_share Agent     -
+    Element baseline      ref_child Memory    * // State before change
+    Element objective2    ref_share Objective - // Objective of Thought
+    Element intervention  ref_child Thought   + // What changed and why
+    Element agent_id3     ref_share Agent     -
+    Element outcome       ref_child Memory    + // Measured result after change
+    Element improvement   number  .           * // Quantified delta (speedup, accuracy, etc.)
+    Element doc           text    .           *
+
+    Opt error             *   // Triggered by failure
+    Opt optimization      *   // Performance improvement
+    Opt requirement       *   // New user need
+    Opt feedback          *   // User or system feedback
+    Opt exploration       *   // Proactive experiment
+
+// ----------------------------------------------------------------
+// PATTERN: Extracted Reusable Knowledge
+// ----------------------------------------------------------------
+Comp Pattern parent . Find
+    Element pattern_id    key       .       +   // e.g., "pattern_tensor_ordering"
+    Element name          word      .       +   // Human-readable identifier
+    Element category      word      .       *   // bug_fix | optimization | design | constraint
+    Element discovered_in ref       Session *   // Which session found this
+    Element evidence      ref_child Cycle   *   // Learning cycles supporting this
+    Element confidence    number    .       *   // 0.0–1.0 reliability
+    Element applicability text      .       *   // When/where to apply this pattern
+    Element doc           text      .       *
+
+    Opt bug_fix           *   // Avoids errors
+    Opt optimization      *   // Improves performance
+    Opt design            *   // Architectural principle
+    Opt constraint        *   // Boundary condition
+    Opt heuristic         *   // Rule of thumb
+
+// ----------------------------------------------------------------
+// EVOLUTION: Schema/Domain Changes Over Time
+// ----------------------------------------------------------------
+Comp Evolution      parent .          Find
+    Element evolution_id  key     .       +   // e.g., "evo_added_citation_role"
+    Element target_schema text    .       +   // Which schema changed (cog, session, omni)
+    Element change_type   word    .       +   // add_component | add_element | add_opt | deprecate
+    Element motivation    ref     Pattern *   // Why this change was needed
+    Element sessions      ref     Session *   // Sessions driving this evolution
+    Element timestamp     number  .       +   // When evolution occurred
+    Element doc           text    .       *
+
+    Opt add_component     *   // New Comp added
+    Opt add_element       *   // New Element added
+    Opt add_opt           *   // New Opt added
+    Opt deprecate         *   // Component/Element marked obsolete
+    Opt rename            *   // Identifier changed
+
+// ----------------------------------------------------------------
+// METRIC: Quantitative Performance Tracking
+// ----------------------------------------------------------------
+Comp Metric         parent Session   FindIn
+    Element metric_id     key     .       +   // e.g., "metric_convergence_time"
+    Element name          word    .       +   // Human-readable
+    Element measurement   text    .       *   // How it's calculated
+    Element value         number  .       *   // Current measured value
+    Element target        number  .       *   // Goal value
+    Element timestamp     number  .       +   // When measured
+    Element doc           text    .       *
+
+// ----------------------------------------------------------------
+// ARTIFACT: External Files/Data Produced or Consumed
+// ----------------------------------------------------------------
+Comp Artifact       parent Session   FindIn
+    Element artifact_id   key     .       +   // e.g., "artifact_maxcut_v2_json"
+    Element type          word    .       +   // file | url | database | stream
+    Element path          text    .       +   // Location (filesystem path, URL, etc.)
+    Element format        word    .       *   // json | rio | py | cu | md | etc.
+    Element role          word    .       +   // input | output | intermediate | reference
+    Element size_bytes    number  .       *   // File size
+    Element hash          text    .       *   // Content hash for versioning
+    Element timestamp     number  .       +   // Created/accessed time
+    Element doc           text    .       *
+
+    Opt file              *   // Filesystem artifact
+    Opt url               *   // Web resource
+    Opt database          *   // DB record/table
+    Opt stream            *   // Real-time data
+
+    Opt input             *   // Consumed by session
+    Opt output            *   // Produced by session
+    Opt intermediate      *   // Temporary working file
+    Opt reference         *   // External documentation/context
