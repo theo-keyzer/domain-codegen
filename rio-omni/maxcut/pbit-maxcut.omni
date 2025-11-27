@@ -1,0 +1,307 @@
+// =========================================================================
+// MAX-CUT QUBO ON P-BIT ARCHITECTURE — OMNI.UNIT FORMAT
+// Demonstrates the unified schema for TSU thermodynamic sampling
+// =========================================================================
+
+// --- 1. PROJECT & DOMAIN ---
+
+Domain {
+  name = tsu
+  desc = "Thermodynamic Sampling Unit domain"
+}
+
+Project {
+  project = MaxCutPBit
+  domain = tsu
+  model = maxcut_qubo_model
+  strategy = simulated_annealing
+  hardware = tsu_extropic_v1
+  desc = "Max-Cut QUBO problem on P-bit Memristor Array"
+}
+
+// --- 2. HARDWARE DEFINITIONS ---
+
+Hardware {
+  hardware = tsu_extropic_v1
+  emulation = tsu_gpu_emulator
+  noise_model = thermal_noise_constraint
+  backend = tsu_analog
+  memory_gb = 16
+  thermal_bandwidth_hz = 1e9
+  operating_temp_k = 300
+  pbit_count = 1024
+  memristor_type = TaOx
+}
+
+Hardware {
+  hardware = tsu_gpu_emulator
+  backend = cuda
+  arch = ampere
+  memory_gb = 80
+  emulation_mode = cycle_accurate
+}
+
+Hardware {
+  hardware = cpu_x86
+  backend = cpu
+  cores = 16
+  desc = "Python/NumPy reference implementation"
+}
+
+// --- 3. MODEL DEFINITION ---
+
+Model {
+  model = maxcut_qubo_model
+  hardware = tsu_extropic_v1
+  search_space = qubo_hyperparams
+  config = annealing_config
+  code = models/maxcut_qubo.py
+  type = energy_based
+  framework = thrml_jax
+  pgm_schema = qubo
+  graph_structure = dense
+  num_variables = 100
+}
+
+Config {
+  config = annealing_config
+  schedule = simulated_annealing
+  batch_size = 128
+  num_samples = 10000
+  warmup_steps = 500
+  anneal_steps = 10000
+  temp_start = 10.0
+  temp_end = 0.01
+  temperature_schedule = geometric
+}
+
+// --- 4. LAYERS ---
+
+Layer {
+  layer = qubo_sampling_layer
+  parent = maxcut_qubo_model
+  layer_type = sampling
+  repeat = 1
+}
+
+// --- 5. TENSORS ---
+
+Tensor {
+  tensor = binary_state_vector
+  parent = maxcut_qubo_model
+  shape = [100]
+  dtype = int8
+  role = state
+  value_range = [0, 1]
+  desc = "Binary state vector for 100 P-bits"
+}
+
+Tensor {
+  tensor = qubo_matrix
+  parent = maxcut_qubo_model
+  shape = [100, 100]
+  dtype = float32
+  role = parameter
+  layout = symmetric
+  desc = "QUBO coefficient matrix Q_ij"
+}
+
+Tensor {
+  tensor = temperature
+  parent = maxcut_qubo_model
+  shape = []
+  dtype = float32
+  role = input
+}
+
+Tensor {
+  tensor = energy_output
+  parent = maxcut_qubo_model
+  producer = qubo_gibbs_update
+  shape = []
+  dtype = float32
+  role = output
+}
+
+// --- 6. OPERATIONS ---
+
+Op {
+  op = qubo_gibbs_update
+  parent = maxcut_qubo_model
+  hardware = tsu_extropic_v1
+  energy_fn = qubo_energy
+  search_space = qubo_hyperparams
+  strategy = simulated_annealing
+  layer = qubo_sampling_layer
+  code = kernels/tsu/qubo_gibbs.cu
+  op_type = tsu_sampling
+  variant = gibbs
+  parallel_flips = true
+  calibration_mode = adaptive
+  sweeps_per_step = 10
+  desc = "Block Gibbs sampler for QUBO on TSU hardware"
+}
+
+// --- 7. ARGUMENTS ---
+
+Arg {
+  arg = Q
+  parent = qubo_gibbs_update
+  role = parameter
+  tensor = qubo_matrix
+}
+
+Arg {
+  arg = T
+  parent = qubo_gibbs_update
+  role = input
+  tensor = temperature
+}
+
+Arg {
+  arg = state
+  parent = qubo_gibbs_update
+  role = input_output
+  tensor = binary_state_vector
+}
+
+Arg {
+  arg = energy
+  parent = qubo_gibbs_update
+  role = output
+  tensor = energy_output
+}
+
+// --- 8. ENERGY FUNCTION ---
+
+EnergyFunction {
+  energy_fn = qubo_energy
+  code = physics/qubo_energy.py
+  form = "E = sum_ij(Q_ij * x_i * x_j) + sum_i(Q_ii * x_i)"
+  coupling_type = all_pairs
+}
+
+// --- 9. SEARCH SPACE & DIMENSIONS ---
+
+SearchSpace {
+  space = qubo_hyperparams
+  target_model = maxcut_qubo_model
+  algorithm = bayesian
+  budget = 100
+}
+
+Dimension {
+  dimension = temperature_start
+  parent = qubo_hyperparams
+  type = continuous
+  range = [1.0, 100.0]
+  scale = log
+}
+
+Dimension {
+  dimension = temperature_end
+  parent = qubo_hyperparams
+  type = continuous
+  range = [0.001, 1.0]
+  scale = log
+}
+
+Dimension {
+  dimension = anneal_steps
+  parent = qubo_hyperparams
+  type = integer
+  range = [1000, 100000]
+  scale = log
+}
+
+Dimension {
+  dimension = sweeps_per_step
+  parent = qubo_hyperparams
+  type = categorical
+  choices = [1, 5, 10, 20, 50]
+}
+
+// --- 10. STRATEGY & METRICS ---
+
+Strategy {
+  strategy = simulated_annealing
+  search_space = qubo_hyperparams
+  fitness = cut_value_metric
+  code = strategies/simulated_annealing.py
+  type = annealing
+  cooling = geometric
+  restarts = 5
+}
+
+Metric {
+  metric = cut_value_metric
+  target_hw = tsu_extropic_v1
+  unit = cut_edges
+  minimize = false
+  desc = "Number of edges in the cut (maximize)"
+}
+
+Metric {
+  metric = energy_metric
+  target_hw = tsu_extropic_v1
+  unit = energy
+  minimize = true
+  desc = "QUBO energy value (minimize)"
+}
+
+// --- 11. CONSTRAINTS ---
+
+Constraint {
+  constraint_id = thermal_noise_constraint
+  target_hw = tsu_extropic_v1
+  type = noise_model
+  distribution = gaussian
+  variance_model = temperature_dependent
+  base_variance = 0.01
+  temp_coefficient = 0.001
+}
+
+Constraint {
+  constraint_id = power_budget
+  target_hw = tsu_extropic_v1
+  type = power
+  max_watts = 50
+  severity = hard
+}
+
+// --- 12. CHECKPOINTS ---
+
+Checkpoint {
+  checkpoint_id = best_maxcut_solution
+  model = maxcut_qubo_model
+  state_path = checkpoints/maxcut_best_20251121.pt
+  timestamp = 2025-11-21T15:00:00Z
+  metrics = '''
+{
+  "cut_value": 2847,
+  "energy": -2847.0,
+  "steps": 8500
+}
+'''
+}
+
+// --- 13. BLOCKS (Reusable Templates) ---
+
+Block {
+  block = pbit_sampling_block
+  model = maxcut_qubo_model
+  block_type = sampling
+  pbit_array_size = 100
+  coupling = dense
+  noise_model = thermal
+}
+
+// --- 14. FUSION PATTERNS ---
+
+Fusion {
+  fusion = qubo_fused_update
+  hardware = tsu_extropic_v1
+  pattern_type = sample_and_compute_energy
+  ops_fused = [gibbs_sweep, energy_eval]
+  speedup_factor = 2.3
+}

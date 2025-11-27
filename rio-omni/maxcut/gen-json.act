@@ -1,0 +1,1050 @@
+----------------------
+Actor main
+----------------------
+Cs {
+C 
+Cs  "Agent": [
+All Agent gen_Agent
+C
+Cs  ]
+C ,
+Cs  "Objective": [
+All Objective gen_Objective
+C
+Cs  ]
+C ,
+Cs  "Memory": [
+All Memory gen_Memory
+C
+Cs  ]
+C ,
+Cs  "MemorySource": [
+All MemorySource gen_MemorySource
+C
+Cs  ]
+C ,
+Cs  "Thought": [
+All Thought gen_Thought
+C
+Cs  ]
+C ,
+Cs  "Citation": [
+All Citation gen_Citation
+C
+Cs  ]
+C ,
+Cs  "Action": [
+All Action gen_Action
+C
+Cs  ]
+C ,
+Cs  "ThoughtSource": [
+All ThoughtSource gen_ThoughtSource
+C
+Cs  ]
+C ,
+Cs  "Tool": [
+All Tool gen_Tool
+C
+Cs  ]
+C ,
+Cs  "Vector": [
+All Vector gen_Vector
+C
+Cs  ]
+C ,
+Cs  "Session": [
+All Session gen_Session
+C
+Cs  ]
+C ,
+Cs  "Snapshot": [
+All Snapshot gen_Snapshot
+C
+Cs  ]
+C ,
+Cs  "Restoration": [
+All Restoration gen_Restoration
+C
+Cs  ]
+C ,
+Cs  "CrossRef": [
+All CrossRef gen_CrossRef
+C
+Cs  ]
+C ,
+Cs  "Cycle": [
+All Cycle gen_Cycle
+C
+Cs  ]
+C ,
+Cs  "Recommendation": [
+All Recommendation gen_Recommendation
+C
+Cs  ]
+C ,
+Cs  "CanonCycle": [
+All CanonCycle gen_CanonCycle
+C
+Cs  ]
+C ,
+Cs  "Pattern": [
+All Pattern gen_Pattern
+C
+Cs  ]
+C ,
+Cs  "PatternSource": [
+All PatternSource gen_PatternSource
+C
+Cs  ]
+C ,
+Cs  "Evolution": [
+All Evolution gen_Evolution
+C
+Cs  ]
+C ,
+Cs  "MetricS": [
+All MetricS gen_MetricS
+C
+Cs  ]
+C ,
+Cs  "Artifact": [
+All Artifact gen_Artifact
+C
+Cs  ]
+C ,
+Cs  "GenExecution": [
+All GenExecution gen_GenExecution
+C
+Cs  ]
+C ,
+Cs  "GenValidation": [
+All GenValidation gen_GenValidation
+C
+Cs  ]
+C ,
+Cs  "GenLearning": [
+All GenLearning gen_GenLearning
+C
+Cs  ]
+C ,
+Cs  "GenDebug": [
+All GenDebug gen_GenDebug
+C
+Cs  ]
+C ,
+Cs  "Canon": [
+All Canon gen_Canon
+C
+Cs  ]
+C ,
+Cs  "Link": [
+All Link gen_Link
+C
+Cs  ]
+C ,
+Cs  "Section": [
+All Section gen_Section
+C
+Cs  ]
+C ,
+Cs  "CanonMeta": [
+All CanonMeta gen_CanonMeta
+C
+Cs  ]
+C ,
+Cs  "Implementation": [
+All Implementation gen_Implementation
+C
+Cs  ]
+C ,
+Cs  "CanonVersion": [
+All CanonVersion gen_CanonVersion
+C
+Cs  ]
+C ,
+Cs  "Library": [
+All Library gen_Library
+C
+Cs  ]
+C ,
+Cs  "GenProgram": [
+All GenProgram gen_GenProgram
+C
+Cs  ]
+C ,
+Cs  "GenBootstrap": [
+All GenBootstrap gen_GenBootstrap
+C
+Cs  ]
+C ,
+Cs  "GenInput": [
+All GenInput gen_GenInput
+C
+Cs  ]
+C ,
+Cs  "GenStrategy": [
+All GenStrategy gen_GenStrategy
+C
+Cs  ]
+C ,
+Cs  "GenSearchSpace": [
+All GenSearchSpace gen_GenSearchSpace
+C
+Cs  ]
+C ,
+Cs  "GenPatternRef": [
+All GenPatternRef gen_GenPatternRef
+C
+Cs  ]
+C ,
+Cs  "GenOutputSpec": [
+All GenOutputSpec gen_GenOutputSpec
+C
+Cs  ]
+C ,
+Cs  "GenMetric": [
+All GenMetric gen_GenMetric
+C
+Cs  ]
+C ,
+Cs  "GenEvolution": [
+All GenEvolution gen_GenEvolution
+C
+Cs  ]
+C ,
+Cs  "GenPipeline": [
+All GenPipeline gen_GenPipeline
+C
+Cs  ]
+C ,
+Cs  "GenStage": [
+All GenStage gen_GenStage
+C
+Cs  ]
+C ,
+Cs  "Project": [
+All Project gen_Project
+C
+Cs  ]
+C ,
+Cs  "Domain": [
+All Domain gen_Domain
+C
+Cs  ]
+C ,
+Cs  "Hardware": [
+All Hardware gen_Hardware
+C
+Cs  ]
+C ,
+Cs  "Model": [
+All Model gen_Model
+C
+Cs  ]
+C ,
+Cs  "Layer": [
+All Layer gen_Layer
+C
+Cs  ]
+C ,
+Cs  "Block": [
+All Block gen_Block
+C
+Cs  ]
+C ,
+Cs  "Tensor": [
+All Tensor gen_Tensor
+C
+Cs  ]
+C ,
+Cs  "Op": [
+All Op gen_Op
+C
+Cs  ]
+C ,
+Cs  "Arg": [
+All Arg gen_Arg
+C
+Cs  ]
+C ,
+Cs  "Config": [
+All Config gen_Config
+C
+Cs  ]
+C ,
+Cs  "Kernel": [
+All Kernel gen_Kernel
+C
+Cs  ]
+C ,
+Cs  "EnergyFunction": [
+All EnergyFunction gen_EnergyFunction
+C
+Cs  ]
+C ,
+Cs  "SearchSpace": [
+All SearchSpace gen_SearchSpace
+C
+Cs  ]
+C ,
+Cs  "Dimension": [
+All Dimension gen_Dimension
+C
+Cs  ]
+C ,
+Cs  "Strategy": [
+All Strategy gen_Strategy
+C
+Cs  ]
+C ,
+Cs  "Constraint": [
+All Constraint gen_Constraint
+C
+Cs  ]
+C ,
+Cs  "Metric": [
+All Metric gen_Metric
+C
+Cs  ]
+C ,
+Cs  "Checkpoint": [
+All Checkpoint gen_Checkpoint
+C
+Cs  ]
+C ,
+Cs  "Fusion": [
+All Fusion gen_Fusion
+C
+Cs  ]
+C ,
+Cs  "ControlFlow": [
+All ControlFlow gen_ControlFlow
+C
+Cs  ]
+C
+C }
+
+----------------------
+Actor refs .
+C    "${._arg}": { "type": "${kComp}", "id": ${kMe} },
+
+----------------------
+Actor childs
+----------------------
+Cs ${.1., }${kMe}
+----------------------
+Actor gen_Agent
+C ${.1.,}
+C   {
+Du refs me
+Its tools refs tools
+Cs    "Objective": [
+Its Objective childs
+C ],
+Cs    "Memory": [
+Its Memory childs
+C ],
+C    "payload": ${payload}
+Cs   }
+----------------------
+Actor gen_Objective
+C ${.1.,}
+C   {
+Du refs me
+Its parent refs parent
+Its parent_obj refs parent_obj
+Cs    "Thought": [
+Its Thought childs
+C ],
+C    "payload": ${payload}
+Cs   }
+----------------------
+Actor gen_Memory
+C ${.1.,}
+C   {
+Du refs me
+Its parent refs parent
+Its embedding refs embedding
+Its objective refs objective
+Its invalidated_by refs invalidated_by
+Cs    "MemorySource": [
+Its MemorySource childs
+C ],
+C    "payload": ${payload}
+Cs   }
+----------------------
+Actor gen_MemorySource
+C ${.1.,}
+C   {
+Du refs me
+Its parent refs parent
+Its impl refs impl
+Its canon refs canon
+C    "payload": ${payload}
+Cs   }
+----------------------
+Actor gen_Thought
+C ${.1.,}
+C   {
+Du refs me
+Its parent refs parent
+Its prev refs prev
+Its branches refs branches
+Its parent_branch refs parent_branch
+Cs    "Citation": [
+Its Citation childs
+C ],
+Cs    "Action": [
+Its Action childs
+C ],
+Cs    "ThoughtSource": [
+Its ThoughtSource childs
+C ],
+C    "payload": ${payload}
+Cs   }
+----------------------
+Actor gen_Citation
+C ${.1.,}
+C   {
+Du refs me
+Its parent refs parent
+Its agent refs agent
+Its memory refs memory
+C    "payload": ${payload}
+Cs   }
+----------------------
+Actor gen_Action
+C ${.1.,}
+C   {
+Du refs me
+Its parent refs parent
+Its tool refs tool
+Its agent refs agent
+Its result_mem refs result_mem
+C    "payload": ${payload}
+Cs   }
+----------------------
+Actor gen_ThoughtSource
+C ${.1.,}
+C   {
+Du refs me
+Its parent refs parent
+Its impl refs impl
+Its canon refs canon
+C    "payload": ${payload}
+Cs   }
+----------------------
+Actor gen_Tool
+C ${.1.,}
+C   {
+Du refs me
+C    "payload": ${payload}
+Cs   }
+----------------------
+Actor gen_Vector
+C ${.1.,}
+C   {
+Du refs me
+C    "payload": ${payload}
+Cs   }
+----------------------
+Actor gen_Session
+C ${.1.,}
+C   {
+Du refs me
+Its agent_id refs agent_id
+Its parent_session refs parent_session
+Cs    "Snapshot": [
+Its Snapshot childs
+C ],
+Cs    "Restoration": [
+Its Restoration childs
+C ],
+Cs    "CrossRef": [
+Its CrossRef childs
+C ],
+Cs    "Cycle": [
+Its Cycle childs
+C ],
+Cs    "Recommendation": [
+Its Recommendation childs
+C ],
+Cs    "MetricS": [
+Its MetricS childs
+C ],
+Cs    "Artifact": [
+Its Artifact childs
+C ],
+Cs    "GenExecution": [
+Its GenExecution childs
+C ],
+C    "payload": ${payload}
+Cs   }
+----------------------
+Actor gen_Snapshot
+C ${.1.,}
+C   {
+Du refs me
+Its parent refs parent
+Its session refs session
+Its agent_id refs agent_id
+Its objectives refs objectives
+Its thoughts refs thoughts
+Its memories refs memories
+C    "payload": ${payload}
+Cs   }
+----------------------
+Actor gen_Restoration
+C ${.1.,}
+C   {
+Du refs me
+Its parent refs parent
+Its source_session refs source_session
+Its agent_id refs agent_id
+Its source_memory refs source_memory
+Its session refs session
+Its agent_id2 refs agent_id2
+Its restored_as refs restored_as
+C    "payload": ${payload}
+Cs   }
+----------------------
+Actor gen_CrossRef
+C ${.1.,}
+C   {
+Du refs me
+Its parent refs parent
+C    "payload": ${payload}
+Cs   }
+----------------------
+Actor gen_Cycle
+C ${.1.,}
+C   {
+Du refs me
+Its parent refs parent
+Its session refs session
+Its agent_id refs agent_id
+Its objective refs objective
+Its hypothesis refs hypothesis
+Its baseline refs baseline
+Its intervention refs intervention
+Its outcome refs outcome
+Cs    "CanonCycle": [
+Its CanonCycle childs
+C ],
+C    "payload": ${payload}
+Cs   }
+----------------------
+Actor gen_Recommendation
+C ${.1.,}
+C   {
+Du refs me
+Its parent refs parent
+Its session refs session
+Its agent_id refs agent_id
+Its outcome refs outcome
+Its objective refs objective
+Its canon refs canon
+Its impl refs impl
+C    "payload": ${payload}
+Cs   }
+----------------------
+Actor gen_CanonCycle
+C ${.1.,}
+C   {
+Du refs me
+Its parent refs parent
+Its implementations refs implementations
+Its baseline_canon refs baseline_canon
+Its new_version refs new_version
+C    "payload": ${payload}
+Cs   }
+----------------------
+Actor gen_Pattern
+C ${.1.,}
+C   {
+Du refs me
+Its discovered_in refs discovered_in
+Its evidence refs evidence
+Cs    "PatternSource": [
+Its PatternSource childs
+C ],
+C    "payload": ${payload}
+Cs   }
+----------------------
+Actor gen_PatternSource
+C ${.1.,}
+C   {
+Du refs me
+Its parent refs parent
+Its impl refs impl
+Its canon refs canon
+C    "payload": ${payload}
+Cs   }
+----------------------
+Actor gen_Evolution
+C ${.1.,}
+C   {
+Du refs me
+Its motivation refs motivation
+Its sessions refs sessions
+C    "payload": ${payload}
+Cs   }
+----------------------
+Actor gen_MetricS
+C ${.1.,}
+C   {
+Du refs me
+Its parent refs parent
+C    "payload": ${payload}
+Cs   }
+----------------------
+Actor gen_Artifact
+C ${.1.,}
+C   {
+Du refs me
+Its parent refs parent
+C    "payload": ${payload}
+Cs   }
+----------------------
+Actor gen_GenExecution
+C ${.1.,}
+C   {
+Du refs me
+Its parent refs parent
+Its program refs program
+Its session refs session
+Its agent_id refs agent_id
+Cs    "GenValidation": [
+Its GenValidation childs
+C ],
+Cs    "GenLearning": [
+Its GenLearning childs
+C ],
+Cs    "GenDebug": [
+Its GenDebug childs
+C ],
+C    "payload": ${payload}
+Cs   }
+----------------------
+Actor gen_GenValidation
+C ${.1.,}
+C   {
+Du refs me
+Its parent refs parent
+C    "payload": ${payload}
+Cs   }
+----------------------
+Actor gen_GenLearning
+C ${.1.,}
+C   {
+Du refs me
+Its parent refs parent
+Its session refs session
+Its baseline refs baseline
+Its applied_to_program refs applied_to_program
+C    "payload": ${payload}
+Cs   }
+----------------------
+Actor gen_GenDebug
+C ${.1.,}
+C   {
+Du refs me
+Its parent refs parent
+C    "payload": ${payload}
+Cs   }
+----------------------
+Actor gen_Canon
+C ${.1.,}
+C   {
+Du refs me
+Cs    "Link": [
+Its Link childs
+C ],
+Cs    "Section": [
+Its Section childs
+C ],
+Cs    "CanonMeta": [
+Its CanonMeta childs
+C ],
+Cs    "CanonVersion": [
+Its CanonVersion childs
+C ],
+C    "payload": ${payload}
+Cs   }
+----------------------
+Actor gen_Link
+C ${.1.,}
+C   {
+Du refs me
+Its parent refs parent
+Its concept refs concept
+Its relation refs relation
+C    "payload": ${payload}
+Cs   }
+----------------------
+Actor gen_Section
+C ${.1.,}
+C   {
+Du refs me
+Its parent refs parent
+C    "payload": ${payload}
+Cs   }
+----------------------
+Actor gen_CanonMeta
+C ${.1.,}
+C   {
+Du refs me
+Its parent refs parent
+C    "payload": ${payload}
+Cs   }
+----------------------
+Actor gen_Implementation
+C ${.1.,}
+C   {
+Du refs me
+Its canon refs canon
+Its session refs session
+C    "payload": ${payload}
+Cs   }
+----------------------
+Actor gen_CanonVersion
+C ${.1.,}
+C   {
+Du refs me
+Its parent refs parent
+Its canon refs canon
+Its previous refs previous
+Its implementations refs implementations
+Its session refs session
+Its evidence refs evidence
+C    "payload": ${payload}
+Cs   }
+----------------------
+Actor gen_Library
+C ${.1.,}
+C   {
+Du refs me
+Its canons refs canons
+C    "payload": ${payload}
+Cs   }
+----------------------
+Actor gen_GenProgram
+C ${.1.,}
+C   {
+Du refs me
+Its supersedes refs supersedes
+Cs    "GenBootstrap": [
+Its GenBootstrap childs
+C ],
+Cs    "GenInput": [
+Its GenInput childs
+C ],
+Cs    "GenStrategy": [
+Its GenStrategy childs
+C ],
+Cs    "GenPatternRef": [
+Its GenPatternRef childs
+C ],
+Cs    "GenOutputSpec": [
+Its GenOutputSpec childs
+C ],
+Cs    "GenMetric": [
+Its GenMetric childs
+C ],
+Cs    "GenEvolution": [
+Its GenEvolution childs
+C ],
+C    "payload": ${payload}
+Cs   }
+----------------------
+Actor gen_GenBootstrap
+C ${.1.,}
+C   {
+Du refs me
+Its parent refs parent
+Its superseded_by refs superseded_by
+C    "payload": ${payload}
+Cs   }
+----------------------
+Actor gen_GenInput
+C ${.1.,}
+C   {
+Du refs me
+Its parent refs parent
+C    "payload": ${payload}
+Cs   }
+----------------------
+Actor gen_GenStrategy
+C ${.1.,}
+C   {
+Du refs me
+Its parent refs parent
+Cs    "GenSearchSpace": [
+Its GenSearchSpace childs
+C ],
+C    "payload": ${payload}
+Cs   }
+----------------------
+Actor gen_GenSearchSpace
+C ${.1.,}
+C   {
+Du refs me
+Its parent refs parent
+C    "payload": ${payload}
+Cs   }
+----------------------
+Actor gen_GenPatternRef
+C ${.1.,}
+C   {
+Du refs me
+Its parent refs parent
+Its pattern refs pattern
+C    "payload": ${payload}
+Cs   }
+----------------------
+Actor gen_GenOutputSpec
+C ${.1.,}
+C   {
+Du refs me
+Its parent refs parent
+C    "payload": ${payload}
+Cs   }
+----------------------
+Actor gen_GenMetric
+C ${.1.,}
+C   {
+Du refs me
+Its parent refs parent
+C    "payload": ${payload}
+Cs   }
+----------------------
+Actor gen_GenEvolution
+C ${.1.,}
+C   {
+Du refs me
+Its parent refs parent
+Its previous_version refs previous_version
+C    "payload": ${payload}
+Cs   }
+----------------------
+Actor gen_GenPipeline
+C ${.1.,}
+C   {
+Du refs me
+Cs    "GenStage": [
+Its GenStage childs
+C ],
+C    "payload": ${payload}
+Cs   }
+----------------------
+Actor gen_GenStage
+C ${.1.,}
+C   {
+Du refs me
+Its parent refs parent
+Its program refs program
+Its parallel_with refs parallel_with
+C    "payload": ${payload}
+Cs   }
+----------------------
+Actor gen_Project
+C ${.1.,}
+C   {
+Du refs me
+Its domain refs domain
+Its model refs model
+Its strategy refs strategy
+Its hardware refs hardware
+C    "payload": ${payload}
+Cs   }
+----------------------
+Actor gen_Domain
+C ${.1.,}
+C   {
+Du refs me
+C    "payload": ${payload}
+Cs   }
+----------------------
+Actor gen_Hardware
+C ${.1.,}
+C   {
+Du refs me
+Its parent_hw refs parent_hw
+Its emulation refs emulation
+Its noise_model refs noise_model
+C    "payload": ${payload}
+Cs   }
+----------------------
+Actor gen_Model
+C ${.1.,}
+C   {
+Du refs me
+Its hardware refs hardware
+Its search_space refs search_space
+Its config refs config
+Cs    "Layer": [
+Its Layer childs
+C ],
+Cs    "Tensor": [
+Its Tensor childs
+C ],
+Cs    "Op": [
+Its Op childs
+C ],
+C    "payload": ${payload}
+Cs   }
+----------------------
+Actor gen_Layer
+C ${.1.,}
+C   {
+Du refs me
+Its parent refs parent
+Its parent_layer refs parent_layer
+C    "payload": ${payload}
+Cs   }
+----------------------
+Actor gen_Block
+C ${.1.,}
+C   {
+Du refs me
+Its model refs model
+C    "payload": ${payload}
+Cs   }
+----------------------
+Actor gen_Tensor
+C ${.1.,}
+C   {
+Du refs me
+Its parent refs parent
+Its producer refs producer
+Its distribution refs distribution
+C    "payload": ${payload}
+Cs   }
+----------------------
+Actor gen_Op
+C ${.1.,}
+C   {
+Du refs me
+Its parent refs parent
+Its hardware refs hardware
+Its energy_fn refs energy_fn
+Its search_space refs search_space
+Its strategy refs strategy
+Its predicate refs predicate
+Its next_op refs next_op
+Its layer refs layer
+Cs    "Arg": [
+Its Arg childs
+C ],
+Cs    "ControlFlow": [
+Its ControlFlow childs
+C ],
+C    "payload": ${payload}
+Cs   }
+----------------------
+Actor gen_Arg
+C ${.1.,}
+C   {
+Du refs me
+Its parent refs parent
+Its model refs model
+Its tensor refs tensor
+C    "payload": ${payload}
+Cs   }
+----------------------
+Actor gen_Config
+C ${.1.,}
+C   {
+Du refs me
+Its schedule refs schedule
+C    "payload": ${payload}
+Cs   }
+----------------------
+Actor gen_Kernel
+C ${.1.,}
+C   {
+Du refs me
+Its hardware refs hardware
+C    "payload": ${payload}
+Cs   }
+----------------------
+Actor gen_EnergyFunction
+C ${.1.,}
+C   {
+Du refs me
+C    "payload": ${payload}
+Cs   }
+----------------------
+Actor gen_SearchSpace
+C ${.1.,}
+C   {
+Du refs me
+Its target_model refs target_model
+Cs    "Dimension": [
+Its Dimension childs
+C ],
+C    "payload": ${payload}
+Cs   }
+----------------------
+Actor gen_Dimension
+C ${.1.,}
+C   {
+Du refs me
+Its parent refs parent
+C    "payload": ${payload}
+Cs   }
+----------------------
+Actor gen_Strategy
+C ${.1.,}
+C   {
+Du refs me
+Its search_space refs search_space
+Its fitness refs fitness
+C    "payload": ${payload}
+Cs   }
+----------------------
+Actor gen_Constraint
+C ${.1.,}
+C   {
+Du refs me
+Its target_hw refs target_hw
+Its model refs model
+Its target_op refs target_op
+C    "payload": ${payload}
+Cs   }
+----------------------
+Actor gen_Metric
+C ${.1.,}
+C   {
+Du refs me
+Its target_hw refs target_hw
+C    "payload": ${payload}
+Cs   }
+----------------------
+Actor gen_Checkpoint
+C ${.1.,}
+C   {
+Du refs me
+Its model refs model
+C    "payload": ${payload}
+Cs   }
+----------------------
+Actor gen_Fusion
+C ${.1.,}
+C   {
+Du refs me
+Its hardware refs hardware
+C    "payload": ${payload}
+Cs   }
+----------------------
+Actor gen_ControlFlow
+C ${.1.,}
+C   {
+Du refs me
+Its parent refs parent
+Its model1 refs model1
+Its model2 refs model2
+Its model3 refs model3
+C    "payload": ${payload}
+Cs   }

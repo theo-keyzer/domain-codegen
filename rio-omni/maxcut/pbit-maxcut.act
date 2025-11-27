@@ -1,0 +1,213 @@
+// =========================================================================
+// THRML/JAX PYTHON ACTOR SCRIPT FOR P-BIT MAX-CUT QUBO - OPTIMIZATION RUN
+// =========================================================================
+
+Actor main
+
+Map _:tensor
+
+All Model generate_model_files
+
+// =========================================================================
+// MODEL FILE GENERATION
+// =========================================================================
+
+Actor generate_model_files Model
+C # Generated Python/JAX inference code for ${model}
+C # Problem: Max-Cut QUBO (N=100) using P-Bit Gibbs Sampling
+C # WARNING: Auto-generated file, do not edit manually
+C
+C import jax
+C import jax.numpy as jnp
+C import numpy as np
+C from typing import Dict, Any, Tuple
+C
+C # ... (pbit_probability, qubo_gibbs_update_kernel, calculate_qubo_energy remain unchanged) ...
+
+C @jax.jit
+C def pbit_probability(local_field: jnp.ndarray, beta: float) -> jnp.ndarray:
+C     """
+C     Calculates P(x_i=1) using the logistic (sigmoid) function from the local field (H_i).
+C     """
+C     return 1.0 / (1.0 + jnp.exp(-2.0 * beta * local_field))
+C
+C # ... (qubo_gibbs_update_kernel remains unchanged) ...
+
+C @jax.jit
+C def qubo_gibbs_update_kernel(
+C     x_state: jnp.ndarray,    # Current state of binary variables (N=100)
+C     Q_matrix: jnp.ndarray,   # The N x N QUBO coupling matrix
+C     beta: float,             # Inverse Temperature (Annealing parameter)
+C     rng_key: jnp.ndarray     # JAX PRNG key for stochastic sampling
+C ) -> Tuple[jnp.ndarray, jnp.ndarray]:
+C     N = Q_matrix.shape[0]
+C     local_fields = jnp.dot(Q_matrix, x_state)
+C     p_ones = pbit_probability(local_fields, beta)
+C     rng_key, subkey = jax.random.split(rng_key)
+C     random_numbers = jax.random.uniform(subkey, shape=(N,))
+C     new_x_state = jnp.where(random_numbers < p_ones, 1, 0).astype(x_state.dtype)
+C     return new_x_state, rng_key
+C
+C # =========================================================================
+C # 2. MAX-CUT ENERGY AND VALUE CALCULATION (for verification)
+C # =========================================================================
+C
+C @jax.jit
+C def calculate_qubo_energy(x_state: jnp.ndarray, Q_matrix: jnp.ndarray) -> float:
+C     """
+C     Calculates the QUBO energy (cost function value) for the current state.
+C     E = x^T * Q * x. Lower energy is the minimization goal.
+C     """
+C     energy = jnp.dot(x_state, jnp.dot(Q_matrix, x_state))
+C     return energy
+C
+C @jax.jit
+C def calculate_max_cut_value(x_state: jnp.ndarray, Q_matrix: jnp.ndarray) -> float:
+C     """
+C     Calculates the actual Max-Cut value C(x) by summing the weights of all cut edges.
+C     """
+C     N = Q_matrix.shape[0]
+C     i_indices, j_indices = jnp.triu_indices(N, k=1)
+C
+
+C     Q_values = Q_matrix[i_indices, j_indices]
+
+C     x_i_values = x_state[i_indices]
+
+C     x_j_values = x_state[j_indices]
+
+C
+
+C     # Check where the cut occurs: cut_mask = 1 if x_i != x_j, else 0
+C     cut_mask = jnp.where(x_i_values != x_j_values, 1.0, 0.0)
+C
+
+C     # Cut edge weight w_ij = -Q_ij (since Q_ij = -w_ij for Max-Cut QUBO)
+C     cut_contributions = -Q_values * cut_mask
+C
+
+C     total_cut_value = jnp.sum(cut_contributions)
+C
+
+C     return total_cut_value
+C
+C # ... (run_maxcut_annealing remains unchanged) ...
+
+C def run_maxcut_annealing(
+C     Q_matrix: jnp.ndarray,
+C     anneal_steps: int,
+C     temp_start: float,
+C     temp_end: float,
+C     initial_state: jnp.ndarray,
+C     rng_key: jnp.ndarray
+C ) -> Tuple[jnp.ndarray, float]:
+C
+
+C     # ... (Annealing loop remains unchanged) ...
+C
+C     log_temp_start = np.log(temp_start)
+C     log_temp_end = np.log(temp_end)
+C
+
+C     temp_schedule = np.exp(np.linspace(log_temp_start, log_temp_end, anneal_steps))
+C
+
+C     current_state = initial_state
+C     best_state = initial_state
+C     min_energy = calculate_qubo_energy(initial_state, Q_matrix)
+C
+
+C     print(f"--- Starting P-Bit Max-Cut Annealing (N={Q_matrix.shape[0]}) ---")
+C     print(f"Anneal Steps: {anneal_steps}, T_start: {temp_start:.2f}, T_end: {temp_end:.2f}")
+C
+
+C     for step in range(anneal_steps):
+C         temperature = temp_schedule[step]
+C         beta = 1.0 / temperature
+C
+
+C         rng_key, update_key = jax.random.split(rng_key)
+C
+
+C         new_state, rng_key = qubo_gibbs_update_kernel(
+C             current_state, Q_matrix, beta, update_key
+C         )
+C
+
+C         current_state = new_state
+C
+
+C         current_energy = calculate_qubo_energy(current_state, Q_matrix)
+C
+
+C         if current_energy < min_energy:
+C             min_energy = current_energy
+C             best_state = current_state
+C
+
+C         if step % (anneal_steps // 10) == 0 and step > 0:
+C             print(f"Step {step}/{anneal_steps} done. Current E: {current_energy:.4f}, Min E: {min_energy:.4f}")
+C
+
+C     print(f"--- Annealing Complete ---")
+C     print(f"Final Minimum Energy Found: {min_energy:.4f}")
+C     return best_state, min_energy
+
+C # =========================================================================
+C # 4. DUMMY EXECUTION (Simulating the Max-Cut problem defined in pbit_maxcut.net)
+C # =========================================================================
+
+C if __name__ == "__main__":
+C     # --- Setup Parameters (from pbit_maxcut.net Config) ---
+C     N_VARS = 100
+C     ANNEAL_STEPS = 10000
+C     TEMP_START = 10.0
+C     TEMP_END = 0.01
+C
+C     # --- Correct Dummy QUBO Matrix Construction for Max-Cut ---
+C     np.random.seed(42)
+C     Q_dummy = np.zeros((N_VARS, N_VARS), dtype=np.float32)
+C
+
+C     # 1. Define positive edge weights (w_ij) and set Q_ij = -w_ij
+C     weights = np.zeros((N_VARS, N_VARS), dtype=np.float32)
+C     for i in range(N_VARS):
+C         for j in range(i + 1, N_VARS):
+C             if np.random.rand() < 0.1: # 10% sparsity
+C                 w_ij = np.random.uniform(0.1, 1.0)
+C                 weights[i, j] = weights[j, i] = w_ij
+C                 Q_dummy[i, j] = Q_dummy[j, i] = -w_ij # Off-diagonal coupling
+C
+
+C     # 2. Define Diagonal Biases (Q_ii) for Max-Cut: Q_ii = Sum_{j != i} w_ij
+C     # This term forces the QUBO minimization to maximize the cut.
+C     for i in range(N_VARS):
+C         Q_dummy[i, i] = np.sum(weights[i, :])
+C
+C     Q_jax = jnp.array(Q_dummy)
+C
+C     # --- Execution ---
+C     rng_key = jax.random.PRNGKey(1234)
+C
+
+C     rng_key, init_key = jax.random.split(rng_key)
+C     initial_state = jax.random.randint(init_key, (N_VARS,), 0, 2, dtype=jnp.int32)
+C
+
+C     final_state, min_energy = run_maxcut_annealing(
+C         Q_jax,
+C         ANNEAL_STEPS,
+C         TEMP_START,
+C         TEMP_END,
+C         initial_state,
+C         rng_key
+C     )
+C
+
+C     # Calculate and print the actual Max-Cut value for the found minimum energy state
+C     max_cut_value = calculate_max_cut_value(final_state, Q_jax)
+C
+C     print("\n--- Final Results ---")
+C     print(f"Best P-bit State (First 10): {final_state[:10].tolist()}...")
+C     print(f"Minimum QUBO Energy: {min_energy:.4f}")
+C     print(f"Actual Max-Cut Value: {max_cut_value:.4f}")

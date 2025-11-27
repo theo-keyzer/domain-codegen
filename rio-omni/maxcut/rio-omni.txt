@@ -1,0 +1,2782 @@
+
+// ================================================================
+// COG.UNIT,SESSION.UNIT,CANON.UNIT,GEN-HIGH.UNIT,OMNI.UNIT SCHEMA CONSTRUCTION GUIDE
+// Auto-generated documentation from schema definitions
+// ================================================================
+
+Artifact table-of-contents navigation guide
+O Quick navigation to all components in the schema.
+
+Section components 2 Component Index
+D
+D - [Agent](#agent-component) - 
+D   - [Objective](#objective-component) - 
+D     - [Thought](#thought-component) - 
+D       - [Citation](#citation-component) - 
+D       - [Action](#action-component) - 
+D       - [ThoughtSource](#thoughtsource-component) - 
+D   - [Memory](#memory-component) - 
+D     - [MemorySource](#memorysource-component) - 
+D - [Tool](#tool-component) - 
+D - [Vector](#vector-component) - 
+D - [Session](#session-component) - 
+D   - [Snapshot](#snapshot-component) - 
+D   - [Restoration](#restoration-component) - 
+D   - [CrossRef](#crossref-component) - 
+D   - [Cycle](#cycle-component) - 
+D     - [CanonCycle](#canoncycle-component) - 
+D   - [Recommendation](#recommendation-component) - 
+D   - [MetricS](#metrics-component) - 
+D   - [Artifact](#artifact-component) - 
+D   - [GenExecution](#genexecution-component) - 
+D     - [GenValidation](#genvalidation-component) - 
+D     - [GenLearning](#genlearning-component) - 
+D     - [GenDebug](#gendebug-component) - 
+D - [Pattern](#pattern-component) - 
+D   - [PatternSource](#patternsource-component) - 
+D - [Evolution](#evolution-component) - 
+D - [Canon](#canon-component) - 
+D   - [Link](#link-component) - 
+D   - [Section](#section-component) - 
+D   - [CanonMeta](#canonmeta-component) - 
+D   - [CanonVersion](#canonversion-component) - 
+D - [Implementation](#implementation-component) - 
+D - [Library](#library-component) - 
+D - [GenProgram](#genprogram-component) - 
+D   - [GenBootstrap](#genbootstrap-component) - 
+D   - [GenInput](#geninput-component) - 
+D   - [GenStrategy](#genstrategy-component) - 
+D     - [GenSearchSpace](#gensearchspace-component) - 
+D   - [GenPatternRef](#genpatternref-component) - 
+D   - [GenOutputSpec](#genoutputspec-component) - 
+D   - [GenMetric](#genmetric-component) - 
+D   - [GenEvolution](#genevolution-component) - 
+D - [GenPipeline](#genpipeline-component) - 
+D   - [GenStage](#genstage-component) - 
+D - [Project](#project-component) - 
+D - [Domain](#domain-component) - 
+D - [Hardware](#hardware-component) - 
+D - [Model](#model-component) - 
+D   - [Layer](#layer-component) - 
+D   - [Tensor](#tensor-component) - 
+D   - [Op](#op-component) - 
+D     - [Arg](#arg-component) - 
+D     - [ControlFlow](#controlflow-component) - 
+D - [Block](#block-component) - 
+D - [Config](#config-component) - 
+D - [Kernel](#kernel-component) - 
+D - [EnergyFunction](#energyfunction-component) - 
+D - [SearchSpace](#searchspace-component) - 
+D   - [Dimension](#dimension-component) - 
+D - [Strategy](#strategy-component) - 
+D - [Constraint](#constraint-component) - 
+D - [Metric](#metric-component) - 
+D - [Checkpoint](#checkpoint-component) - 
+D - [Fusion](#fusion-component) - 
+
+Artifact element-types-reference quick reference
+O Complete reference for all element type keywords and their behaviors.
+
+Section type_summary 2 Element Type Summary
+D
+D | Type | Scope | Resolution | Navigation |
+D |------|-------|------------|------------|
+D | `key` | Local | Immediate | Field access only |
+D | `word` | Local | Immediate | Field access only |
+D | `text` | Local | Immediate | Field access only |
+D | `number` | Local | Immediate | Field access only |
+D | `ref` | Global | Pass 1 | `Its field actor` |
+D | `link` | Sibling | Pass 1 | `Its field actor` |
+D | `ref_copy` | Previous | Pass 2+ | `Its field actor` |
+D | `ref_child` | Parent→Child | Pass 2+ | `Its field actor` |
+D | `ref_share` | Copy | Pass 2+ | `Its field actor` |
+D | `up_copy` | Ancestor | Pass 2+ | `Its field actor` |
+D | `type_of` | Child by type | Pass 2+ | `Its field actor` |
+D | `tree` | Local | Immediate | `Its field.up/down/left/right actor` |
+D
+Section type_resolution_passes 2 Multi-Pass Resolution Details
+D
+D **Pass 1: Direct References**
+D - `ref`: Global lookup by key in Find index
+D - `link`: Parent-scoped lookup by key in FindIn index
+D
+D **Pass 2+: Derived References**
+D - `ref_copy`: Copy pointer from previous resolved field
+D - `ref_child`: Look up child in previously resolved parent
+D - `up_copy`: Walk parent chain to ancestor type
+D - `type_of`: Match child by component type name
+D
+D The loader continues passes until all references resolve or error count stabilizes.
+
+Artifact agent-component structure overview
+
+O Comp Agent parent . Find
+
+O Defines a top-level Agent component with Find searchability, meaning instances can be looked up globally by their key field.
+
+Section element_summary 2 Element Summary
+D
+D | Element | Type | Target | Check | Description |
+D |---------|------|--------|-------|-------------|
+D | agent_id | key | . | + |   // e.g., "claude_sonnet_4_session_abc" |
+D | persona | text | . | * |   // System prompt / role definition |
+D | tools | ref | Tool | * |   // Available capabilities |
+D | token_budget | number | . | * |   // Context window limit |
+D | doc | text | . | * |  |
+D
+
+Section variables 2 Variable fields
+D ```
+D ${agent_id}
+D ${persona}
+D ${tools}
+D ${token_budget}
+D ${doc}
+D ${tools.tool_id}
+D ${Citation_agent.citation_id}
+D ${Action_agent.action_id}
+D ${Session_agent_id.session_id}
+D ${Snapshot_agent_id.snapshot_id}
+D ${Restoration_agent_id.restoration_id}
+D ${Restoration_agent_id2.restoration_id}
+D ${Cycle_agent_id.cycle_id}
+D ${Recommendation_agent_id.rec_id}
+D ${GenExecution_agent_id.execution_id}
+D ```
+Section Navigation 2 Command navigation
+D ```
+D Its Objective actor  [Link to Objective](#objective-component)
+D Its Memory actor  [Link to Memory](#memory-component)
+D Its tools actor  [Link to Tool](#tool-component)
+D Its Citation_agent actor  [Reverse link to Citation](#citation-component)
+D Its Action_agent actor  [Reverse link to Action](#action-component)
+D Its Session_agent_id actor  [Reverse link to Session](#session-component)
+D Its Snapshot_agent_id actor  [Reverse link to Snapshot](#snapshot-component)
+D Its Restoration_agent_id actor  [Reverse link to Restoration](#restoration-component)
+D Its Restoration_agent_id2 actor  [Reverse link to Restoration](#restoration-component)
+D Its Cycle_agent_id actor  [Reverse link to Cycle](#cycle-component)
+D Its Recommendation_agent_id actor  [Reverse link to Recommendation](#recommendation-component)
+D Its GenExecution_agent_id actor  [Reverse link to GenExecution](#genexecution-component)
+D ```
+
+Artifact objective-component structure detail
+
+O Comp Objective parent Agent FindIn
+
+O Defines a Objective component with FindIn searchability under parent Agent, meaning instances are searchable within their parent's context.
+
+Section element_summary 2 Element Summary
+D
+D | Element | Type | Target | Check | Description |
+D |---------|------|--------|-------|-------------|
+D | objective_id | key | . | + |   // Unique goal identifier |
+D | parent_obj | link | Objective | * |   // Hierarchical sub-goals |
+D | status | word | . | + |   // active | suspended | completed | failed | abandoned |
+D | priority | number | . | * |   // 0.0–1.0 (urgency) |
+D | doc | text | . | * |  |
+D
+
+Section variables 2 Variable fields
+D ```
+D ${objective_id}
+D ${parent_obj}
+D ${status}
+D ${priority}
+D ${doc}
+D ${parent.agent_id}
+D ${parent_obj.objective_id}
+D ${Objective_parent_obj.objective_id}
+D ${Memory_objective.memory_id}
+D ${Snapshot_objectives.snapshot_id}
+D ${Cycle_objective.cycle_id}
+D ${Recommendation_objective.rec_id}
+D ```
+Section Navigation 2 Command navigation
+D ```
+D Its parent actor  [Link to Agent](#agent-component)
+D Its Thought actor  [Link to Thought](#thought-component)
+D Its parent_obj actor  [Link to Objective](#objective-component)
+D Its Objective_parent_obj actor  [Reverse link to Objective](#objective-component)
+D Its Memory_objective actor  [Reverse link to Memory](#memory-component)
+D Its Snapshot_objectives actor  [Reverse link to Snapshot](#snapshot-component)
+D Its Cycle_objective actor  [Reverse link to Cycle](#cycle-component)
+D Its Recommendation_objective actor  [Reverse link to Recommendation](#recommendation-component)
+D ```
+
+Artifact memory-component structure detail
+
+O Comp Memory parent Agent FindIn
+
+O Defines a Memory component with FindIn searchability under parent Agent, meaning instances are searchable within their parent's context.
+
+Section element_summary 2 Element Summary
+D
+D | Element | Type | Target | Check | Description |
+D |---------|------|--------|-------|-------------|
+D | memory_id | key | . | + |   // e.g., "mem_8f3c1d" |
+D | type | word | . | * |   // semantic | episodic | working | tool_result | meta |
+D | source | word | . | * |   // user | web | self | tool | training |
+D | timestamp | number | . | * |   // Unix milliseconds |
+D | confidence | number | . | * |   // 0.0–1.0 reliability score |
+D | embedding | ref | Vector | * |   // Optional: for semantic retrieval |
+D | objective | link | Objective | * | // Objective of Thought |
+D | invalidated_by | ref_child | Thought | * | // Which thought proved this false |
+D | doc | text | . | * |  |
+D
+
+Section variables 2 Variable fields
+D ```
+D ${memory_id}
+D ${type}
+D ${source}
+D ${timestamp}
+D ${confidence}
+D ${embedding}
+D ${objective}
+D ${invalidated_by}
+D ${doc}
+D ${parent.agent_id}
+D ${embedding.vector_id}
+D ${objective.objective_id}
+D ${invalidated_by.thought_id}
+D ${Citation_memory.citation_id}
+D ${Action_result_mem.action_id}
+D ${Snapshot_memories.snapshot_id}
+D ${Restoration_source_memory.restoration_id}
+D ${Restoration_restored_as.restoration_id}
+D ${Cycle_baseline.cycle_id}
+D ${Cycle_outcome.cycle_id}
+D ${Recommendation_outcome.rec_id}
+D ```
+Section Navigation 2 Command navigation
+D ```
+D Its parent actor  [Link to Agent](#agent-component)
+D Its MemorySource actor  [Link to MemorySource](#memorysource-component)
+D Its embedding actor  [Link to Vector](#vector-component)
+D Its objective actor  [Link to Objective](#objective-component)
+D Its invalidated_by actor  [Link to Thought](#thought-component)
+D Its Citation_memory actor  [Reverse link to Citation](#citation-component)
+D Its Action_result_mem actor  [Reverse link to Action](#action-component)
+D Its Snapshot_memories actor  [Reverse link to Snapshot](#snapshot-component)
+D Its Restoration_source_memory actor  [Reverse link to Restoration](#restoration-component)
+D Its Restoration_restored_as actor  [Reverse link to Restoration](#restoration-component)
+D Its Cycle_baseline actor  [Reverse link to Cycle](#cycle-component)
+D Its Cycle_outcome actor  [Reverse link to Cycle](#cycle-component)
+D Its Recommendation_outcome actor  [Reverse link to Recommendation](#recommendation-component)
+D ```
+
+Artifact memorysource-component structure detail
+
+O Comp MemorySource parent Memory FindIn
+
+O Defines a MemorySource component with FindIn searchability under parent Memory, meaning instances are searchable within their parent's context.
+
+Section element_summary 2 Element Summary
+D
+D | Element | Type | Target | Check | Description |
+D |---------|------|--------|-------|-------------|
+D | impl | ref | Implementation | + | // Implementation record |
+D | canon | ref_copy | Canon | - | // What canonical concept this encodes |
+D | doc | text | . | * |  |
+D
+
+Section variables 2 Variable fields
+D ```
+D ${impl}
+D ${canon}
+D ${doc}
+D ${parent.memory_id}
+D ${impl.impl_id}
+D ${canon.name}
+D ```
+Section Navigation 2 Command navigation
+D ```
+D Its parent actor  [Link to Memory](#memory-component)
+D Its impl actor  [Link to Implementation](#implementation-component)
+D Its canon actor  [Link to Canon](#canon-component)
+D ```
+
+Artifact thought-component structure detail
+
+O Comp Thought parent Objective FindIn
+
+O Defines a Thought component with FindIn searchability under parent Objective, meaning instances are searchable within their parent's context.
+
+Section element_summary 2 Element Summary
+D
+D | Element | Type | Target | Check | Description |
+D |---------|------|--------|-------|-------------|
+D | thought_id | key | . | + |   // e.g., "t_00047" |
+D | level | tree | . | + |   // Tree depth level |
+D | type | word | . | * |   // reasoning | hypothesis | reflection | constraint | plan_step | synthesis |
+D | prev | link | Thought | * |   // Linear chain predecessor |
+D | branches | link | Thought | * |   // Tree-of-Thoughts children |
+D | parent_branch | link | Thought | * |   // If this is a branch, parent thought |
+D | confidence | number | . | * |   // 0.0–1.0 self-assessed certainty |
+D | doc | text | . | * |  |
+D
+
+Section variables 2 Variable fields
+D ```
+D ${thought_id}
+D ${level}
+D ${type}
+D ${prev}
+D ${branches}
+D ${parent_branch}
+D ${confidence}
+D ${doc}
+D ${parent.objective_id}
+D ${prev.thought_id}
+D ${branches.thought_id}
+D ${parent_branch.thought_id}
+D ${Memory_invalidated_by.memory_id}
+D ${Thought_prev.thought_id}
+D ${Thought_branches.thought_id}
+D ${Thought_parent_branch.thought_id}
+D ${Snapshot_thoughts.snapshot_id}
+D ${Cycle_hypothesis.cycle_id}
+D ${Cycle_intervention.cycle_id}
+D ```
+Section Navigation 2 Command navigation
+D ```
+D Its parent actor  [Link to Objective](#objective-component)
+D Its Citation actor  [Link to Citation](#citation-component)
+D Its Action actor  [Link to Action](#action-component)
+D Its ThoughtSource actor  [Link to ThoughtSource](#thoughtsource-component)
+D Its prev actor  [Link to Thought](#thought-component)
+D Its branches actor  [Link to Thought](#thought-component)
+D Its parent_branch actor  [Link to Thought](#thought-component)
+D Its Memory_invalidated_by actor  [Reverse link to Memory](#memory-component)
+D Its Thought_prev actor  [Reverse link to Thought](#thought-component)
+D Its Thought_branches actor  [Reverse link to Thought](#thought-component)
+D Its Thought_parent_branch actor  [Reverse link to Thought](#thought-component)
+D Its Snapshot_thoughts actor  [Reverse link to Snapshot](#snapshot-component)
+D Its Cycle_hypothesis actor  [Reverse link to Cycle](#cycle-component)
+D Its Cycle_intervention actor  [Reverse link to Cycle](#cycle-component)
+D ```
+
+Artifact citation-component structure detail
+
+O Comp Citation parent Thought FindIn
+
+O Defines a Citation component with FindIn searchability under parent Thought, meaning instances are searchable within their parent's context.
+
+Section element_summary 2 Element Summary
+D
+D | Element | Type | Target | Check | Description |
+D |---------|------|--------|-------|-------------|
+D | citation_id | key | . | + |   // e.g., "c_001", "c_002" |
+D | agent | up_copy | Agent | - |   // Lookup the Agent via parents |
+D | memory | ref_child | Memory | + |   // Exactly one Memory per citation (MANDATORY) |
+D | role | word | . | * |   // supports | contradicts | background | quote | evidence_for | evidence_against |
+D | quote | text | . | * |   // Optional: direct excerpt from memory (max 15 words) |
+D | doc | text | . | * |  |
+D
+
+Section variables 2 Variable fields
+D ```
+D ${citation_id}
+D ${agent}
+D ${memory}
+D ${role}
+D ${quote}
+D ${doc}
+D ${parent.thought_id}
+D ${agent.agent_id}
+D ${memory.memory_id}
+D ```
+Section Navigation 2 Command navigation
+D ```
+D Its parent actor  [Link to Thought](#thought-component)
+D Its agent actor  [Link to Agent](#agent-component)
+D Its memory actor  [Link to Memory](#memory-component)
+D ```
+
+Artifact action-component structure detail
+
+O Comp Action parent Thought FindIn
+
+O Defines a Action component with FindIn searchability under parent Thought, meaning instances are searchable within their parent's context.
+
+Section element_summary 2 Element Summary
+D
+D | Element | Type | Target | Check | Description |
+D |---------|------|--------|-------|-------------|
+D | action_id | key | . | + |   // e.g., "act_search_001" |
+D | tool | ref | Tool | + |   // Which capability to invoke |
+D | args | text | . | * |   // JSON parameters or ~~~ code block |
+D | agent | up_copy | Agent | - |   // Lookup the Agent via parents |
+D | result_mem | ref_child | Memory | * |   // Pre-declared result storage location |
+D | status | word | . | * |   // pending | executing | success | error | timeout |
+D | doc | text | . | * |  |
+D
+
+Section variables 2 Variable fields
+D ```
+D ${action_id}
+D ${tool}
+D ${args}
+D ${agent}
+D ${result_mem}
+D ${status}
+D ${doc}
+D ${parent.thought_id}
+D ${tool.tool_id}
+D ${agent.agent_id}
+D ${result_mem.memory_id}
+D ```
+Section Navigation 2 Command navigation
+D ```
+D Its parent actor  [Link to Thought](#thought-component)
+D Its tool actor  [Link to Tool](#tool-component)
+D Its agent actor  [Link to Agent](#agent-component)
+D Its result_mem actor  [Link to Memory](#memory-component)
+D ```
+
+Artifact thoughtsource-component structure detail
+
+O Comp ThoughtSource parent Thought FindIn
+
+O Defines a ThoughtSource component with FindIn searchability under parent Thought, meaning instances are searchable within their parent's context.
+
+Section element_summary 2 Element Summary
+D
+D | Element | Type | Target | Check | Description |
+D |---------|------|--------|-------|-------------|
+D | impl | ref | Implementation | + | // Implementation record |
+D | canon | ref_copy | Canon | - | // Direct ref to source canonical doc |
+D | doc | text | . | * |  |
+D
+
+Section variables 2 Variable fields
+D ```
+D ${impl}
+D ${canon}
+D ${doc}
+D ${parent.thought_id}
+D ${impl.impl_id}
+D ${canon.name}
+D ```
+Section Navigation 2 Command navigation
+D ```
+D Its parent actor  [Link to Thought](#thought-component)
+D Its impl actor  [Link to Implementation](#implementation-component)
+D Its canon actor  [Link to Canon](#canon-component)
+D ```
+
+Artifact tool-component structure overview
+
+O Comp Tool parent . Find
+
+O Defines a top-level Tool component with Find searchability, meaning instances can be looked up globally by their key field.
+
+Section element_summary 2 Element Summary
+D
+D | Element | Type | Target | Check | Description |
+D |---------|------|--------|-------|-------------|
+D | tool_id | key | . | + |   // e.g., "web_search" |
+D | name | word | . | + |   // Human-readable name |
+D | schema | text | . | * |   // Function signature or JSON schema |
+D | doc | text | . | * |  |
+D
+
+Section variables 2 Variable fields
+D ```
+D ${tool_id}
+D ${name}
+D ${schema}
+D ${doc}
+D ${Agent_tools.agent_id}
+D ${Action_tool.action_id}
+D ```
+Section Navigation 2 Command navigation
+D ```
+D Its Agent_tools actor  [Reverse link to Agent](#agent-component)
+D Its Action_tool actor  [Reverse link to Action](#action-component)
+D ```
+
+Artifact vector-component structure overview
+
+O Comp Vector parent . Find
+
+O Defines a top-level Vector component with Find searchability, meaning instances can be looked up globally by their key field.
+
+Section element_summary 2 Element Summary
+D
+D | Element | Type | Target | Check | Description |
+D |---------|------|--------|-------|-------------|
+D | vector_id | key | . | + |   // Unique identifier |
+D | dimensions | number | . | * |   // Vector size (e.g., 1536) |
+D | values | text | . | * |   // Comma-separated floats or base64 |
+D | doc | text | . | * |  |
+D
+
+Section variables 2 Variable fields
+D ```
+D ${vector_id}
+D ${dimensions}
+D ${values}
+D ${doc}
+D ${Memory_embedding.memory_id}
+D ```
+Section Navigation 2 Command navigation
+D ```
+D Its Memory_embedding actor  [Reverse link to Memory](#memory-component)
+D ```
+
+Artifact session-component structure overview
+
+O Comp Session parent . Find
+
+O Defines a top-level Session component with Find searchability, meaning instances can be looked up globally by their key field.
+
+Section element_summary 2 Element Summary
+D
+D | Element | Type | Target | Check | Description |
+D |---------|------|--------|-------|-------------|
+D | session_id | key | . | + |   // e.g., "sess_2024_11_23_001" |
+D | agent_id | ref | Agent | + |   // Which agent ran this session |
+D | agent_id2 | ref_share | Agent | - |  |
+D | parent_session | ref | Session | * |   // Previous session (continuity chain) |
+D | timestamp | number | . | + |   // Session start (Unix ms) |
+D | status | word | . | + |   // active | paused | completed | failed | abandoned |
+D | doc | text | . | * |  |
+D
+
+Section variables 2 Variable fields
+D ```
+D ${session_id}
+D ${agent_id}
+D ${agent_id2}
+D ${parent_session}
+D ${timestamp}
+D ${status}
+D ${doc}
+D ${agent_id.agent_id}
+D ${parent_session.session_id}
+D ${Session_parent_session.session_id}
+D ${Snapshot_session.snapshot_id}
+D ${Restoration_source_session.restoration_id}
+D ${Restoration_session.restoration_id}
+D ${Cycle_session.cycle_id}
+D ${Recommendation_session.rec_id}
+D ${Pattern_discovered_in.pattern_id}
+D ${Evolution_sessions.evolution_id}
+D ${GenExecution_session.execution_id}
+D ${GenLearning_session.learning_id}
+D ${Implementation_session.impl_id}
+D ${CanonVersion_session.version}
+D ```
+Section Navigation 2 Command navigation
+D ```
+D Its Snapshot actor  [Link to Snapshot](#snapshot-component)
+D Its Restoration actor  [Link to Restoration](#restoration-component)
+D Its CrossRef actor  [Link to CrossRef](#crossref-component)
+D Its Cycle actor  [Link to Cycle](#cycle-component)
+D Its Recommendation actor  [Link to Recommendation](#recommendation-component)
+D Its MetricS actor  [Link to MetricS](#metrics-component)
+D Its Artifact actor  [Link to Artifact](#artifact-component)
+D Its GenExecution actor  [Link to GenExecution](#genexecution-component)
+D Its agent_id actor  [Link to Agent](#agent-component)
+D Its parent_session actor  [Link to Session](#session-component)
+D Its Session_parent_session actor  [Reverse link to Session](#session-component)
+D Its Snapshot_session actor  [Reverse link to Snapshot](#snapshot-component)
+D Its Restoration_source_session actor  [Reverse link to Restoration](#restoration-component)
+D Its Restoration_session actor  [Reverse link to Restoration](#restoration-component)
+D Its Cycle_session actor  [Reverse link to Cycle](#cycle-component)
+D Its Recommendation_session actor  [Reverse link to Recommendation](#recommendation-component)
+D Its Pattern_discovered_in actor  [Reverse link to Pattern](#pattern-component)
+D Its Evolution_sessions actor  [Reverse link to Evolution](#evolution-component)
+D Its GenExecution_session actor  [Reverse link to GenExecution](#genexecution-component)
+D Its GenLearning_session actor  [Reverse link to GenLearning](#genlearning-component)
+D Its Implementation_session actor  [Reverse link to Implementation](#implementation-component)
+D Its CanonVersion_session actor  [Reverse link to CanonVersion](#canonversion-component)
+D ```
+
+Artifact snapshot-component structure detail
+
+O Comp Snapshot parent Session FindIn
+
+O Defines a Snapshot component with FindIn searchability under parent Session, meaning instances are searchable within their parent's context.
+
+Section element_summary 2 Element Summary
+D
+D | Element | Type | Target | Check | Description |
+D |---------|------|--------|-------|-------------|
+D | snapshot_id | key | . | + |   // e.g., "snap_checkpoint_001" |
+D | timestamp | number | . | + |   // When snapshot was taken |
+D | trigger | word | . | * |   // manual | auto | error | milestone |
+D | session | up_copy | Session | - |  |
+D | agent_id | ref_copy | Agent | - |  |
+D | objectives | ref_child | Objective | * |   // Active objectives at this time |
+D | thoughts | ref_child | Thought | * |   // Recent thought chain |
+D | agent_id2 | ref_share | Agent | - |  |
+D | memories | ref_child | Memory | * |   // Working memory set |
+D | doc | text | . | * |  |
+D
+
+Section variables 2 Variable fields
+D ```
+D ${snapshot_id}
+D ${timestamp}
+D ${trigger}
+D ${session}
+D ${agent_id}
+D ${objectives}
+D ${thoughts}
+D ${agent_id2}
+D ${memories}
+D ${doc}
+D ${parent.session_id}
+D ${session.session_id}
+D ${agent_id.agent_id}
+D ${objectives.objective_id}
+D ${thoughts.thought_id}
+D ${memories.memory_id}
+D ```
+Section Navigation 2 Command navigation
+D ```
+D Its parent actor  [Link to Session](#session-component)
+D Its session actor  [Link to Session](#session-component)
+D Its agent_id actor  [Link to Agent](#agent-component)
+D Its objectives actor  [Link to Objective](#objective-component)
+D Its thoughts actor  [Link to Thought](#thought-component)
+D Its memories actor  [Link to Memory](#memory-component)
+D ```
+
+Artifact restoration-component structure detail
+
+O Comp Restoration parent Session FindIn
+
+O Defines a Restoration component with FindIn searchability under parent Session, meaning instances are searchable within their parent's context.
+
+Section element_summary 2 Element Summary
+D
+D | Element | Type | Target | Check | Description |
+D |---------|------|--------|-------|-------------|
+D | restoration_id | key | . | + |   // e.g., "restore_001" |
+D | source_session | ref | Session | + |   // Which session data came from |
+D | agent_id | ref_copy | Agent | - |  |
+D | source_memory | ref_child | Memory | + |   // Original memory being restored |
+D | session | up_copy | Session | - |  |
+D | agent_id2 | ref_copy | Agent | - |  |
+D | restored_as | ref_child | Memory | + |   // New memory created in current session |
+D | relevance | number | . | * |   // 0.0–1.0 why this was selected |
+D | doc | text | . | * |  |
+D
+
+Section variables 2 Variable fields
+D ```
+D ${restoration_id}
+D ${source_session}
+D ${agent_id}
+D ${source_memory}
+D ${session}
+D ${agent_id2}
+D ${restored_as}
+D ${relevance}
+D ${doc}
+D ${parent.session_id}
+D ${source_session.session_id}
+D ${agent_id.agent_id}
+D ${source_memory.memory_id}
+D ${session.session_id}
+D ${agent_id2.agent_id}
+D ${restored_as.memory_id}
+D ```
+Section Navigation 2 Command navigation
+D ```
+D Its parent actor  [Link to Session](#session-component)
+D Its source_session actor  [Link to Session](#session-component)
+D Its agent_id actor  [Link to Agent](#agent-component)
+D Its source_memory actor  [Link to Memory](#memory-component)
+D Its session actor  [Link to Session](#session-component)
+D Its agent_id2 actor  [Link to Agent](#agent-component)
+D Its restored_as actor  [Link to Memory](#memory-component)
+D ```
+
+Artifact crossref-component structure detail
+
+O Comp CrossRef parent Session FindIn
+
+O Defines a CrossRef component with FindIn searchability under parent Session, meaning instances are searchable within their parent's context.
+
+Section element_summary 2 Element Summary
+D
+D | Element | Type | Target | Check | Description |
+D |---------|------|--------|-------|-------------|
+D | xref_id | key | . | + |   // e.g., "xref_001" |
+D | cog_type | word | . | + |   // Agent | Objective | Thought | Memory | Action |
+D | cog_id | text | . | + |   // ID of cognitive component |
+D | external_type | text | . | * |   // External system/schema name |
+D | external_id | text | . | * |   // External component ID |
+D | relationship | word | . | + |   // generates | validates | executes | measures | invalidates |
+D | confidence | number | . | * |   // 0.0–1.0 strength of link |
+D | timestamp | number | . | + |   // When link established |
+D | doc | text | . | * |  |
+D
+
+Section variables 2 Variable fields
+D ```
+D ${xref_id}
+D ${cog_type}
+D ${cog_id}
+D ${external_type}
+D ${external_id}
+D ${relationship}
+D ${confidence}
+D ${timestamp}
+D ${doc}
+D ${parent.session_id}
+D ```
+Section Navigation 2 Command navigation
+D ```
+D Its parent actor  [Link to Session](#session-component)
+D ```
+
+Artifact cycle-component structure detail
+
+O Comp Cycle parent Session FindIn
+
+O Defines a Cycle component with FindIn searchability under parent Session, meaning instances are searchable within their parent's context.
+
+Section element_summary 2 Element Summary
+D
+D | Element | Type | Target | Check | Description |
+D |---------|------|--------|-------|-------------|
+D | cycle_id | key | . | + | // e.g., "cycle_error_recovery_001" |
+D | trigger | word | . | + | // error | optimization | requirement | feedback |
+D | session | up_copy | Session | - |  |
+D | agent_id | ref_copy | Agent | - |  |
+D | objective | ref_child | Objective | * | // Objective of Thought |
+D | hypothesis | ref_child | Thought | * | // Hypothesis being tested (if any) |
+D | agent_id2 | ref_share | Agent | - |  |
+D | baseline | ref_child | Memory | * | // State before change |
+D | objective2 | ref_share | Objective | - | // Objective of Thought |
+D | intervention | ref_child | Thought | + | // What changed and why |
+D | agent_id3 | ref_share | Agent | - |  |
+D | outcome | ref_child | Memory | + | // Measured result after change |
+D | improvement | number | . | * | // Quantified delta (speedup, accuracy, etc.) |
+D | doc | text | . | * |  |
+D
+
+Section variables 2 Variable fields
+D ```
+D ${cycle_id}
+D ${trigger}
+D ${session}
+D ${agent_id}
+D ${objective}
+D ${hypothesis}
+D ${agent_id2}
+D ${baseline}
+D ${objective2}
+D ${intervention}
+D ${agent_id3}
+D ${outcome}
+D ${improvement}
+D ${doc}
+D ${parent.session_id}
+D ${session.session_id}
+D ${agent_id.agent_id}
+D ${objective.objective_id}
+D ${hypothesis.thought_id}
+D ${baseline.memory_id}
+D ${intervention.thought_id}
+D ${outcome.memory_id}
+D ${Pattern_evidence.pattern_id}
+D ${CanonVersion_evidence.version}
+D ```
+Section Navigation 2 Command navigation
+D ```
+D Its parent actor  [Link to Session](#session-component)
+D Its CanonCycle actor  [Link to CanonCycle](#canoncycle-component)
+D Its session actor  [Link to Session](#session-component)
+D Its agent_id actor  [Link to Agent](#agent-component)
+D Its objective actor  [Link to Objective](#objective-component)
+D Its hypothesis actor  [Link to Thought](#thought-component)
+D Its baseline actor  [Link to Memory](#memory-component)
+D Its intervention actor  [Link to Thought](#thought-component)
+D Its outcome actor  [Link to Memory](#memory-component)
+D Its Pattern_evidence actor  [Reverse link to Pattern](#pattern-component)
+D Its CanonVersion_evidence actor  [Reverse link to CanonVersion](#canonversion-component)
+D ```
+
+Artifact recommendation-component structure detail
+
+O Comp Recommendation parent Session FindIn
+
+O Defines a Recommendation component with FindIn searchability under parent Session, meaning instances are searchable within their parent's context.
+
+Section element_summary 2 Element Summary
+D
+D | Element | Type | Target | Check | Description |
+D |---------|------|--------|-------|-------------|
+D | rec_id | key | . | + | // e.g., "rec_001"  |
+D | session | up_copy | Session | - | // Current session  |
+D | agent_id | ref_copy | Agent | - | // Current agent |
+D | outcome | ref_child | Memory | * | // Result after acceptance  |
+D | agent_id2 | ref_share | Agent | - | // Current agent  |
+D | objective | ref_child | Objective | * | // Current goal  |
+D | situation | text | . | * | // Why recommended (pattern match)  |
+D | canon | ref | Canon | + | // Recommended canonical documentation |
+D | confidence | number | . | * | // 0.0–1.0 recommendation strength |
+D | reasoning | text | . | * | // Why this Canon fits |
+D | accepted | word | . | * | // yes | no | modified |
+D | impl | ref | Implementation | * | // If accepted, the instantiation |
+D | doc | text | . | * |  |
+D
+
+Section variables 2 Variable fields
+D ```
+D ${rec_id}
+D ${session}
+D ${agent_id}
+D ${outcome}
+D ${agent_id2}
+D ${objective}
+D ${situation}
+D ${canon}
+D ${confidence}
+D ${reasoning}
+D ${accepted}
+D ${impl}
+D ${doc}
+D ${parent.session_id}
+D ${session.session_id}
+D ${agent_id.agent_id}
+D ${outcome.memory_id}
+D ${objective.objective_id}
+D ${canon.name}
+D ${impl.impl_id}
+D ```
+Section Navigation 2 Command navigation
+D ```
+D Its parent actor  [Link to Session](#session-component)
+D Its session actor  [Link to Session](#session-component)
+D Its agent_id actor  [Link to Agent](#agent-component)
+D Its outcome actor  [Link to Memory](#memory-component)
+D Its objective actor  [Link to Objective](#objective-component)
+D Its canon actor  [Link to Canon](#canon-component)
+D Its impl actor  [Link to Implementation](#implementation-component)
+D ```
+
+Artifact canoncycle-component structure detail
+
+O Comp CanonCycle parent Cycle FindIn
+
+O Defines a CanonCycle component with FindIn searchability under parent Cycle, meaning instances are searchable within their parent's context.
+
+Section element_summary 2 Element Summary
+D
+D | Element | Type | Target | Check | Description |
+D |---------|------|--------|-------|-------------|
+D | implementations | ref | Implementation | * | // Usage instances |
+D | baseline_canon | ref | Canon | + | // Original version |
+D | new_version | ref_child | CanonVersion | * | // Resulting update |
+D | discovered_issues | text | . | * | // Problems found |
+D | proposed_changes | text | . | * | // Suggested improvements |
+D | doc | text | . | * |  |
+D
+
+Section variables 2 Variable fields
+D ```
+D ${implementations}
+D ${baseline_canon}
+D ${new_version}
+D ${discovered_issues}
+D ${proposed_changes}
+D ${doc}
+D ${parent.cycle_id}
+D ${implementations.impl_id}
+D ${baseline_canon.name}
+D ${new_version.version}
+D ```
+Section Navigation 2 Command navigation
+D ```
+D Its parent actor  [Link to Cycle](#cycle-component)
+D Its implementations actor  [Link to Implementation](#implementation-component)
+D Its baseline_canon actor  [Link to Canon](#canon-component)
+D Its new_version actor  [Link to CanonVersion](#canonversion-component)
+D ```
+
+Artifact pattern-component structure overview
+
+O Comp Pattern parent . Find
+
+O Defines a top-level Pattern component with Find searchability, meaning instances can be looked up globally by their key field.
+
+Section element_summary 2 Element Summary
+D
+D | Element | Type | Target | Check | Description |
+D |---------|------|--------|-------|-------------|
+D | pattern_id | key | . | + |   // e.g., "pattern_tensor_ordering" |
+D | name | word | . | + |   // Human-readable identifier |
+D | category | word | . | * |   // bug_fix | optimization | design | constraint |
+D | discovered_in | ref | Session | * |   // Which session found this |
+D | evidence | ref_child | Cycle | * |   // Learning cycles supporting this |
+D | confidence | number | . | * |   // 0.0–1.0 reliability |
+D | applicability | text | . | * |   // When/where to apply this pattern |
+D | doc | text | . | * |  |
+D
+
+Section variables 2 Variable fields
+D ```
+D ${pattern_id}
+D ${name}
+D ${category}
+D ${discovered_in}
+D ${evidence}
+D ${confidence}
+D ${applicability}
+D ${doc}
+D ${discovered_in.session_id}
+D ${evidence.cycle_id}
+D ${Evolution_motivation.evolution_id}
+D ${GenPatternRef_pattern.ref_id}
+D ```
+Section Navigation 2 Command navigation
+D ```
+D Its PatternSource actor  [Link to PatternSource](#patternsource-component)
+D Its discovered_in actor  [Link to Session](#session-component)
+D Its evidence actor  [Link to Cycle](#cycle-component)
+D Its Evolution_motivation actor  [Reverse link to Evolution](#evolution-component)
+D Its GenPatternRef_pattern actor  [Reverse link to GenPatternRef](#genpatternref-component)
+D ```
+
+Artifact patternsource-component structure detail
+
+O Comp PatternSource parent Pattern FindIn
+
+O Defines a PatternSource component with FindIn searchability under parent Pattern, meaning instances are searchable within their parent's context.
+
+Section element_summary 2 Element Summary
+D
+D | Element | Type | Target | Check | Description |
+D |---------|------|--------|-------|-------------|
+D | impl | ref | Implementation | * | // All implementations |
+D | canon | ref_copy | Canon | + | // Original canonical documentation |
+D | doc | text | . | * |  |
+D
+
+Section variables 2 Variable fields
+D ```
+D ${impl}
+D ${canon}
+D ${doc}
+D ${parent.pattern_id}
+D ${impl.impl_id}
+D ${canon.name}
+D ```
+Section Navigation 2 Command navigation
+D ```
+D Its parent actor  [Link to Pattern](#pattern-component)
+D Its impl actor  [Link to Implementation](#implementation-component)
+D Its canon actor  [Link to Canon](#canon-component)
+D ```
+
+Artifact evolution-component structure overview
+
+O Comp Evolution parent . Find
+
+O Defines a top-level Evolution component with Find searchability, meaning instances can be looked up globally by their key field.
+
+Section element_summary 2 Element Summary
+D
+D | Element | Type | Target | Check | Description |
+D |---------|------|--------|-------|-------------|
+D | evolution_id | key | . | + |   // e.g., "evo_added_citation_role" |
+D | target_schema | text | . | + |   // Which schema changed (cog, session, omni) |
+D | change_type | word | . | + |   // add_component | add_element | add_opt | deprecate |
+D | motivation | ref | Pattern | * |   // Why this change was needed |
+D | sessions | ref | Session | * |   // Sessions driving this evolution |
+D | timestamp | number | . | + |   // When evolution occurred |
+D | doc | text | . | * |  |
+D
+
+Section variables 2 Variable fields
+D ```
+D ${evolution_id}
+D ${target_schema}
+D ${change_type}
+D ${motivation}
+D ${sessions}
+D ${timestamp}
+D ${doc}
+D ${motivation.pattern_id}
+D ${sessions.session_id}
+D ```
+Section Navigation 2 Command navigation
+D ```
+D Its motivation actor  [Link to Pattern](#pattern-component)
+D Its sessions actor  [Link to Session](#session-component)
+D ```
+
+Artifact metrics-component structure detail
+
+O Comp MetricS parent Session FindIn
+
+O Defines a MetricS component with FindIn searchability under parent Session, meaning instances are searchable within their parent's context.
+
+Section element_summary 2 Element Summary
+D
+D | Element | Type | Target | Check | Description |
+D |---------|------|--------|-------|-------------|
+D | metric_id | key | . | + |   // e.g., "metric_convergence_time" |
+D | name | word | . | + |   // Human-readable |
+D | measurement | text | . | * |   // How it's calculated |
+D | value | number | . | * |   // Current measured value |
+D | target | number | . | * |   // Goal value |
+D | timestamp | number | . | + |   // When measured |
+D | doc | text | . | * |  |
+D
+
+Section variables 2 Variable fields
+D ```
+D ${metric_id}
+D ${name}
+D ${measurement}
+D ${value}
+D ${target}
+D ${timestamp}
+D ${doc}
+D ${parent.session_id}
+D ```
+Section Navigation 2 Command navigation
+D ```
+D Its parent actor  [Link to Session](#session-component)
+D ```
+
+Artifact artifact-component structure detail
+
+O Comp Artifact parent Session FindIn
+
+O Defines a Artifact component with FindIn searchability under parent Session, meaning instances are searchable within their parent's context.
+
+Section element_summary 2 Element Summary
+D
+D | Element | Type | Target | Check | Description |
+D |---------|------|--------|-------|-------------|
+D | artifact_id | key | . | + |   // e.g., "artifact_maxcut_v2_json" |
+D | type | word | . | + |   // file | url | database | stream |
+D | path | text | . | + |   // Location (filesystem path, URL, etc.) |
+D | format | word | . | * |   // json | rio | py | cu | md | etc. |
+D | role | word | . | + |   // input | output | intermediate | reference |
+D | size_bytes | number | . | * |   // File size |
+D | hash | text | . | * |   // Content hash for versioning |
+D | timestamp | number | . | + |   // Created/accessed time |
+D | doc | text | . | * |  |
+D
+
+Section variables 2 Variable fields
+D ```
+D ${artifact_id}
+D ${type}
+D ${path}
+D ${format}
+D ${role}
+D ${size_bytes}
+D ${hash}
+D ${timestamp}
+D ${doc}
+D ${parent.session_id}
+D ```
+Section Navigation 2 Command navigation
+D ```
+D Its parent actor  [Link to Session](#session-component)
+D ```
+
+Artifact genexecution-component structure detail
+
+O Comp GenExecution parent Session FindIn
+
+O Defines a GenExecution component with FindIn searchability under parent Session, meaning instances are searchable within their parent's context.
+
+Section element_summary 2 Element Summary
+D
+D | Element | Type | Target | Check | Description |
+D |---------|------|--------|-------|-------------|
+D | execution_id | key | . | + |   // e.g. "exec_cuda_db_001" |
+D | program | ref | GenProgram | + | // Which program was run |
+D | session | up_copy | Session | - |    // Inherited from parent |
+D | agent_id | ref_copy | Agent | - |    // Copy from session |
+D | trigger_thought | word | Thought | * |    // Thought that requested this generation |
+D | input_data | word | Memory | * |    // Input data used (e.g., DAML model) |
+D | output_artifacts | word | Artifact | * |   // Generated files/data |
+D | status | word | . | + |    // pending | running | success | failed |
+D | start_time | number | . | * |    // Unix ms |
+D | end_time | number | . | * |    // Unix ms |
+D | duration_ms | number | . | * |    // Calculated: end - start |
+D | error_message | text | . | * |    // If failed |
+D | learned_from | word | . | * |    // yes | no (did this create a Cycle?) |
+D | doc | text | . | * |  |
+D
+
+Section variables 2 Variable fields
+D ```
+D ${execution_id}
+D ${program}
+D ${session}
+D ${agent_id}
+D ${trigger_thought}
+D ${input_data}
+D ${output_artifacts}
+D ${status}
+D ${start_time}
+D ${end_time}
+D ${duration_ms}
+D ${error_message}
+D ${learned_from}
+D ${doc}
+D ${parent.session_id}
+D ${program.program_id}
+D ${session.session_id}
+D ${agent_id.agent_id}
+D ${GenLearning_baseline.learning_id}
+D ```
+Section Navigation 2 Command navigation
+D ```
+D Its parent actor  [Link to Session](#session-component)
+D Its GenValidation actor  [Link to GenValidation](#genvalidation-component)
+D Its GenLearning actor  [Link to GenLearning](#genlearning-component)
+D Its GenDebug actor  [Link to GenDebug](#gendebug-component)
+D Its program actor  [Link to GenProgram](#genprogram-component)
+D Its session actor  [Link to Session](#session-component)
+D Its agent_id actor  [Link to Agent](#agent-component)
+D Its GenLearning_baseline actor  [Reverse link to GenLearning](#genlearning-component)
+D ```
+
+Artifact genvalidation-component structure detail
+
+O Comp GenValidation parent GenExecution FindIn
+
+O Defines a GenValidation component with FindIn searchability under parent GenExecution, meaning instances are searchable within their parent's context.
+
+Section element_summary 2 Element Summary
+D
+D | Element | Type | Target | Check | Description |
+D |---------|------|--------|-------|-------------|
+D | validation_id | key | . | + |   // e.g. "val_001" |
+D | check_type | word | . | + |   // syntax | semantic | performance | correctness | safety |
+D | tool | word | . | * |   // "valgrind" | "nvcc" | "pytest" | "benchmark" |
+D | passed | word | . | + |   // yes | no | partial |
+D | score | number | . | * |   // 0.0–1.0 quality score |
+D | result | text | . | * |   // Detailed results |
+D | metrics | text | . | * |   // JSON of measured metrics |
+D | timestamp | number | . | + |   // When validation ran |
+D | creates_cycle | word | Cycle | * |   // If this validation triggers learning |
+D | doc | text | . | * |  |
+D
+
+Section variables 2 Variable fields
+D ```
+D ${validation_id}
+D ${check_type}
+D ${tool}
+D ${passed}
+D ${score}
+D ${result}
+D ${metrics}
+D ${timestamp}
+D ${creates_cycle}
+D ${doc}
+D ${parent.execution_id}
+D ```
+Section Navigation 2 Command navigation
+D ```
+D Its parent actor  [Link to GenExecution](#genexecution-component)
+D ```
+
+Artifact genlearning-component structure detail
+
+O Comp GenLearning parent GenExecution FindIn
+
+O Defines a GenLearning component with FindIn searchability under parent GenExecution, meaning instances are searchable within their parent's context.
+
+Section element_summary 2 Element Summary
+D
+D | Element | Type | Target | Check | Description |
+D |---------|------|--------|-------|-------------|
+D | learning_id | key | . | + |   // e.g. "learn_001" |
+D | cycle | word | Cycle | + |   // The Cycle created from this execution |
+D | session | up_copy | Session | E_O_L |  |
+D | baseline | ref_child | GenExecution | * | // Previous execution to compare against |
+D | improvement | number | . | * |   // Delta from baseline |
+D | pattern_candidate | word | . | * |   // yes | no | maybe |
+D | confidence | number | . | * |   // 0.0–1.0 how confident in this learning |
+D | applied_to_program | ref | GenProgram | * | // If pattern strong enough, which program updated |
+D | doc | text | . | * |  |
+D
+
+Section variables 2 Variable fields
+D ```
+D ${learning_id}
+D ${cycle}
+D ${session}
+D ${baseline}
+D ${improvement}
+D ${pattern_candidate}
+D ${confidence}
+D ${applied_to_program}
+D ${doc}
+D ${parent.execution_id}
+D ${session.session_id}
+D ${baseline.execution_id}
+D ${applied_to_program.program_id}
+D ```
+Section Navigation 2 Command navigation
+D ```
+D Its parent actor  [Link to GenExecution](#genexecution-component)
+D Its session actor  [Link to Session](#session-component)
+D Its baseline actor  [Link to GenExecution](#genexecution-component)
+D Its applied_to_program actor  [Link to GenProgram](#genprogram-component)
+D ```
+
+Artifact gendebug-component structure detail
+
+O Comp GenDebug parent GenExecution FindIn
+
+O Defines a GenDebug component with FindIn searchability under parent GenExecution, meaning instances are searchable within their parent's context.
+
+Section element_summary 2 Element Summary
+D
+D | Element | Type | Target | Check | Description |
+D |---------|------|--------|-------|-------------|
+D | debug_id | key | . | + |   // e.g. "debug_001" |
+D | error_category | word | . | * |   // parse | type | runtime | resource | timeout |
+D | stack_trace | text | . | * |   // Full stack trace |
+D | actor_trace | text | . | * |   // Which actors were executing |
+D | input_snapshot | word | Memory | * |   // Snapshot of input that caused failure |
+D | suggested_fix | text | . | * |   // AI-generated suggestion |
+D | fixed_by | word | Thought | * |   // Thought that resolved this |
+D | doc | text | . | * |  |
+D
+
+Section variables 2 Variable fields
+D ```
+D ${debug_id}
+D ${error_category}
+D ${stack_trace}
+D ${actor_trace}
+D ${input_snapshot}
+D ${suggested_fix}
+D ${fixed_by}
+D ${doc}
+D ${parent.execution_id}
+D ```
+Section Navigation 2 Command navigation
+D ```
+D Its parent actor  [Link to GenExecution](#genexecution-component)
+D ```
+
+Artifact canon-component structure overview
+
+O Comp Canon parent . Find
+
+O Defines a top-level Canon component with Find searchability, meaning instances can be looked up globally by their key field.
+
+Section element_summary 2 Element Summary
+D
+D | Element | Type | Target | Check | Description |
+D |---------|------|--------|-------|-------------|
+D | name | key | . | + | // Unique identifier  |
+D | category | word | . | * | // Optional category word  |
+D | topic_type | word | . | * | // Optional type word [cite: 48] |
+D | overview | text | . | * | // 1-3 sentence summary  |
+D | doc | text | . | * | // Not used in definition files  |
+D
+
+Section variables 2 Variable fields
+D ```
+D ${name}
+D ${category}
+D ${topic_type}
+D ${overview}
+D ${doc}
+D ${MemorySource_canon.impl}
+D ${ThoughtSource_canon.impl}
+D ${Recommendation_canon.rec_id}
+D ${CanonCycle_baseline_canon.implementations}
+D ${PatternSource_canon.impl}
+D ${Link_concept.concept}
+D ${Link_relation.concept}
+D ${Implementation_canon.impl_id}
+D ${CanonVersion_canon.version}
+D ${Library_canons.lib_id}
+D ```
+Section Navigation 2 Command navigation
+D ```
+D Its Link actor  [Link to Link](#link-component)
+D Its Section actor  [Link to Section](#section-component)
+D Its CanonMeta actor  [Link to CanonMeta](#canonmeta-component)
+D Its CanonVersion actor  [Link to CanonVersion](#canonversion-component)
+D Its MemorySource_canon actor  [Reverse link to MemorySource](#memorysource-component)
+D Its ThoughtSource_canon actor  [Reverse link to ThoughtSource](#thoughtsource-component)
+D Its Recommendation_canon actor  [Reverse link to Recommendation](#recommendation-component)
+D Its CanonCycle_baseline_canon actor  [Reverse link to CanonCycle](#canoncycle-component)
+D Its PatternSource_canon actor  [Reverse link to PatternSource](#patternsource-component)
+D Its Link_concept actor  [Reverse link to Link](#link-component)
+D Its Link_relation actor  [Reverse link to Link](#link-component)
+D Its Implementation_canon actor  [Reverse link to Implementation](#implementation-component)
+D Its CanonVersion_canon actor  [Reverse link to CanonVersion](#canonversion-component)
+D Its Library_canons actor  [Reverse link to Library](#library-component)
+D ```
+
+Artifact link-component structure detail
+
+O Comp Link parent Canon FindIn
+
+O Defines a Link component with FindIn searchability under parent Canon, meaning instances are searchable within their parent's context.
+
+Section element_summary 2 Element Summary
+D
+D | Element | Type | Target | Check | Description |
+D |---------|------|--------|-------|-------------|
+D | concept | ref | Canon | + | // Target Canon (must exist) [cite: 49] |
+D | relation | ref | Canon | + | // Relationship type (must exist) [cite: 49] |
+D
+
+Section variables 2 Variable fields
+D ```
+D ${concept}
+D ${relation}
+D ${parent.name}
+D ${concept.name}
+D ${relation.name}
+D ```
+Section Navigation 2 Command navigation
+D ```
+D Its parent actor  [Link to Canon](#canon-component)
+D Its concept actor  [Link to Canon](#canon-component)
+D Its relation actor  [Link to Canon](#canon-component)
+D ```
+
+Artifact section-component structure detail
+
+O Comp Section parent Canon FindIn
+
+O Defines a Section component with FindIn searchability under parent Canon, meaning instances are searchable within their parent's context.
+
+Section element_summary 2 Element Summary
+D
+D | Element | Type | Target | Check | Description |
+D |---------|------|--------|-------|-------------|
+D | name | word | . | + | // Section identifier [cite: 50] |
+D | level | tree | . | + | // Heading depth (2=h2, 3=h3, 4=h4) [cite: 51] |
+D | title | text | . | * | // Section heading text [cite: 52] |
+D | content | text | . | * | // Section content with markdown [cite: 53] |
+D
+
+Section variables 2 Variable fields
+D ```
+D ${name}
+D ${level}
+D ${title}
+D ${content}
+D ${parent.name}
+D ```
+Section Navigation 2 Command navigation
+D ```
+D Its parent actor  [Link to Canon](#canon-component)
+D ```
+
+Artifact canonmeta-component structure detail
+
+O Comp CanonMeta parent Canon FindIn
+
+O Defines a CanonMeta component with FindIn searchability under parent Canon, meaning instances are searchable within their parent's context.
+
+Section element_summary 2 Element Summary
+D
+D | Element | Type | Target | Check | Description |
+D |---------|------|--------|-------|-------------|
+D | executable | word | . | * | // yes | no | partial  |
+D | maturity | word | . | * | // draft | stable | deprecated [cite: 2] |
+D | usage_count | number | . | * | // How many implementations [cite: 3] |
+D | avg_effectiveness | number | . | * | // Average measured effectiveness [cite: 4] |
+D | doc | text | . | * |  |
+D
+
+Section variables 2 Variable fields
+D ```
+D ${executable}
+D ${maturity}
+D ${usage_count}
+D ${avg_effectiveness}
+D ${doc}
+D ${parent.name}
+D ```
+Section Navigation 2 Command navigation
+D ```
+D Its parent actor  [Link to Canon](#canon-component)
+D ```
+
+Artifact implementation-component structure overview
+
+O Comp Implementation parent . Find
+
+O Defines a top-level Implementation component with Find searchability, meaning instances can be looked up globally by their key field.
+
+Section element_summary 2 Element Summary
+D
+D | Element | Type | Target | Check | Description |
+D |---------|------|--------|-------|-------------|
+D | impl_id | key | . | + | // e.g., "impl_cot_session_123" [cite: 7] |
+D | canon | ref | Canon | + | // WHAT authoritative rule is being implemented |
+D | cog_type | word | . | + | // Thought | Memory | Pattern | Action [cite: 8] |
+D | cog_id | text | . | + | // ID in cognitive domain [cite: 9] |
+D | session | ref | Session | * | // Where it was instantiated [cite: 10] |
+D | context | text | . | * | // Why/how it was applied [cite: 10] |
+D | effectiveness | number | . | * | // 0.0–1.0 measured outcome [cite: 11] |
+D | adherence | number | . | * | // 0.0–1.0 fidelity to Canon [cite: 12] |
+D | timestamp | number | . | + | // When instantiated [cite: 12] |
+D | doc | text | . | * |  |
+D
+
+Section variables 2 Variable fields
+D ```
+D ${impl_id}
+D ${canon}
+D ${cog_type}
+D ${cog_id}
+D ${session}
+D ${context}
+D ${effectiveness}
+D ${adherence}
+D ${timestamp}
+D ${doc}
+D ${canon.name}
+D ${session.session_id}
+D ${MemorySource_impl.impl}
+D ${ThoughtSource_impl.impl}
+D ${Recommendation_impl.rec_id}
+D ${CanonCycle_implementations.implementations}
+D ${PatternSource_impl.impl}
+D ${CanonVersion_implementations.version}
+D ```
+Section Navigation 2 Command navigation
+D ```
+D Its canon actor  [Link to Canon](#canon-component)
+D Its session actor  [Link to Session](#session-component)
+D Its MemorySource_impl actor  [Reverse link to MemorySource](#memorysource-component)
+D Its ThoughtSource_impl actor  [Reverse link to ThoughtSource](#thoughtsource-component)
+D Its Recommendation_impl actor  [Reverse link to Recommendation](#recommendation-component)
+D Its CanonCycle_implementations actor  [Reverse link to CanonCycle](#canoncycle-component)
+D Its PatternSource_impl actor  [Reverse link to PatternSource](#patternsource-component)
+D Its CanonVersion_implementations actor  [Reverse link to CanonVersion](#canonversion-component)
+D ```
+
+Artifact canonversion-component structure detail
+
+O Comp CanonVersion parent Canon FindIn
+
+O Defines a CanonVersion component with FindIn searchability under parent Canon, meaning instances are searchable within their parent's context.
+
+Section element_summary 2 Element Summary
+D
+D | Element | Type | Target | Check | Description |
+D |---------|------|--------|-------|-------------|
+D | version | key | . | + | // e.g., "v2", "v3_refactored" [cite: 18] |
+D | canon | up_copy | Canon | - | // Parent Canon [cite: 18] |
+D | previous | ref_child | CanonVersion | * | // Version chain [cite: 18] |
+D | change_type | word | . | * | // clarification | bugfix | enhancement | refactor [cite: 19] |
+D | motivation | text | . | * | // Why this version exists [cite: 20] |
+D | canon2 | up_share | Canon | - | // Parent Canon [cite: 18] |
+D | implementations | ref | Implementation | * | // Usage before/after [cite: 20] |
+D | session | ref_copy | Session | * | // Where it was instantiated [cite: 10] |
+D | evidence | ref_child | Cycle | * | // Empirical data supporting change [cite: 20] |
+D | improvement | number | . | * | // Measured delta vs previous [cite: 21] |
+D | timestamp | number | . | + | // When version created [cite: 22] |
+D | doc | text | . | * |  |
+D
+
+Section variables 2 Variable fields
+D ```
+D ${version}
+D ${canon}
+D ${previous}
+D ${change_type}
+D ${motivation}
+D ${canon2}
+D ${implementations}
+D ${session}
+D ${evidence}
+D ${improvement}
+D ${timestamp}
+D ${doc}
+D ${parent.name}
+D ${canon.name}
+D ${previous.version}
+D ${implementations.impl_id}
+D ${session.session_id}
+D ${evidence.cycle_id}
+D ${CanonCycle_new_version.implementations}
+D ${CanonVersion_previous.version}
+D ```
+Section Navigation 2 Command navigation
+D ```
+D Its parent actor  [Link to Canon](#canon-component)
+D Its canon actor  [Link to Canon](#canon-component)
+D Its previous actor  [Link to CanonVersion](#canonversion-component)
+D Its implementations actor  [Link to Implementation](#implementation-component)
+D Its session actor  [Link to Session](#session-component)
+D Its evidence actor  [Link to Cycle](#cycle-component)
+D Its CanonCycle_new_version actor  [Reverse link to CanonCycle](#canoncycle-component)
+D Its CanonVersion_previous actor  [Reverse link to CanonVersion](#canonversion-component)
+D ```
+
+Artifact library-component structure overview
+
+O Comp Library parent . Find
+
+O Defines a top-level Library component with Find searchability, meaning instances can be looked up globally by their key field.
+
+Section element_summary 2 Element Summary
+D
+D | Element | Type | Target | Check | Description |
+D |---------|------|--------|-------|-------------|
+D | lib_id | key | . | + | // e.g., "reasoning_patterns_v1" [cite: 29] |
+D | name | word | . | + | // Human-readable name [cite: 30] |
+D | domain | word | . | * | // reasoning | memory | planning | debugging [cite: 31] |
+D | purpose | text | . | * | // What this library is for [cite: 32] |
+D | canons | ref | Canon | . |        * // Contents (formerly artifacts) |
+D | maintainer | word | . | * | // Who curates this [cite: 33] |
+D | version | word | . | * | // Library version [cite: 34] |
+D | doc | text | . | * |  |
+D
+
+Section variables 2 Variable fields
+D ```
+D ${lib_id}
+D ${name}
+D ${domain}
+D ${purpose}
+D ${canons}
+D ${maintainer}
+D ${version}
+D ${doc}
+D ${canons.name}
+D ```
+Section Navigation 2 Command navigation
+D ```
+D Its canons actor  [Link to Canon](#canon-component)
+D ```
+
+Artifact genprogram-component structure overview
+
+O Comp GenProgram parent . Find
+
+O Defines a top-level GenProgram component with Find searchability, meaning instances can be looked up globally by their key field.
+
+Section element_summary 2 Element Summary
+D
+D | Element | Type | Target | Check | Description |
+D |---------|------|--------|-------|-------------|
+D | program_id | key | . | + |   // e.g. "cuda_database_v3" |
+D | name | word | . | + |   // Human name: "CUDA Autonomous Database" |
+D | target | word | . | + |   // cuda | mlir | triton | cpp | python | llvm | sql |
+D | paradigm | word | . | * |   // kernel | runtime | compiler | dsl | pipeline |
+D | maturity | word | . | + |   // prototype | stable | golden | deprecated |
+D | author_thought | word | Thought | * |   // The Thought that created/designed this program |
+D | version | number | . | + |   // 1, 2, 3… semantic versioning |
+D | supersedes | ref | GenProgram | * | // Previous version this replaces |
+D | description | text | . | * |   // Full architectural doc |
+D
+
+Section variables 2 Variable fields
+D ```
+D ${program_id}
+D ${name}
+D ${target}
+D ${paradigm}
+D ${maturity}
+D ${author_thought}
+D ${version}
+D ${supersedes}
+D ${description}
+D ${supersedes.program_id}
+D ${GenExecution_program.execution_id}
+D ${GenLearning_applied_to_program.learning_id}
+D ${GenProgram_supersedes.program_id}
+D ${GenBootstrap_superseded_by.bootstrap_id}
+D ${GenEvolution_previous_version.evolution_id}
+D ${GenStage_program.stage_id}
+D ```
+Section Navigation 2 Command navigation
+D ```
+D Its GenBootstrap actor  [Link to GenBootstrap](#genbootstrap-component)
+D Its GenInput actor  [Link to GenInput](#geninput-component)
+D Its GenStrategy actor  [Link to GenStrategy](#genstrategy-component)
+D Its GenPatternRef actor  [Link to GenPatternRef](#genpatternref-component)
+D Its GenOutputSpec actor  [Link to GenOutputSpec](#genoutputspec-component)
+D Its GenMetric actor  [Link to GenMetric](#genmetric-component)
+D Its GenEvolution actor  [Link to GenEvolution](#genevolution-component)
+D Its supersedes actor  [Link to GenProgram](#genprogram-component)
+D Its GenExecution_program actor  [Reverse link to GenExecution](#genexecution-component)
+D Its GenLearning_applied_to_program actor  [Reverse link to GenLearning](#genlearning-component)
+D Its GenProgram_supersedes actor  [Reverse link to GenProgram](#genprogram-component)
+D Its GenBootstrap_superseded_by actor  [Reverse link to GenBootstrap](#genbootstrap-component)
+D Its GenEvolution_previous_version actor  [Reverse link to GenEvolution](#genevolution-component)
+D Its GenStage_program actor  [Reverse link to GenStage](#genstage-component)
+D ```
+
+Artifact genbootstrap-component structure detail
+
+O Comp GenBootstrap parent GenProgram FindIn
+
+O Defines a GenBootstrap component with FindIn searchability under parent GenProgram, meaning instances are searchable within their parent's context.
+
+Section element_summary 2 Element Summary
+D
+D | Element | Type | Target | Check | Description |
+D |---------|------|--------|-------|-------------|
+D | bootstrap_id | key | . | + |   // e.g. "boot_cuda_v1" |
+D | seed_actors | word | Artifact | + |  // Hand-written .act files (the initial DNA) |
+D | generator | word | . | + |   // human | llm | evolved |
+D | creation_date | number | . | + |   // When bootstrap created |
+D | deprecated | word | . | * |   // yes | no (yes when patterns take over) |
+D | superseded_by | ref | GenProgram | * | // Which evolved version replaced this |
+D | doc | text | . | * |  |
+D
+
+Section variables 2 Variable fields
+D ```
+D ${bootstrap_id}
+D ${seed_actors}
+D ${generator}
+D ${creation_date}
+D ${deprecated}
+D ${superseded_by}
+D ${doc}
+D ${parent.program_id}
+D ${superseded_by.program_id}
+D ```
+Section Navigation 2 Command navigation
+D ```
+D Its parent actor  [Link to GenProgram](#genprogram-component)
+D Its superseded_by actor  [Link to GenProgram](#genprogram-component)
+D ```
+
+Artifact geninput-component structure detail
+
+O Comp GenInput parent GenProgram FindIn
+
+O Defines a GenInput component with FindIn searchability under parent GenProgram, meaning instances are searchable within their parent's context.
+
+Section element_summary 2 Element Summary
+D
+D | Element | Type | Target | Check | Description |
+D |---------|------|--------|-------|-------------|
+D | input_id | key | . | + |   // e.g. "input_daml_model" |
+D | schema | word | . | + |   // daml | onnx | sql | cog | rio | custom |
+D | root_comp | word | . | + |   // Entry component type (e.g., "Model" in DAML) |
+D | example_instance | word | Memory | * |   // Optional live example data |
+D | validation_rules | text | . | * |   // JSON schema or validation expressions |
+D | required_elements | text | . | * |   // Comma-separated list of mandatory elements |
+D | doc | text | . | * |  |
+D
+
+Section variables 2 Variable fields
+D ```
+D ${input_id}
+D ${schema}
+D ${root_comp}
+D ${example_instance}
+D ${validation_rules}
+D ${required_elements}
+D ${doc}
+D ${parent.program_id}
+D ```
+Section Navigation 2 Command navigation
+D ```
+D Its parent actor  [Link to GenProgram](#genprogram-component)
+D ```
+
+Artifact genstrategy-component structure detail
+
+O Comp GenStrategy parent GenProgram FindIn
+
+O Defines a GenStrategy component with FindIn searchability under parent GenProgram, meaning instances are searchable within their parent's context.
+
+Section element_summary 2 Element Summary
+D
+D | Element | Type | Target | Check | Description |
+D |---------|------|--------|-------|-------------|
+D | strategy_id | key | . | + |   // e.g. "strat_multipass_001" |
+D | approach | word | . | + |   // direct_template | multi_pass | search_guided | learned | hybrid |
+D | passes | number | . | * |   // How many generation passes |
+D | learning_enabled | word | . | * |   // yes | no | nightly | continuous |
+D | quality_gates | text | . | * |   // "must_pass_valgrind", "latency < 2ms" |
+D | actor_artifacts | word | Artifact | * |  // The .act files that do the generation |
+D | doc | text | . | * |  |
+D
+
+Section variables 2 Variable fields
+D ```
+D ${strategy_id}
+D ${approach}
+D ${passes}
+D ${learning_enabled}
+D ${quality_gates}
+D ${actor_artifacts}
+D ${doc}
+D ${parent.program_id}
+D ```
+Section Navigation 2 Command navigation
+D ```
+D Its parent actor  [Link to GenProgram](#genprogram-component)
+D Its GenSearchSpace actor  [Link to GenSearchSpace](#gensearchspace-component)
+D ```
+
+Artifact gensearchspace-component structure detail
+
+O Comp GenSearchSpace parent GenStrategy FindIn
+
+O Defines a GenSearchSpace component with FindIn searchability under parent GenStrategy, meaning instances are searchable within their parent's context.
+
+Section element_summary 2 Element Summary
+D
+D | Element | Type | Target | Check | Description |
+D |---------|------|--------|-------|-------------|
+D | space_id | key | . | + |   // e.g. "space_tile_sizes" |
+D | parameter | word | . | + |   // Name of parameter |
+D | type | word | . | + |   // integer | float | categorical | boolean |
+D | min_value | number | . | * |   // For numeric types |
+D | max_value | number | . | * |   // For numeric types |
+D | choices | text | . | * |   // For categorical (comma-separated) |
+D | default_value | text | . | * |   // Fallback value |
+D | doc | text | . | * |  |
+D
+
+Section variables 2 Variable fields
+D ```
+D ${space_id}
+D ${parameter}
+D ${type}
+D ${min_value}
+D ${max_value}
+D ${choices}
+D ${default_value}
+D ${doc}
+D ${parent.strategy_id}
+D ```
+Section Navigation 2 Command navigation
+D ```
+D Its parent actor  [Link to GenStrategy](#genstrategy-component)
+D ```
+
+Artifact genpatternref-component structure detail
+
+O Comp GenPatternRef parent GenProgram FindIn
+
+O Defines a GenPatternRef component with FindIn searchability under parent GenProgram, meaning instances are searchable within their parent's context.
+
+Section element_summary 2 Element Summary
+D
+D | Element | Type | Target | Check | Description |
+D |---------|------|--------|-------|-------------|
+D | ref_id | key | . | + |   // e.g. "patref_001" |
+D | pattern | ref | Pattern | + |   // Which learned Pattern this program uses |
+D | weight | number | . | * |   // 0.0–1.0 confidence / application strength |
+D | scope | word | . | * |   // kernel | scheduling | memory_layout | fusion | optimization | all |
+D | application_point | text | . | * |   // When/where in generation this applies |
+D | trigger_condition | text | . | * |   // Optional: when to apply (e.g., "input.size > 1000") |
+D | added_by | word | Cycle | * |   // Which learning cycle added this pattern |
+D | doc | text | . | * |  |
+D
+
+Section variables 2 Variable fields
+D ```
+D ${ref_id}
+D ${pattern}
+D ${weight}
+D ${scope}
+D ${application_point}
+D ${trigger_condition}
+D ${added_by}
+D ${doc}
+D ${parent.program_id}
+D ${pattern.pattern_id}
+D ```
+Section Navigation 2 Command navigation
+D ```
+D Its parent actor  [Link to GenProgram](#genprogram-component)
+D Its pattern actor  [Link to Pattern](#pattern-component)
+D ```
+
+Artifact genoutputspec-component structure detail
+
+O Comp GenOutputSpec parent GenProgram FindIn
+
+O Defines a GenOutputSpec component with FindIn searchability under parent GenProgram, meaning instances are searchable within their parent's context.
+
+Section element_summary 2 Element Summary
+D
+D | Element | Type | Target | Check | Description |
+D |---------|------|--------|-------|-------------|
+D | spec_id | key | . | + |   // e.g. "output_spec_001" |
+D | format | word | . | + |   // single_file | multi_file | directory | artifact_set |
+D | main_entry | word | . | * |   // "database.cu" | "runtime.py" | "lib.rs" |
+D | file_pattern | text | . | * |   // Glob pattern for expected files |
+D | build_command | text | . | * |   // How to compile/build generated code |
+D | install_command | text | . | * |   // How to install/deploy |
+D | test_command | text | . | * |   // How to run tests |
+D | doc | text | . | * |  |
+D
+
+Section variables 2 Variable fields
+D ```
+D ${spec_id}
+D ${format}
+D ${main_entry}
+D ${file_pattern}
+D ${build_command}
+D ${install_command}
+D ${test_command}
+D ${doc}
+D ${parent.program_id}
+D ```
+Section Navigation 2 Command navigation
+D ```
+D Its parent actor  [Link to GenProgram](#genprogram-component)
+D ```
+
+Artifact genmetric-component structure detail
+
+O Comp GenMetric parent GenProgram FindIn
+
+O Defines a GenMetric component with FindIn searchability under parent GenProgram, meaning instances are searchable within their parent's context.
+
+Section element_summary 2 Element Summary
+D
+D | Element | Type | Target | Check | Description |
+D |---------|------|--------|-------|-------------|
+D | metric_id | key | . | + |   // e.g. "metric_qps_001" |
+D | name | word | . | + |   // "qps_sf100" | "kernel_launch_overhead" |
+D | category | word | . | * |   // performance | correctness | size | resource |
+D | value | number | . | * |   // Current best measured value |
+D | target | number | . | * |   // Goal value |
+D | unit | word | . | * |   // "qps" | "ms" | "kb" | "percent" |
+D | achieved_in | word | Cycle | * |   // Which learning cycle achieved this |
+D | timestamp | number | . | * |   // When measured |
+D | doc | text | . | * |  |
+D
+
+Section variables 2 Variable fields
+D ```
+D ${metric_id}
+D ${name}
+D ${category}
+D ${value}
+D ${target}
+D ${unit}
+D ${achieved_in}
+D ${timestamp}
+D ${doc}
+D ${parent.program_id}
+D ```
+Section Navigation 2 Command navigation
+D ```
+D Its parent actor  [Link to GenProgram](#genprogram-component)
+D ```
+
+Artifact genevolution-component structure detail
+
+O Comp GenEvolution parent GenProgram FindIn
+
+O Defines a GenEvolution component with FindIn searchability under parent GenProgram, meaning instances are searchable within their parent's context.
+
+Section element_summary 2 Element Summary
+D
+D | Element | Type | Target | Check | Description |
+D |---------|------|--------|-------|-------------|
+D | evolution_id | key | . | + |   // e.g. "evo_v2_to_v3" |
+D | previous_version | ref | GenProgram | * | // Forms a DAG/lineage |
+D | triggering_cycle | word | Cycle | * |    // Why this new version was born |
+D | improvement | number | . | * |    // % speedup, size reduction, etc. |
+D | metric_improved | word | . | * |    // Which metric improved |
+D | changes | text | . | * |    // Human-readable change description |
+D | breaking_changes | word | . | * |    // yes | no |
+D | automatic | word | . | * |    // yes | no (was this auto-generated?) |
+D | timestamp | number | . | + |    // When this version was created |
+D | doc | text | . | * |  |
+D
+
+Section variables 2 Variable fields
+D ```
+D ${evolution_id}
+D ${previous_version}
+D ${triggering_cycle}
+D ${improvement}
+D ${metric_improved}
+D ${changes}
+D ${breaking_changes}
+D ${automatic}
+D ${timestamp}
+D ${doc}
+D ${parent.program_id}
+D ${previous_version.program_id}
+D ```
+Section Navigation 2 Command navigation
+D ```
+D Its parent actor  [Link to GenProgram](#genprogram-component)
+D Its previous_version actor  [Link to GenProgram](#genprogram-component)
+D ```
+
+Artifact genpipeline-component structure overview
+
+O Comp GenPipeline parent . Find
+
+O Defines a top-level GenPipeline component with Find searchability, meaning instances can be looked up globally by their key field.
+
+Section element_summary 2 Element Summary
+D
+D | Element | Type | Target | Check | Description |
+D |---------|------|--------|-------|-------------|
+D | pipeline_id | key | . | + |   // e.g. "pipe_e2e_cuda_db" |
+D | name | word | . | + |   // Human name |
+D | description | text | . | * |   // What this pipeline does |
+D | author_thought | word | Thought | * |   // Thought that designed this |
+D | doc | text | . | * |  |
+D
+
+Section variables 2 Variable fields
+D ```
+D ${pipeline_id}
+D ${name}
+D ${description}
+D ${author_thought}
+D ${doc}
+D ```
+Section Navigation 2 Command navigation
+D ```
+D Its GenStage actor  [Link to GenStage](#genstage-component)
+D ```
+
+Artifact genstage-component structure detail
+
+O Comp GenStage parent GenPipeline FindIn
+
+O Defines a GenStage component with FindIn searchability under parent GenPipeline, meaning instances are searchable within their parent's context.
+
+Section element_summary 2 Element Summary
+D
+D | Element | Type | Target | Check | Description |
+D |---------|------|--------|-------|-------------|
+D | stage_id | key | . | + |   // e.g. "stage_001" |
+D | order | number | . | + |   // Execution order (1, 2, 3...) |
+D | program | ref | GenProgram | + | // Which program runs here |
+D | input_mapping | text | . | * |   // How inputs map from previous stage |
+D | output_mapping | text | . | * |   // How outputs map to next stage |
+D | conditional | text | . | * |   // Optional: when to run this stage |
+D | parallel_with | link | GenStage | * |  // Can run in parallel with this stage |
+D | doc | text | . | * |  |
+D
+
+Section variables 2 Variable fields
+D ```
+D ${stage_id}
+D ${order}
+D ${program}
+D ${input_mapping}
+D ${output_mapping}
+D ${conditional}
+D ${parallel_with}
+D ${doc}
+D ${parent.pipeline_id}
+D ${program.program_id}
+D ${parallel_with.stage_id}
+D ${GenStage_parallel_with.stage_id}
+D ```
+Section Navigation 2 Command navigation
+D ```
+D Its parent actor  [Link to GenPipeline](#genpipeline-component)
+D Its program actor  [Link to GenProgram](#genprogram-component)
+D Its parallel_with actor  [Link to GenStage](#genstage-component)
+D Its GenStage_parallel_with actor  [Reverse link to GenStage](#genstage-component)
+D ```
+
+Artifact project-component structure overview
+
+O Comp Project parent . Find
+
+O Defines a top-level Project component with Find searchability, meaning instances can be looked up globally by their key field.
+
+Section element_summary 2 Element Summary
+D
+D | Element | Type | Target | Check | Description |
+D |---------|------|--------|-------|-------------|
+D | project | key | . | + | Project name/ID |
+D | domain | ref | Domain | * | Primary domain (optional) |
+D | model | ref | Model | + | Root model/graph |
+D | strategy | ref | Strategy | * | Default optimization strategy |
+D | hardware | ref | Hardware | * | Default target hardware |
+D | desc | text | . | * | Description |
+D
+
+Section variables 2 Variable fields
+D ```
+D ${project}
+D ${domain}
+D ${model}
+D ${strategy}
+D ${hardware}
+D ${desc}
+D ${domain.name}
+D ${model.model}
+D ${strategy.strategy}
+D ${hardware.hardware}
+D ```
+Section Navigation 2 Command navigation
+D ```
+D Its domain actor  [Link to Domain](#domain-component)
+D Its model actor  [Link to Model](#model-component)
+D Its strategy actor  [Link to Strategy](#strategy-component)
+D Its hardware actor  [Link to Hardware](#hardware-component)
+D ```
+
+Artifact domain-component structure overview
+
+O Comp Domain parent . Find
+
+O Defines a top-level Domain component with Find searchability, meaning instances can be looked up globally by their key field.
+
+Section element_summary 2 Element Summary
+D
+D | Element | Type | Target | Check | Description |
+D |---------|------|--------|-------|-------------|
+D | name | key | . | + | Domain identifier |
+D | desc | text | . | * | Human name/description |
+D
+
+Section variables 2 Variable fields
+D ```
+D ${name}
+D ${desc}
+D ${Project_domain.project}
+D ```
+Section Navigation 2 Command navigation
+D ```
+D Its Project_domain actor  [Reverse link to Project](#project-component)
+D ```
+
+Artifact hardware-component structure overview
+
+O Comp Hardware parent . Find
+
+O Defines a top-level Hardware component with Find searchability, meaning instances can be looked up globally by their key field.
+
+Section element_summary 2 Element Summary
+D
+D | Element | Type | Target | Check | Description |
+D |---------|------|--------|-------|-------------|
+D | hardware | key | . | + | Unique name (gpu_a100, tsu_v1, ibmq_oslo) |
+D | parent_hw | ref | Hardware | * | Optional hierarchy (rack → node → card) |
+D | emulation | ref | Hardware | * | Reference to emulator hardware |
+D | noise_model | ref | Constraint | * | Stochastic/Quantum noise reference |
+D | payload | text | . | * | JSON/YAML: arch, memory_gb, bandwidth… |
+D
+
+Section variables 2 Variable fields
+D ```
+D ${hardware}
+D ${parent_hw}
+D ${emulation}
+D ${noise_model}
+D ${payload}
+D ${parent_hw.hardware}
+D ${emulation.hardware}
+D ${noise_model.constraint_id}
+D ${Project_hardware.project}
+D ${Hardware_parent_hw.hardware}
+D ${Hardware_emulation.hardware}
+D ${Model_hardware.model}
+D ${Op_hardware.op}
+D ${Kernel_hardware.kernel}
+D ${Constraint_target_hw.constraint_id}
+D ${Metric_target_hw.metric}
+D ${Fusion_hardware.fusion}
+D ```
+Section Navigation 2 Command navigation
+D ```
+D Its parent_hw actor  [Link to Hardware](#hardware-component)
+D Its emulation actor  [Link to Hardware](#hardware-component)
+D Its noise_model actor  [Link to Constraint](#constraint-component)
+D Its Project_hardware actor  [Reverse link to Project](#project-component)
+D Its Hardware_parent_hw actor  [Reverse link to Hardware](#hardware-component)
+D Its Hardware_emulation actor  [Reverse link to Hardware](#hardware-component)
+D Its Model_hardware actor  [Reverse link to Model](#model-component)
+D Its Op_hardware actor  [Reverse link to Op](#op-component)
+D Its Kernel_hardware actor  [Reverse link to Kernel](#kernel-component)
+D Its Constraint_target_hw actor  [Reverse link to Constraint](#constraint-component)
+D Its Metric_target_hw actor  [Reverse link to Metric](#metric-component)
+D Its Fusion_hardware actor  [Reverse link to Fusion](#fusion-component)
+D ```
+
+Artifact model-component structure overview
+
+O Comp Model parent . Find
+
+O Defines a top-level Model component with Find searchability, meaning instances can be looked up globally by their key field.
+
+Section element_summary 2 Element Summary
+D
+D | Element | Type | Target | Check | Description |
+D |---------|------|--------|-------|-------------|
+D | model | key | . | + | Model identifier |
+D | hardware | ref | Hardware | * | Preferred substrate |
+D | search_space | ref | SearchSpace | * | NAS search space (optional) |
+D | config | ref | Config | * | Inference/runtime configuration |
+D | code | text | . | * | Optional: main driver file path |
+D | payload | text | . | * | type, dataset, num_classes, pgm_schema… |
+D
+
+Section variables 2 Variable fields
+D ```
+D ${model}
+D ${hardware}
+D ${search_space}
+D ${config}
+D ${code}
+D ${payload}
+D ${hardware.hardware}
+D ${search_space.space}
+D ${config.config}
+D ${Project_model.project}
+D ${Block_model.block}
+D ${Arg_model.arg}
+D ${SearchSpace_target_model.space}
+D ${Constraint_model.constraint_id}
+D ${Checkpoint_model.checkpoint_id}
+D ${ControlFlow_model1.control}
+D ${ControlFlow_model2.control}
+D ${ControlFlow_model3.control}
+D ```
+Section Navigation 2 Command navigation
+D ```
+D Its Layer actor  [Link to Layer](#layer-component)
+D Its Tensor actor  [Link to Tensor](#tensor-component)
+D Its Op actor  [Link to Op](#op-component)
+D Its hardware actor  [Link to Hardware](#hardware-component)
+D Its search_space actor  [Link to SearchSpace](#searchspace-component)
+D Its config actor  [Link to Config](#config-component)
+D Its Project_model actor  [Reverse link to Project](#project-component)
+D Its Block_model actor  [Reverse link to Block](#block-component)
+D Its Arg_model actor  [Reverse link to Arg](#arg-component)
+D Its SearchSpace_target_model actor  [Reverse link to SearchSpace](#searchspace-component)
+D Its Constraint_model actor  [Reverse link to Constraint](#constraint-component)
+D Its Checkpoint_model actor  [Reverse link to Checkpoint](#checkpoint-component)
+D Its ControlFlow_model1 actor  [Reverse link to ControlFlow](#controlflow-component)
+D Its ControlFlow_model2 actor  [Reverse link to ControlFlow](#controlflow-component)
+D Its ControlFlow_model3 actor  [Reverse link to ControlFlow](#controlflow-component)
+D ```
+
+Artifact layer-component structure detail
+
+O Comp Layer parent Model FindIn
+
+O Defines a Layer component with FindIn searchability under parent Model, meaning instances are searchable within their parent's context.
+
+Section element_summary 2 Element Summary
+D
+D | Element | Type | Target | Check | Description |
+D |---------|------|--------|-------|-------------|
+D | layer | key | . | + | Layer name |
+D | parent_layer | link | Layer | * | Nested layer support |
+D | payload | text | . | * | layer_type, repeat, reduction… |
+D
+
+Section variables 2 Variable fields
+D ```
+D ${layer}
+D ${parent_layer}
+D ${payload}
+D ${parent.model}
+D ${parent_layer.layer}
+D ${Layer_parent_layer.layer}
+D ${Op_layer.op}
+D ```
+Section Navigation 2 Command navigation
+D ```
+D Its parent actor  [Link to Model](#model-component)
+D Its parent_layer actor  [Link to Layer](#layer-component)
+D Its Layer_parent_layer actor  [Reverse link to Layer](#layer-component)
+D Its Op_layer actor  [Reverse link to Op](#op-component)
+D ```
+
+Artifact block-component structure overview
+
+O Comp Block parent . Find
+
+O Defines a top-level Block component with Find searchability, meaning instances can be looked up globally by their key field.
+
+Section element_summary 2 Element Summary
+D
+D | Element | Type | Target | Check | Description |
+D |---------|------|--------|-------|-------------|
+D | block | key | . | + | Block identifier |
+D | model | ref | Model | * | Reference to sub-model structure |
+D | payload | text | . | * | block_type, params, noise_model, energy… |
+D
+
+Section variables 2 Variable fields
+D ```
+D ${block}
+D ${model}
+D ${payload}
+D ${model.model}
+D ```
+Section Navigation 2 Command navigation
+D ```
+D Its model actor  [Link to Model](#model-component)
+D ```
+
+Artifact tensor-component structure detail
+
+O Comp Tensor parent Model FindIn
+
+O Defines a Tensor component with FindIn searchability under parent Model, meaning instances are searchable within their parent's context.
+
+Section element_summary 2 Element Summary
+D
+D | Element | Type | Target | Check | Description |
+D |---------|------|--------|-------|-------------|
+D | tensor | key | . | + | Tensor name (e.g. input, hidden_3, qubits) |
+D | producer | link | Op | * | Operation producing this tensor |
+D | distribution | ref | EnergyFunction | * | Probabilistic semantics (optional) |
+D | payload | text | . | * | shape, dtype, layout, symbolic, role… |
+D
+
+Section variables 2 Variable fields
+D ```
+D ${tensor}
+D ${producer}
+D ${distribution}
+D ${payload}
+D ${parent.model}
+D ${producer.op}
+D ${distribution.energy_fn}
+D ${Op_predicate.op}
+D ${Arg_tensor.arg}
+D ```
+Section Navigation 2 Command navigation
+D ```
+D Its parent actor  [Link to Model](#model-component)
+D Its producer actor  [Link to Op](#op-component)
+D Its distribution actor  [Link to EnergyFunction](#energyfunction-component)
+D Its Op_predicate actor  [Reverse link to Op](#op-component)
+D Its Arg_tensor actor  [Reverse link to Arg](#arg-component)
+D ```
+
+Artifact op-component structure detail
+
+O Comp Op parent Model FindIn
+
+O Defines a Op component with FindIn searchability under parent Model, meaning instances are searchable within their parent's context.
+
+Section element_summary 2 Element Summary
+D
+D | Element | Type | Target | Check | Description |
+D |---------|------|--------|-------|-------------|
+D | op | key | . | + | Unique operation name |
+D | hardware | ref | Hardware | * | Target substrate for this op |
+D | energy_fn | ref | EnergyFunction | * | Physics energy (optional) |
+D | search_space | ref | SearchSpace | * | NAS/tuning context (optional) |
+D | strategy | ref | Strategy | * | Meta-optimisation / simulation strategy |
+D | predicate | link | Tensor | * | Dynamic condition (optional) |
+D | next_op | link | Op | * | Explicit DAG edge (optional) |
+D | layer | link | Layer | * | Containing layer (optional) |
+D | code | text | . | * | Path to implementation: kernels/matmul.cu, etc. |
+D | payload | text | . | * | JSON/YAML blob: op_type, num_heads, gate_type, |
+D | desc | text | . | * | Human description |
+D
+
+Section variables 2 Variable fields
+D ```
+D ${op}
+D ${hardware}
+D ${energy_fn}
+D ${search_space}
+D ${strategy}
+D ${predicate}
+D ${next_op}
+D ${layer}
+D ${code}
+D ${payload}
+D ${desc}
+D ${parent.model}
+D ${hardware.hardware}
+D ${energy_fn.energy_fn}
+D ${search_space.space}
+D ${strategy.strategy}
+D ${predicate.tensor}
+D ${next_op.op}
+D ${layer.layer}
+D ${Tensor_producer.tensor}
+D ${Op_next_op.op}
+D ${Constraint_target_op.constraint_id}
+D ```
+Section Navigation 2 Command navigation
+D ```
+D Its parent actor  [Link to Model](#model-component)
+D Its Arg actor  [Link to Arg](#arg-component)
+D Its ControlFlow actor  [Link to ControlFlow](#controlflow-component)
+D Its hardware actor  [Link to Hardware](#hardware-component)
+D Its energy_fn actor  [Link to EnergyFunction](#energyfunction-component)
+D Its search_space actor  [Link to SearchSpace](#searchspace-component)
+D Its strategy actor  [Link to Strategy](#strategy-component)
+D Its predicate actor  [Link to Tensor](#tensor-component)
+D Its next_op actor  [Link to Op](#op-component)
+D Its layer actor  [Link to Layer](#layer-component)
+D Its Tensor_producer actor  [Reverse link to Tensor](#tensor-component)
+D Its Op_next_op actor  [Reverse link to Op](#op-component)
+D Its Constraint_target_op actor  [Reverse link to Constraint](#constraint-component)
+D ```
+
+Artifact arg-component structure detail
+
+O Comp Arg parent Op FindIn
+
+O Defines a Arg component with FindIn searchability under parent Op, meaning instances are searchable within their parent's context.
+
+Section element_summary 2 Element Summary
+D
+D | Element | Type | Target | Check | Description |
+D |---------|------|--------|-------|-------------|
+D | arg | key | . | + | Argument name |
+D | role | word | . | + | input | output | parameter |
+D | model | up_copy | Model | * | Context navigation to parent Model |
+D | tensor | ref_child | Tensor | + | Connected tensor (sibling under Model) |
+D
+
+Section variables 2 Variable fields
+D ```
+D ${arg}
+D ${role}
+D ${model}
+D ${tensor}
+D ${parent.op}
+D ${model.model}
+D ${tensor.tensor}
+D ```
+Section Navigation 2 Command navigation
+D ```
+D Its parent actor  [Link to Op](#op-component)
+D Its model actor  [Link to Model](#model-component)
+D Its tensor actor  [Link to Tensor](#tensor-component)
+D ```
+
+Artifact config-component structure overview
+
+O Comp Config parent . Find
+
+O Defines a top-level Config component with Find searchability, meaning instances can be looked up globally by their key field.
+
+Section element_summary 2 Element Summary
+D
+D | Element | Type | Target | Check | Description |
+D |---------|------|--------|-------|-------------|
+D | config | key | . | + | Config identifier |
+D | schedule | ref | Strategy | * | Execution schedule |
+D | payload | text | . | * | batch_size, precision, state_transfer… |
+D
+
+Section variables 2 Variable fields
+D ```
+D ${config}
+D ${schedule}
+D ${payload}
+D ${schedule.strategy}
+D ${Model_config.model}
+D ```
+Section Navigation 2 Command navigation
+D ```
+D Its schedule actor  [Link to Strategy](#strategy-component)
+D Its Model_config actor  [Reverse link to Model](#model-component)
+D ```
+
+Artifact kernel-component structure overview
+
+O Comp Kernel parent . Find
+
+O Defines a top-level Kernel component with Find searchability, meaning instances can be looked up globally by their key field.
+
+Section element_summary 2 Element Summary
+D
+D | Element | Type | Target | Check | Description |
+D |---------|------|--------|-------|-------------|
+D | kernel | key | . | + | Kernel name |
+D | hardware | ref | Hardware | * | Target hardware |
+D | code | text | . | * | Path to kernel file |
+D
+
+Section variables 2 Variable fields
+D ```
+D ${kernel}
+D ${hardware}
+D ${code}
+D ${hardware.hardware}
+D ```
+Section Navigation 2 Command navigation
+D ```
+D Its hardware actor  [Link to Hardware](#hardware-component)
+D ```
+
+Artifact energyfunction-component structure overview
+
+O Comp EnergyFunction parent . Find
+
+O Defines a top-level EnergyFunction component with Find searchability, meaning instances can be looked up globally by their key field.
+
+Section element_summary 2 Element Summary
+D
+D | Element | Type | Target | Check | Description |
+D |---------|------|--------|-------|-------------|
+D | energy_fn | key | . | + | Name |
+D | code | text | . | * | Optional: energy function source path |
+D | payload | text | . | * | expression, variables, temperature… |
+D
+
+Section variables 2 Variable fields
+D ```
+D ${energy_fn}
+D ${code}
+D ${payload}
+D ${Tensor_distribution.tensor}
+D ${Op_energy_fn.op}
+D ```
+Section Navigation 2 Command navigation
+D ```
+D Its Tensor_distribution actor  [Reverse link to Tensor](#tensor-component)
+D Its Op_energy_fn actor  [Reverse link to Op](#op-component)
+D ```
+
+Artifact searchspace-component structure overview
+
+O Comp SearchSpace parent . Find
+
+O Defines a top-level SearchSpace component with Find searchability, meaning instances can be looked up globally by their key field.
+
+Section element_summary 2 Element Summary
+D
+D | Element | Type | Target | Check | Description |
+D |---------|------|--------|-------|-------------|
+D | space | key | . | + | Search space ID |
+D | target_model | ref | Model | * | Model being tuned |
+D | payload | text | . | * | algorithm hints, constraints… |
+D
+
+Section variables 2 Variable fields
+D ```
+D ${space}
+D ${target_model}
+D ${payload}
+D ${target_model.model}
+D ${Model_search_space.model}
+D ${Op_search_space.op}
+D ${Strategy_search_space.strategy}
+D ```
+Section Navigation 2 Command navigation
+D ```
+D Its Dimension actor  [Link to Dimension](#dimension-component)
+D Its target_model actor  [Link to Model](#model-component)
+D Its Model_search_space actor  [Reverse link to Model](#model-component)
+D Its Op_search_space actor  [Reverse link to Op](#op-component)
+D Its Strategy_search_space actor  [Reverse link to Strategy](#strategy-component)
+D ```
+
+Artifact dimension-component structure detail
+
+O Comp Dimension parent SearchSpace FindIn
+
+O Defines a Dimension component with FindIn searchability under parent SearchSpace, meaning instances are searchable within their parent's context.
+
+Section element_summary 2 Element Summary
+D
+D | Element | Type | Target | Check | Description |
+D |---------|------|--------|-------|-------------|
+D | dimension | key | . | + | Dimension name (e.g. temperature, num_heads) |
+D | payload | text | . | * | type, range, scale, choices… |
+D
+
+Section variables 2 Variable fields
+D ```
+D ${dimension}
+D ${payload}
+D ${parent.space}
+D ```
+Section Navigation 2 Command navigation
+D ```
+D Its parent actor  [Link to SearchSpace](#searchspace-component)
+D ```
+
+Artifact strategy-component structure overview
+
+O Comp Strategy parent . Find
+
+O Defines a top-level Strategy component with Find searchability, meaning instances can be looked up globally by their key field.
+
+Section element_summary 2 Element Summary
+D
+D | Element | Type | Target | Check | Description |
+D |---------|------|--------|-------|-------------|
+D | strategy | key | . | + | Name (darts, evolution, maml, cycle_accurate_sim) |
+D | search_space | ref | SearchSpace | * | Target search space |
+D | fitness | ref | Metric | * | Fitness metric |
+D | code | text | . | * | Strategy implementation file path |
+D | payload | text | . | * | learning rates, budgets, fidelity… |
+D
+
+Section variables 2 Variable fields
+D ```
+D ${strategy}
+D ${search_space}
+D ${fitness}
+D ${code}
+D ${payload}
+D ${search_space.space}
+D ${fitness.metric}
+D ${Project_strategy.project}
+D ${Op_strategy.op}
+D ${Config_schedule.config}
+D ```
+Section Navigation 2 Command navigation
+D ```
+D Its search_space actor  [Link to SearchSpace](#searchspace-component)
+D Its fitness actor  [Link to Metric](#metric-component)
+D Its Project_strategy actor  [Reverse link to Project](#project-component)
+D Its Op_strategy actor  [Reverse link to Op](#op-component)
+D Its Config_schedule actor  [Reverse link to Config](#config-component)
+D ```
+
+Artifact constraint-component structure overview
+
+O Comp Constraint parent . Find
+
+O Defines a top-level Constraint component with Find searchability, meaning instances can be looked up globally by their key field.
+
+Section element_summary 2 Element Summary
+D
+D | Element | Type | Target | Check | Description |
+D |---------|------|--------|-------|-------------|
+D | constraint_id | key | . | + | ID |
+D | target_hw | ref | Hardware | * | Constrained hardware (optional) |
+D | model | ref | Model | * | Context navigation to parent Model |
+D | target_op | ref_child | Op | * | Constrained operation (optional) |
+D | payload | text | . | * | condition, severity, target, noise_model… |
+D
+
+Section variables 2 Variable fields
+D ```
+D ${constraint_id}
+D ${target_hw}
+D ${model}
+D ${target_op}
+D ${payload}
+D ${target_hw.hardware}
+D ${model.model}
+D ${target_op.op}
+D ${Hardware_noise_model.hardware}
+D ```
+Section Navigation 2 Command navigation
+D ```
+D Its target_hw actor  [Link to Hardware](#hardware-component)
+D Its model actor  [Link to Model](#model-component)
+D Its target_op actor  [Link to Op](#op-component)
+D Its Hardware_noise_model actor  [Reverse link to Hardware](#hardware-component)
+D ```
+
+Artifact metric-component structure overview
+
+O Comp Metric parent . Find
+
+O Defines a top-level Metric component with Find searchability, meaning instances can be looked up globally by their key field.
+
+Section element_summary 2 Element Summary
+D
+D | Element | Type | Target | Check | Description |
+D |---------|------|--------|-------|-------------|
+D | metric | key | . | + | Name |
+D | target_hw | ref | Hardware | * | Component measured (optional) |
+D | payload | text | . | * | unit, target_value… |
+D
+
+Section variables 2 Variable fields
+D ```
+D ${metric}
+D ${target_hw}
+D ${payload}
+D ${target_hw.hardware}
+D ${Strategy_fitness.strategy}
+D ```
+Section Navigation 2 Command navigation
+D ```
+D Its target_hw actor  [Link to Hardware](#hardware-component)
+D Its Strategy_fitness actor  [Reverse link to Strategy](#strategy-component)
+D ```
+
+Artifact checkpoint-component structure overview
+
+O Comp Checkpoint parent . Find
+
+O Defines a top-level Checkpoint component with Find searchability, meaning instances can be looked up globally by their key field.
+
+Section element_summary 2 Element Summary
+D
+D | Element | Type | Target | Check | Description |
+D |---------|------|--------|-------|-------------|
+D | checkpoint_id | key | . | + | ID |
+D | model | ref | Model | * | Model snapshot belongs to |
+D | payload | text | . | * | state path, timestamp |
+D
+
+Section variables 2 Variable fields
+D ```
+D ${checkpoint_id}
+D ${model}
+D ${payload}
+D ${model.model}
+D ```
+Section Navigation 2 Command navigation
+D ```
+D Its model actor  [Link to Model](#model-component)
+D ```
+
+Artifact fusion-component structure overview
+
+O Comp Fusion parent . Find
+
+O Defines a top-level Fusion component with Find searchability, meaning instances can be looked up globally by their key field.
+
+Section element_summary 2 Element Summary
+D
+D | Element | Type | Target | Check | Description |
+D |---------|------|--------|-------|-------------|
+D | fusion | key | . | + | Pattern identifier |
+D | hardware | ref | Hardware | * | Target hardware |
+D | payload | text | . | * | pattern_type, ops_fused, strategy… |
+D
+
+Section variables 2 Variable fields
+D ```
+D ${fusion}
+D ${hardware}
+D ${payload}
+D ${hardware.hardware}
+D ```
+Section Navigation 2 Command navigation
+D ```
+D Its hardware actor  [Link to Hardware](#hardware-component)
+D ```
+
+Artifact controlflow-component structure detail
+
+O Comp ControlFlow parent Op FindIn
+
+O Defines a ControlFlow component with FindIn searchability under parent Op, meaning instances are searchable within their parent's context.
+
+Section element_summary 2 Element Summary
+D
+D | Element | Type | Target | Check | Description |
+D |---------|------|--------|-------|-------------|
+D | control | key | . | + | Control flow identifier |
+D | model1 | up_copy | Model | * | Context navigation to parent Model |
+D | predicate | ref_cild | Tensor | * | Condition tensor |
+D | model2 | up_copy | Model | * | Context navigation to parent Model |
+D | branch_true | ref_cild | Op | * | True branch target |
+D | model3 | up_copy | Model | * | Context navigation to parent Model |
+D | branch_false | ref_cild | Op | * | False branch target |
+D | payload | text | . | * | loop_count, condition_type… |
+D
+
+Section variables 2 Variable fields
+D ```
+D ${control}
+D ${model1}
+D ${predicate}
+D ${model2}
+D ${branch_true}
+D ${model3}
+D ${branch_false}
+D ${payload}
+D ${parent.op}
+D ${model1.model}
+D ${model2.model}
+D ${model3.model}
+D ```
+Section Navigation 2 Command navigation
+D ```
+D Its parent actor  [Link to Op](#op-component)
+D Its model1 actor  [Link to Model](#model-component)
+D Its model2 actor  [Link to Model](#model-component)
+D Its model3 actor  [Link to Model](#model-component)
+D ```
+
+Artifact reference-resolution-guide workflow overview
+O Multi-pass reference resolution algorithm that handles complex reference chains.
+
+Section resolution_order 2 Resolution Order
+D References resolve in passes until stable:
+D
+D **Pass 1: Direct References**
+D - `ref`: Direct lookup in global index
+D - `link`: Lookup in parent's child index
+D
+D **Pass 2+: Derived References**
+D - `ref_copy`: Copies resolved reference from previous field
+D - `ref_child`: Looks up child in previously referenced component
+D - `up_copy`: Walks parent chain to find ancestor
+D
+D The loader repeats passes until error count stops changing (typically 2-4 passes).
+
+Section chaining_pattern 2 Common Chaining Pattern
+D ```
+D Element base_ref    ref       Target    +
+D Element child_ref   ref_child ChildType +
+D ```
+D First field resolves Target by name, second field looks up ChildType within that Target.
+
+Section up_chain_pattern 2 Up-Chain Pattern
+D ```
+D Element context     up_copy   Ancestor  +
+D Element target      ref_child ChildType +
+D ```
+D First field walks parents to find Ancestor, second field looks up ChildType within it.
+
+Section common_patterns 2 Common Design Patterns
+D
+D **Pattern 1: Direct Reference**
+D ```
+D Element target ref ComponentType +
+D ```
+D Simple global lookup.
+D
+D **Pattern 2: Reference Chain**
+D ```
+D Element parent_ref   ref       Parent +
+D Element child_ref    ref_child Child  +
+D ```
+D Two-level lookup: resolve parent, then find child within parent.
+D
+D **Pattern 3: Ancestor Lookup**
+D ```
+D Element ancestor  up_copy   Ancestor +
+D Element target    ref_child Target   +
+D ```
+D Navigate up hierarchy to find ancestor, then look up child within it.
+D
+D **Pattern 4: Reference Reuse**
+D ```
+D Element original  ref      Target +
+D Element copy      ref_copy Target +
+D ```
+D Resolve once, copy pointer multiple times for efficiency.
+D
+D **Pattern 5: Sibling Link**
+D ```
+D Element sibling link SiblingType +
+D ```
+D Reference sibling component under same parent.
+D
+
