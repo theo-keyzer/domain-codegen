@@ -1,0 +1,1778 @@
+// ================================================================
+// CANON-BREAK-OUT-RIO.RIO
+// Control Flow and Deferred Output in Actor-Based Code Generation
+// Extracted from fix.md analysis and runtime behavior
+// ================================================================
+
+Canon {
+  name = break_command_fundamentals
+  category = control_flow
+  topic_type = core_mechanism
+  overview = "Break commands provide multi-layered control flow termination, from stopping a single command sequence to exiting the entire generation process."
+  doc = ~~~
+**The Break Command Structure:**
+
+```
+Break [check] [what] [actor]
+```
+
+**Parameters:**
+
+1. **check** (optional) - Conditional execution gate:
+   - (none) → Always execute break
+   - True → Only break if IsCheck flag is true
+   - False → Only break if IsCheck flag is false
+
+2. **what** - Scope of break:
+   - actor (or none) → Stop matching actors for this name
+   - loop → Exit current Its/All/This iteration
+   - cmds → Stop current actor's commands, continue to next matching actor
+   - exit → Terminate entire generation (when errors exist)
+
+3. **actor** (optional) - Target for break propagation:
+   - (none) or . → Break applies to immediate context
+   - name → Break propagates up Win stack to named actor
+
+**Return Code System:**
+
+The break mechanism uses integer return codes that flow through the execution layers:
+
+| What | Return Code | Effect |
+|------|-------------|--------|
+| actor/none | 2 | Stop trying actors with this name |
+| loop | 1 | Exit current iteration, continue to next |
+| cmds | 3 | Stop commands, continue to next actor |
+| exit (with errors) | -4 | Terminate everything |
+| exit (no errors) | 0 | Continue (current behavior) |
+
+**Named breaks negate the return code** to signal propagation.
+~~~
+}
+
+Canon {
+  name = break_immediate_scope
+  category = control_flow
+  topic_type = usage_pattern
+  overview = "Simple breaks without actor names affect only the immediate enclosing scope."
+  doc = ~~~
+**Break actor - Stop Current Actor Matching:**
+
+```
+Actor gen_field Element type = ref
+  C "  K${name}p int  // Reference"
+  Break actor
+  
+Actor gen_field Element type = text
+  C "  // Text field: ${name}"
+```
+
+When the first actor matches (type=ref), it generates output and breaks.
+The second actor (type=text) will NOT be tried even though name matches.
+
+**Use Case:** First-match-wins pattern when multiple actors share the same name.
+
+---
+
+**Break loop - Exit Current Iteration:**
+
+```
+Actor process_items Element
+  Its SubElement validate_item
+  Break loop  # Skip remaining SubElements after first
+
+Actor validate_item SubElement
+  C "Validating ${name}"
+```
+
+After processing the first SubElement, the loop exits.
+Remaining SubElements are skipped.
+
+**Use Case:** Process only the first child, or exit early when condition met.
+
+---
+
+**Break cmds - Stop Commands, Continue Actors:**
+
+```
+Actor gen_code Comp doc = ""
+  Break cmds  # Skip generation if no doc
+  
+Actor gen_code Comp
+  C "// ${doc}"
+  C "func Generate() {}"
+```
+
+Both actors match the name "gen_code".
+If doc is empty, first actor breaks from its commands (which is just the Break).
+Second actor still executes because cmds doesn't stop actor matching.
+
+**Use Case:** Conditional setup or validation before main generation.
+
+---
+
+**Break exit - Terminate Generation:**
+
+```
+Actor validate_schema Comp
+  Its Element check_required
+  
+Actor check_required Element required = true name = ""
+  C "Error: Required field missing"
+  Break exit
+```
+
+When a required field is empty, generation terminates immediately.
+Only works if glob.RunErrs > 0 (error counter incremented).
+
+**Use Case:** Fatal validation failures that should stop all generation.
+~~~
+}
+
+Canon {
+  name = break_named_propagation
+  category = control_flow
+  topic_type = advanced_mechanism
+  overview = "Named breaks walk backward through the Win stack to find a target actor frame and propagate the break to that exact point."
+  doc = ~~~
+**The Named Break Mechanism:**
+
+When you write:
+```
+Break loop outer_loop
+```
+
+The runtime:
+
+1. Searches backward through glob.Wins[winp-1], winp-2, etc.
+2. Looks for a frame where Name == "outer_loop"
+3. When found at frame index i:
+   - Sets glob.Wins[i+1].BrkAct = true
+   - Negates the return code (1 becomes -1)
+4. Each frame unwinds, checking if BrkAct is set
+5. When target frame reached, flips return code back (−1 becomes 1)
+
+**Why i+1 Not i:**
+
+```
+Win Stack:
+[4] validate      ← Current (winp=4), issues Break loop outer_loop
+[3] gen_elem      ← BrkAct set HERE (i+1)
+[2] inner_loop    ← BrkAct set, propagates
+[1] outer_loop    ← TARGET found (i), handles the break
+[0] main
+```
+
+The flag is set on i+1 because that's the frame that needs to know
+"propagate this break upward" when unwinding. The target frame (i)
+doesn't need the flag—it's the destination.
+
+**Propagation Example:**
+
+```
+Actor outer_loop Comp
+  Its Element inner_loop
+  C "Done with ${name}"
+  
+Actor inner_loop Element
+  Its SubElement validate
+  
+Actor validate SubElement error = "true"
+  Break loop outer_loop  # Jump out of both loops
+```
+
+Timeline:
+1. validate actor at winp=5 issues Break loop outer_loop
+2. Runtime finds outer_loop at winp=2
+3. Sets BrkAct=true on frames 3, 4, 5
+4. Return code: -1 (negated loop break)
+5. Each frame checks BrkAct and propagates -1
+6. Frame 2 (outer_loop) sees its name matches, flips to +1
+7. outer_loop handles the loop break normally
+
+**Use Cases:**
+
+1. **Early exit from nested iterations:**
+```
+Actor outer Comp
+  All Child deep_process
+  
+Actor deep_process Child
+  Its Element find_match
+  
+Actor find_match Element name = "target"
+  C "Found: ${name}"
+  Break loop outer  # Exit all the way to outer
+```
+
+2. **Error handling across layers:**
+```
+Actor main_gen
+  All Comp validate_and_gen
+  
+Actor validate_and_gen Comp
+  Its Element check_valid
+  
+Actor check_valid Element valid = "false"
+  C "Error: ${name} is invalid"
+  Break actor main_gen  # Stop entire generation
+```
+
+3. **Conditional deep breaks:**
+```
+Actor find_first Comp
+  Its Element match_condition
+  
+Actor match_condition Element type = "special"
+  Break loop find_first  # Stop searching
+```
+~~~
+}
+
+Canon {
+  name = break_check_flag_pattern
+  category = control_flow
+  topic_type = conditional_execution
+  overview = "The IsCheck flag enables conditional breaks based on validation state, typically set by Add.check operations."
+  doc = ~~~
+**The IsCheck Flag:**
+
+Every WinT frame has an IsCheck boolean that tracks validation state.
+Break commands can gate execution on this flag:
+
+```
+Break True loop    # Only break if IsCheck == true
+Break False actor  # Only break if IsCheck == false
+```
+
+**Setting IsCheck with Add.check:**
+
+While the exact Add.check implementation may vary, the pattern is:
+
+```
+Add.check _.collection:${key} ${value}
+```
+
+This operation:
+1. Checks if key already exists in the collection
+2. If exists → sets glob.Wins[winp].IsCheck = true
+3. If new → sets glob.Wins[winp].IsCheck = false
+4. Then adds/updates the collection entry
+
+**Use Case 1 - Skip Duplicates:**
+
+```
+Actor collect_unique Element
+  Add.check _.seen:${name} ${name}
+  Break True actor  # Skip if duplicate
+  C "Processing new element: ${name}"
+```
+
+Flow:
+- First element "foo" → not in _.seen → IsCheck=false → Break skipped → processes
+- Second element "foo" → found in _.seen → IsCheck=true → Break fires → skips
+- Third element "bar" → not in _.seen → IsCheck=false → Break skipped → processes
+
+**Use Case 2 - Process Only New Items:**
+
+```
+Actor update_cache Element
+  Add.check _.cache:${id} ${value}
+  Break True cmds  # Don't update if already cached
+  C "Updating ${id} = ${value}"
+  # ... expensive update operations
+```
+
+**Use Case 3 - Error on Duplicates:**
+
+```
+Actor enforce_unique Comp name
+  Add.check _.names:${name} ${name}
+  Break False cmds  # Skip the error if this is the first occurrence
+  C "Error: Duplicate component name: ${name}"
+  # Increment error counter
+  Break actor  # Stop processing this component
+```
+
+**Use Case 4 - Conditional Nested Break:**
+
+```
+Actor find_new_match Element
+  Add.check _.processed:${id} ${id}
+  Break True loop outer  # Exit outer loop if already processed
+  Its SubElement process_new
+```
+
+**Pattern Summary:**
+
+| Pattern | Code | Meaning |
+|---------|------|---------|
+| Skip if duplicate | Add.check + Break True | Don't process if seen before |
+| Process if new | Add.check + Break False | Skip error/validation if new |
+| Error on duplicate | Add.check + Break False cmds + error | Fail when duplicate found |
+| Deduplicate loop | Add.check + Break True loop | Exit iteration on duplicate |
+
+**Critical Insight:**
+
+The IsCheck flag is frame-local. Each actor invocation gets its own flag.
+This means nested actors can each do their own Add.check without interference:
+
+```
+Actor outer Element
+  Add.check _.outer_seen:${name} ${name}
+  Break True cmds
+  Its Inner process_inner
+  
+Actor process_inner Inner
+  Add.check _.inner_seen:${id} ${id}  # Different flag, different frame
+  Break True actor
+  C "Processing ${id}"
+```
+~~~
+}
+
+Canon {
+  name = out_command_fundamentals
+  category = deferred_output
+  topic_type = core_mechanism
+  overview = "Out commands control when output is emitted, with delay mode enabling conditional section generation based on whether child content exists."
+  doc = ~~~
+**The Out Command Structure:**
+
+```
+Out [mode] [stream]
+```
+
+**Parameters:**
+
+1. **mode** (optional):
+   - (none) → Immediate output
+   - delay → Defer output until triggered
+
+2. **stream** (optional):
+   - (none) → Default output stream
+   - (stream name) → Named output destination
+
+**Immediate Output Mode:**
+
+```
+Actor gen_header Comp
+  Out
+  C "package ${name}"
+  C ""
+  C "import ("
+```
+
+This is equivalent to no Out command—output is emitted immediately as C commands execute.
+
+**Delayed Output Mode:**
+
+```
+Actor gen_section Comp
+  Out delay
+  C "## ${name} Section"
+  C ""
+  Its Element gen_element
+```
+
+This sets glob.Wins[winp].IsOn = true and records the command position.
+The C commands are executed but their output is buffered, not emitted.
+
+**The Trigger Mechanism:**
+
+When a C command is executed inside a delayed context:
+
+```go
+case *KpC:
+    if glob.Wins[winp].IsOn && !glob.Wins[winp].IsTrig {
+        continue  // Skip output, just record the command
+    }
+    trig(glob, winp)  // Trigger parent chain
+```
+
+The trig() function:
+1. Checks if previous frame (parent) exists and succeeded
+2. Sets glob.Wins[prev].IsTrig = true
+3. Calls reGoCmds(glob, prev) to replay delayed commands
+4. Walks up the chain, triggering all delayed ancestors
+
+**Key Insight:**
+
+Out delay is lazy evaluation with memoization.
+Output is deferred until we know it's needed (a child emitted something).
+
+**The replay mechanism (reGoCmds):**
+
+```go
+func reGoCmds(glob *GlobT, winp int) {
+    for i := glob.Wins[winp].OnPos; i < glob.Wins[winp].CurPos; i++ {
+        cmd := glob.Acts.ApActor[actId].Cmds[i]
+        switch c := cmd.(type) {
+        case *KpC, *KpCs:  // Only output commands are replayed
+            // Execute the C command now that we know it's needed
+        }
+    }
+}
+```
+
+Only output commands (C, Cs, New) are replayed.
+Control flow commands (Break, Its, etc.) are not re-executed.
+~~~
+}
+
+Canon {
+  name = out_delay_use_cases
+  category = deferred_output
+  topic_type = usage_patterns
+  overview = "Out delay enables conditional sections, optional headers, and cleanup of empty output structures."
+  doc = ~~~
+**Use Case 1 - Optional Section Headers:**
+
+```
+Actor gen_methods Comp
+  Out delay
+  C ""
+  C "// Methods"
+  Its Element gen_method
+
+Actor gen_method Element type = method
+  C "func (m *${.gen_methods.name}) ${name}() {"
+  C "    // Implementation"
+  C "}"
+```
+
+Result:
+- If no methods exist → nothing is emitted (no empty "// Methods" section)
+- If methods exist → header is emitted, then each method
+
+**Use Case 2 - Conditional Imports:**
+
+```
+Actor gen_imports Comp
+  Out delay
+  C "import ("
+  Its Element gen_import
+  C ")"
+
+Actor gen_import Element type = import
+  C "    \"${name}\""
+```
+
+Result:
+- No imports → no import block at all
+- Has imports → complete import(...) block with contents
+
+**Use Case 3 - Nested Conditional Sections:**
+
+```
+Actor gen_file Comp
+  Out delay
+  C "package ${name}"
+  C ""
+  Du gen_types
+  Du gen_functions
+
+Actor gen_types Comp
+  Out delay
+  C "// Type Definitions"
+  Its Element gen_type
+
+Actor gen_type Element type = type
+  C "type ${name} struct { }"
+```
+
+Trigger chain:
+1. gen_type emits → triggers gen_types delay → emits "// Type Definitions"
+2. gen_types output → triggers gen_file delay → emits "package..."
+3. Full file is assembled only if actual content exists
+
+**Use Case 4 - Table Headers:**
+
+```
+Actor gen_table Comp
+  Out delay
+  C "| Name | Type | Description |"
+  C "|------|------|-------------|"
+  Its Element gen_row
+
+Actor gen_row Element
+  C "| ${name} | ${type} | ${doc} |"
+```
+
+Empty table → no header lines emitted.
+
+**Use Case 5 - Conditional Wrapper Code:**
+
+```
+Actor gen_class Comp
+  Out delay
+  C "class ${name} {"
+  Its Element gen_member
+  C "}"
+
+Actor gen_member Element visible = "true"
+  C "    ${type} ${name};"
+```
+
+If all elements have visible="false", no class is generated at all.
+
+**Use Case 6 - Optional Documentation Blocks:**
+
+```
+Actor gen_docs Comp doc != ""
+  Out delay
+  C "/**"
+  C " * ${doc}"
+  Du gen_param_docs
+  C " */"
+
+Actor gen_param_docs Comp
+  Its Element gen_param_doc
+
+Actor gen_param_doc Element type = param
+  C " * @param ${name} - ${doc}"
+```
+
+Complex nested trigger: parameters trigger param_docs, which triggers main docs block.
+
+**Pattern Summary:**
+
+| Pattern | Structure | Trigger Condition |
+|---------|-----------|-------------------|
+| Optional header | delay → Its → emit | Any child emits |
+| Wrapper | delay → open → Its → close | Any child emits |
+| Nested sections | delay → delay → emit | Grandchild emits |
+| Conditional block | delay → Du → Du → emit | Any sub-actor emits |
+
+**Critical Rule:**
+
+Always structure as:
+```
+Out delay
+C <header/opening>
+<iteration or delegation that might emit>
+C <footer/closing>  # Optional
+```
+
+The C commands between delay and iteration are recorded.
+They're only emitted if the iteration produces output.
+~~~
+}
+
+Canon {
+  name = out_delay_trigger_chain
+  category = deferred_output
+  topic_type = execution_flow
+  overview = "Triggers propagate up the Win stack, causing delayed output at each level to be replayed exactly once when needed."
+  doc = ~~~
+**The Trigger Propagation Algorithm:**
+
+```go
+func trig(glob *GlobT, winp int) {
+    if !glob.Wins[winp].IsPrev || winp == 0 {
+        return  // Can't trigger if parent failed or we're at root
+    }
+    prev := winp - 1
+    glob.Wins[prev].IsTrig = true   // Mark parent as triggered
+    reGoCmds(glob, prev)             // Replay parent's delayed commands
+}
+```
+
+**Visualization of Trigger Chain:**
+
+```
+Win Stack State:
+
+[4] gen_field     IsOn=false, IsTrig=false
+    C "    ${type} ${name};"   ← This C will trigger...
+
+[3] gen_members   IsOn=true, IsTrig=false, OnPos=5
+    OUT DELAY recorded:
+    C "  // Members"           ← Replayed when triggered
+
+[2] gen_struct    IsOn=true, IsTrig=false, OnPos=2
+    OUT DELAY recorded:
+    C "struct ${name} {"       ← Replayed when triggered
+    C "  // Fields"
+
+[1] gen_file      IsOn=true, IsTrig=false, OnPos=0
+    OUT DELAY recorded:
+    C "package ${pkg}"         ← Replayed when triggered
+
+[0] main
+```
+
+**Execution Sequence:**
+
+1. **gen_field at [4] executes C command:**
+   - Not in delay mode (IsOn=false)
+   - Emits "    int count;"
+   - Calls trig(glob, 4)
+
+2. **trig(4) triggers [3]:**
+   - Sets Wins[3].IsTrig = true
+   - Calls reGoCmds(glob, 3)
+   - Replays commands from OnPos=5 to CurPos
+   - Emits "  // Members"
+   - After replay, calls trig(glob, 3)
+
+3. **trig(3) triggers [2]:**
+   - Sets Wins[2].IsTrig = true
+   - Calls reGoCmds(glob, 2)
+   - Replays "struct ${name} {" and "  // Fields"
+   - After replay, calls trig(glob, 2)
+
+4. **trig(2) triggers [1]:**
+   - Sets Wins[1].IsTrig = true
+   - Calls reGoCmds(glob, 1)
+   - Replays "package ${pkg}"
+   - After replay, calls trig(glob, 1)
+
+5. **trig(1) stops:**
+   - Wins[0] has no parent (winp-1 = -1 or root)
+   - Chain complete
+
+**Final Output Order:**
+
+```
+package mypackage        ← From [1]
+struct MyStruct {        ← From [2]
+  // Fields              ← From [2]
+  // Members             ← From [3]
+    int count;           ← From [4]
+```
+
+**Critical Properties:**
+
+1. **One-Time Trigger:** Each frame's delayed output is replayed exactly once
+   - IsTrig flag prevents re-triggering
+   - Even if multiple children emit
+
+2. **Correct Nesting:** Output appears in Win stack order (parent before child)
+   - Triggers walk up, but replay happens top-down naturally
+
+3. **Partial Sections:** Only triggered sections are emitted
+   - If gen_field never emits → [3], [2], [1] never triggered
+   - If [3] has other children that do emit → still only triggers once
+
+**Common Pattern - Multiple Delayed Sections:**
+
+```
+Actor gen_code Comp
+  Out delay
+  C "// Generated Code"
+  Du gen_types
+  Du gen_functions
+  C "// End"
+
+Actor gen_types Comp
+  Out delay
+  C "// Types"
+  Its Element gen_type
+
+Actor gen_functions Comp
+  Out delay
+  C "// Functions"
+  Its Element gen_func
+```
+
+Trigger scenarios:
+
+| Content Exists | Triggers | Output |
+|----------------|----------|--------|
+| No types, no functions | None | Nothing |
+| Types only | gen_type → gen_types → gen_code | Header + Types + End |
+| Functions only | gen_func → gen_functions → gen_code | Header + Functions + End |
+| Both | Either child triggers gen_code once | Header + Types + Functions + End |
+
+**Edge Case - Multiple Children:**
+
+```
+Actor parent
+  Out delay
+  C "BEGIN"
+  Its Child emit_child
+  C "END"
+
+Actor emit_child Child
+  C "  Child ${name}"
+```
+
+If 3 children exist:
+1. First child emits → triggers parent → replays "BEGIN"
+2. First child continues → emits "  Child One"
+3. Second child emits → parent already IsTrig=true → no replay
+4. Second child continues → emits "  Child Two"
+5. Third child same as second
+6. Parent's C "END" executes after Its completes
+
+Result:
+```
+BEGIN
+  Child One
+  Child Two
+  Child Three
+END
+```
+
+The "END" line is NOT delayed—it executes in normal flow after the Its command completes.
+Only the commands between Out delay and the Its/Du are replayed.
+~~~
+}
+
+Canon {
+  name = break_and_out_interaction
+  category = control_flow
+  topic_type = advanced_patterns
+  overview = "Break and Out delay can be combined to create sophisticated conditional generation with early exit strategies."
+  doc = ~~~
+**Pattern 1 - Break Skips Trigger:**
+
+```
+Actor gen_optional Comp enabled = "false"
+  Out delay
+  C "// Optional Section"
+  Break cmds  # Exit before iteration
+  Its Element gen_item
+
+Actor gen_item Element
+  C "Item: ${name}"
+```
+
+Result:
+- Break cmds stops execution before Its
+- Its never executes → no children emit
+- No children emit → Out delay never triggered
+- Nothing is output
+
+**Pattern 2 - Conditional Trigger Chain:**
+
+```
+Actor gen_complete Comp
+  Out delay
+  C "BEGIN"
+  Du gen_validated
+  C "END"
+
+Actor gen_validated Comp valid = "false"
+  Break actor  # Don't even try if invalid
+  Its Element gen_content
+
+Actor gen_content Element
+  C "  Content: ${name}"
+```
+
+Result when valid="false":
+- gen_validated breaks immediately
+- No content generated
+- gen_complete never triggered
+- Silent skip of entire section
+
+**Pattern 3 - Early Exit with Partial Trigger:**
+
+```
+Actor gen_section Comp
+  Out delay
+  C "SECTION ${name}"
+  Its Element gen_subsection
+
+Actor gen_subsection Element
+  Out delay
+  C "  Subsection: ${name}"
+  Its SubItem gen_item
+  
+Actor gen_item SubItem error = "true"
+  C "Error: ${message}"
+  Break loop gen_section  # Jump out of everything
+```
+
+Result:
+- First item with error triggers gen_subsection delay
+- gen_subsection starts emitting
+- Error occurs in gen_item
+- Break loop gen_section exits both iterations
+- Partial output: "SECTION..." and started subsection
+
+**Pattern 4 - Validation Before Delayed Output:**
+
+```
+Actor gen_validated Comp
+  Du validate_first
+  Out delay
+  C "Valid Content:"
+  Its Element gen_item
+
+Actor validate_first Comp
+  Its Element check_valid
+
+Actor check_valid Element valid = "false"
+  C "Validation Error: ${name}"
+  Break actor gen_validated  # Stop the main actor
+
+Actor gen_item Element
+  C "  ${name}"
+```
+
+Flow:
+- If validation fails → error emitted, Break stops gen_validated
+- Out delay never reached → no delayed content
+- If validation passes → validation emits nothing, delay reached
+- If items exist → delay triggered, "Valid Content:" appears
+
+**Pattern 5 - Conditional Nested Delays with Breaks:**
+
+```
+Actor gen_outer Comp
+  Out delay
+  C "OUTER {"
+  Its Section gen_section
+  C "}"
+
+Actor gen_section Section
+  Out delay
+  C "  Section ${name} {"
+  Its Element gen_conditional_item
+  C "  }"
+
+Actor gen_conditional_item Element skip = "true"
+  Break actor  # Skip silently
+  C "    Item: ${name}"
+
+Actor gen_conditional_item Element
+  C "    Item: ${name}"
+```
+
+Result:
+- Only non-skipped items emit
+- If all items skipped in a section → section not triggered
+- If all sections have all items skipped → outer not triggered
+- If any item in any section emits → full chain triggers
+
+**Pattern 6 - Deduplication with Delayed Headers:**
+
+```
+Actor gen_unique_list Comp
+  Out delay
+  C "Unique Items:"
+  Its Element gen_unique_item
+
+Actor gen_unique_item Element
+  Add.check _.seen:${name} ${name}
+  Break True actor  # Skip duplicates silently
+  C "  - ${name}"
+```
+
+Result:
+- Only first occurrence of each name emits
+- Duplicates break before emitting (no trigger)
+- If all items are duplicates → nothing emitted, no header
+- Clean deduplication with optional header
+
+**Critical Insights:**
+
+1. **Break before Its prevents trigger:**
+   ```
+   Out delay
+   Break cmds
+   Its Element ...  # Never executes
+   ```
+
+2. **Break inside iteration stops remaining triggers:**
+   ```
+   Actor parent
+     Out delay
+     Its Child emit
+   
+   Actor emit Child count = "5"
+     Break loop parent  # Stops iteration, parent may be partially triggered
+   ```
+
+3. **Named breaks can skip multiple delay layers:**
+   ```
+   [3] delay + Its
+   [2] delay + Its
+   [1] delay + Its
+   [0] main
+   
+   Break at [3] with target [0] → [2] and [1] never triggered
+   ```
+
+4. **Validation then delay is common pattern:**
+   ```
+   Du validate  # May emit errors and break
+   Out delay    # Only reached if validation passed
+   <actual content>
+   ```
+~~~
+}
+
+Canon {
+  name = break_out_antipatterns
+  category = control_flow
+  topic_type = pitfalls
+  overview = "Common mistakes when combining Break and Out delay, and how to avoid them."
+  doc = ~~~
+**Antipattern 1 - Delay After Its:**
+
+```
+# WRONG
+Actor bad_pattern Comp
+  Its Element gen_item
+  Out delay  # Too late! Its already executed
+  C "Header"
+```
+
+**Problem:** Out delay only affects commands that come AFTER it.
+The Its already executed, so no conditional behavior.
+
+**Fix:**
+```
+Actor good_pattern Comp
+  Out delay
+  C "Header"
+  Its Element gen_item
+```
+
+---
+
+**Antipattern 2 - Break After Output:**
+
+```
+# INEFFICIENT
+Actor wasteful Element skip = "true"
+  C "// This will be emitted"
+  C "Content: ${name}"
+  Break actor  # Too late, already emitted
+```
+
+**Problem:** Output already triggered parent chain.
+Break doesn't undo output.
+
+**Fix:**
+```
+Actor efficient Element skip = "true"
+  Break actor  # Exit before any output
+  C "Content: ${name}"
+```
+
+---
+
+**Antipattern 3 - Forgetting Delay on Intermediate Levels:**
+
+```
+# WRONG
+Actor outer Comp
+  Out delay
+  C "OUTER"
+  Du middle
+
+Actor middle Comp
+  # No Out delay here!
+  C "MIDDLE"  # This will emit regardless
+  Its Element gen_item
+```
+
+**Problem:** middle emits immediately, triggering outer even if gen_item produces nothing.
+
+**Fix:**
+```
+Actor middle Comp
+  Out delay
+  C "MIDDLE"
+  Its Element gen_item
+```
+
+---
+
+**Antipattern 4 - Break Without Check on Add.check:**
+
+```
+# UNCLEAR INTENT
+Actor process Element
+  Add.check _.seen:${name} ${name}
+  Break actor  # Always breaks! Even for new items!
+```
+
+**Problem:** Break always executes, Add.check has no effect.
+
+**Fix:**
+```
+Actor process Element
+  Add.check _.seen:${name} ${name}
+  Break True actor  # Only break if duplicate
+  C "Processing ${name}"
+```
+
+---
+
+**Antipattern 5 - Named Break to Non-Existent Actor:**
+
+```
+# SILENT FAILURE
+Actor inner Element
+  Break loop outer_loop  # No actor named outer_loop in stack!
+```
+
+**Problem:** Break has no effect, continues normally.
+No error or warning.
+
+**Fix:** Ensure named actor exists in call chain:
+```
+Actor outer_loop Comp
+  Its Element middle
+  
+Actor middle Element
+  Its SubElement inner
+
+Actor inner SubElement error = "true"
+  Break loop outer_loop  # Now outer_loop is in stack
+```
+
+---
+
+**Antipattern 6 - Over-Breaking:**
+
+```
+# REDUNDANT
+Actor process Element
+  C "Processing"
+  Break actor
+  C "Never reached"
+  Break cmds  # Never executes
+```
+
+**Problem:** Second break is unreachable dead code.
+
+**Fix:** One break is sufficient:
+```
+Actor process Element
+  C "Processing"
+  Break actor
+```
+
+---
+
+**Antipattern 7 - Delay Without Child Emission:**
+
+```
+# USELESS DELAY
+Actor lonely Comp
+  Out delay
+  C "This will never be seen"
+  # No Its, Du, or child content
+```
+
+**Problem:** Delay is never triggered, output is lost.
+
+**Fix:** Only use delay when child emission is possible:
+```
+Actor useful Comp
+  Out delay
+  C "Header"
+  Its Element gen_item  # Potential to trigger
+```
+
+---
+
+**Antipattern 8 - Wrong Check Polarity:**
+
+```
+# LOGIC ERROR
+Actor skip_duplicates Element
+  Add.check _.seen:${name} ${name}
+  Break False actor  # Breaks on NEW items!
+```
+
+**Problem:** Logic is inverted—skips new items, processes duplicates.
+
+**Fix:**
+```
+Actor skip_duplicates Element
+  Add.check _.seen:${name} ${name}
+  Break True actor  # Correctly skip duplicates
+  C "New item: ${name}"
+```
+
+---
+
+**Best Practice Summary:**
+
+1. ✓ Delay comes BEFORE the content and iteration
+2. ✓ Break comes BEFORE output if you want to prevent it
+3. ✓ All nested levels need delay if you want full conditional behavior
+4. ✓ Use True/False on Break when combining with Add.check
+5. ✓ Ensure named break targets exist in Win stack
+6. ✓ One break per code path is sufficient
+7. ✓ Delay only makes sense with potential child emission
+8. ✓ Test check polarity—True means "is duplicate", False means "is new"
+~~~
+}
+
+Canon {
+  name = break_out_mastery
+  category = control_flow
+  topic_type = expert_patterns
+  overview = "Advanced patterns combining Break, Out delay, Add.check, and named targets for sophisticated code generation control."
+  doc = ~~~
+**Master Pattern 1 - Cascading Validation with Partial Output:**
+
+```
+Actor gen_complete_module Comp
+  Du validate_module
+  Out delay
+  C "// Module: ${name}"
+  C "// Generated: ${date}"
+  Du gen_types
+  Du gen_functions
+  C "// End Module"
+
+Actor validate_module Comp
+  Its Element validate_element
+
+Actor validate_element Element
+  Du check_type
+  Du check_name
+  Du check_deps
+
+Actor check_type Element type = ""
+  C "Error: Missing type for ${name}"
+  Break actor gen_complete_module  # Fatal, stop entire module
+
+Actor check_name Element name = ""
+  C "Warning: Anonymous element"
+  Break loop  # Skip this element, continue with others
+
+Actor check_deps Element deps = "missing"
+  C "Warning: Missing dependencies for ${name}"
+  # Continue without breaking - just a warning
+
+Actor gen_types Comp
+  Out delay
+  C ""
+  C "// Type Definitions"
+  Its Element gen_type
+
+Actor gen_type Element type = type
+  C "type ${name} struct { }"
+
+Actor gen_functions Comp
+  Out delay
+  C ""
+  C "// Functions"
+  Its Element gen_function
+
+Actor gen_function Element type = function
+  C "func ${name}() { }"
+```
+
+**Flow:**
+- Fatal errors (no type) → Break actor → stop entire module → no output
+- Element errors (no name) → Break loop → skip element, continue others
+- Warnings (missing deps) → continue → element still generated
+- If validation passes → delayed headers trigger → clean output
+- If all elements invalid → no types/functions sections appear
+
+---
+
+**Master Pattern 2 - Multi-Level Deduplication:**
+
+```
+Actor gen_imports Comp
+  Out delay
+  C "import ("
+  Its Package gen_package_imports
+  C ")"
+
+Actor gen_package_imports Package
+  Out delay
+  C "    // ${name}"
+  Its Import gen_unique_import
+
+Actor gen_unique_import Import
+  # Check both global and package-local uniqueness
+  Add.check _.global_imports:${path} ${path}
+  Break True actor gen_imports  # Duplicate globally → skip entirely
+  
+  Add.check _.package_imports:${.gen_package_imports.name}.${path} ${path}
+  Break True actor  # Duplicate in package → skip this import
+  
+  C "    \"${path}\""
+```
+
+**Behavior:**
+- First occurrence globally → emits, triggers both delays
+- Duplicate within same package → skips silently
+- Duplicate across packages → skips and prevents entire import block trigger
+- Empty packages → no package comment emitted
+- All duplicates → no import block at all
+
+---
+
+**Master Pattern 3 - Conditional Assembly with Error Recovery:**
+
+```
+Actor gen_system Comp
+  C "// System: ${name}"
+  Du gen_core_modules
+  Du gen_optional_modules
+  C "// System Complete"
+
+Actor gen_core_modules Comp
+  Its Module gen_critical_module
+
+Actor gen_critical_module Module critical = true
+  Du validate_critical
+  Out delay
+  C "// CRITICAL: ${name}"
+  Du gen_module_body
+
+Actor validate_critical Module valid = false
+  C "FATAL: Critical module ${name} is invalid"
+  Break exit  # Terminate entire generation
+
+Actor gen_optional_modules Comp
+  Its Module gen_optional_module
+
+Actor gen_optional_module Module critical = false
+  Du validate_optional
+  Out delay
+  C "// Optional: ${name}"
+  Du gen_module_body
+
+Actor validate_optional Module valid = false
+  C "// Skipped: ${name} (validation failed)"
+  Break actor  # Skip this module, continue others
+
+Actor gen_module_body Module
+  Out delay
+  Its Element gen_element
+
+Actor gen_element Element
+  C "  ${type} ${name}"
+```
+
+**Outcomes:**
+- Invalid critical module → FATAL message → Break exit → nothing generated
+- Valid critical module → full output including "CRITICAL:" header
+- Invalid optional module → "Skipped:" message → Break actor → no module body
+- Valid optional module → full output including "Optional:" header
+- Empty modules → no headers or bodies emitted
+
+---
+
+**Master Pattern 4 - Stateful Iteration with Accumulation:**
+
+```
+Actor gen_summary Comp
+  Out delay
+  C "Summary of ${name}:"
+  C ""
+  Its Element accumulate_stats
+  C ""
+  C "Total elements: ${_.stats.count}"
+
+Actor accumulate_stats Element
+  # Add to counter
+  Add _.stats:count ${_calc.stats.count + 1}
+  
+  # Emit item
+  C "  - ${type}: ${name}"
+  
+  # Track by type
+  Add.check _.type_seen:${type} ${type}
+  Break True cmds  # Already emitted this type category
+  C "    (First ${type})"
+
+Actor gen_element Element type = internal visible = false
+  Break actor  # Skip internal elements entirely
+```
+
+**Features:**
+- Counts elements via Add accumulation
+- Emits each element
+- Marks first occurrence of each type
+- Skips internal elements silently
+- Summary header only appears if any elements emitted
+- Total count accurate even with skipped elements
+
+---
+
+**Master Pattern 5 - Hierarchical Section Generation:**
+
+```
+Actor gen_documentation Comp
+  Out delay
+  C "# ${name} Documentation"
+  C ""
+  Du gen_overview
+  Du gen_api
+  Du gen_examples
+
+Actor gen_overview Comp doc != ""
+  Out delay
+  C "## Overview"
+  C ""
+  C "${doc}"
+  C ""
+
+Actor gen_api Comp
+  Out delay
+  C "## API Reference"
+  C ""
+  Its Element gen_api_entry
+
+Actor gen_api_entry Element type in "function,method"
+  Out delay
+  C "### ${name}"
+  C ""
+  Its Parameter gen_parameter
+  Du gen_returns
+  C ""
+
+Actor gen_parameter Parameter
+  C "- **${name}**: ${type} - ${doc}"
+
+Actor gen_returns Element returns != ""
+  Out delay
+  C ""
+  C "**Returns:** ${returns}"
+
+Actor gen_examples Comp
+  Out delay
+  C "## Examples"
+  C ""
+  Its Example gen_example
+
+Actor gen_example Example
+  Out delay
+  C "### ${title}"
+  C ""
+  C "```${language}"
+  C "${code}"
+  C "```"
+  C ""
+```
+
+**Trigger Chain:**
+```
+gen_parameter emits
+  → gen_api_entry delay triggers (### heading)
+    → gen_api delay triggers (## API Reference)
+      → gen_documentation delay triggers (# title)
+```
+
+**Results:**
+- No functions → no API section
+- Functions with no parameters → heading only
+- No returns → no Returns subsection
+- No examples → no Examples section
+- No doc → no Overview section
+- Empty comp → no documentation file at all
+
+---
+
+**Master Pattern 6 - Conditional Compilation Blocks:**
+
+```
+Actor gen_platform_code Comp
+  Its Platform gen_platform_section
+
+Actor gen_platform_section Platform
+  Out delay
+  C "#ifdef ${define}"
+  C ""
+  Du gen_platform_types
+  Du gen_platform_functions
+  C ""
+  C "#endif // ${define}"
+
+Actor gen_platform_types Platform
+  Out delay
+  C "// ${name} Types"
+  Its Element gen_platform_type
+
+Actor gen_platform_type Element type = type platform = ${.gen_platform_section.name}
+  C "typedef struct ${name}_${platform} ${name};"
+
+Actor gen_platform_functions Platform
+  Out delay
+  C "// ${name} Functions"
+  Its Element gen_platform_function
+
+Actor gen_platform_function Element type = function platform = ${.gen_platform_section.name}
+  C "void ${name}_${platform}();"
+```
+
+**Output Structure:**
+- Only platforms with actual types or functions get #ifdef blocks
+- Empty platforms → no output
+- Platform with only types → Types section only
+- Nested delays ensure clean block structure
+- No empty #ifdef blocks
+
+---
+
+**Master Pattern 7 - Error Recovery with Continuation:**
+
+```
+Actor gen_robust_system Comp
+  Its Module gen_module_safe
+
+Actor gen_module_safe Module
+  Add _.error_count:total ${_.error_count.total}
+  
+  Du validate_module_quick
+  Break True cmds  # Validation failed, skip this module
+  
+  Out delay
+  C "// Module: ${name}"
+  Du gen_module_contents
+  C "// End Module"
+
+Actor validate_module_quick Module
+  Its Element quick_check
+
+Actor quick_check Element required = true value = ""
+  C "Error: ${.gen_module_safe.name}.${name} is required but empty"
+  Add _.error_count:total ${_.error_count.total + 1}
+  Add.check _.max_errors:${_.error_count.total} 10
+  Break False actor gen_robust_system  # Under limit, continue
+  
+  C "FATAL: Maximum errors (10) exceeded"
+  Break exit
+
+Actor gen_module_contents Module
+  Its Element gen_element_safe
+
+Actor gen_element_safe Element
+  Du validate_element
+  Break True actor  # Skip invalid elements silently
+
+Actor validate_element Element
+  # Element-specific validation
+  # Sets IsCheck = true if invalid
+```
+
+**Behavior:**
+- Each error increments counter
+- After 10 errors → Break exit → terminate
+- Invalid modules → error logged, Break cmds → module skipped
+- Invalid elements → silently skipped
+- Valid modules → full generation
+- System continues as long as error count < 10
+
+---
+
+**Master Pattern 8 - Dynamic Section Ordering with Priority:**
+
+```
+Actor gen_prioritized Comp
+  Du gen_priority_high
+  Du gen_priority_medium
+  Du gen_priority_low
+
+Actor gen_priority_high Comp
+  Out delay
+  C "// High Priority"
+  Its Element gen_by_priority
+
+Actor gen_by_priority Element priority = high
+  C "  ${name}: ${type}"
+
+Actor gen_priority_medium Comp
+  Out delay
+  C "// Medium Priority"
+  Its Element gen_by_priority
+
+Actor gen_by_priority Element priority = medium
+  C "  ${name}: ${type}"
+
+Actor gen_priority_low Comp
+  Out delay
+  C "// Low Priority"
+  Its Element gen_by_priority
+
+Actor gen_by_priority Element priority = low
+  C "  ${name}: ${type}"
+```
+
+**Result:**
+- Elements automatically grouped by priority
+- Empty priority levels → no section header
+- Same actor name (gen_by_priority) with different conditions
+- Each matches only its priority level
+- Clean output with only populated sections
+
+---
+
+**Key Principles for Mastery:**
+
+1. **Validation First, Generation Later:**
+   ```
+   Du validate
+   Out delay
+   <generation>
+   ```
+
+2. **Multi-Level Delays for Clean Nesting:**
+   ```
+   Actor outer: Out delay → Du inner
+   Actor inner: Out delay → Its
+   ```
+
+3. **Break Scope Matches Intent:**
+   - `Break actor` → skip this item
+   - `Break loop` → skip this item, continue siblings
+   - `Break cmds` → skip generation, continue validation
+   - Named break → escape nested context
+
+4. **Check Flags for Binary Decisions:**
+   ```
+   Add.check
+   Break True  → exists path
+   Break False → new path
+   ```
+
+5. **Accumulation with Add for Statistics:**
+   ```
+   Add _.collection:${key} ${value}
+   ```
+   Use collection contents in delayed footer
+
+6. **Error Limits with Break exit:**
+   ```
+   Add _.errors:count ${count + 1}
+   Add.check _.errors:count ${limit}
+   Break False cmds
+   Break exit
+   ```
+
+7. **Deduplication Across Scopes:**
+   ```
+   Global: _.seen:${key}
+   Local: _.seen:${context}.${key}
+   ```
+
+8. **Silent Skip vs. Logged Skip:**
+   ```
+   Silent: Break actor (no output)
+   Logged: C "Skipped: ${name}" → Break actor
+   ```
+~~~
+}
+
+Canon {
+  name = break_out_complete_reference
+  category = control_flow
+  topic_type = reference_guide
+  overview = "Complete technical reference for Break and Out commands with all parameters, return codes, and interaction rules."
+  doc = ~~~
+**BREAK COMMAND REFERENCE:**
+
+```
+Break [check] [what] [actor]
+```
+
+**Check Parameter:**
+
+| Value | Condition | Effect |
+|-------|-----------|--------|
+| (none) | Always | Break executes unconditionally |
+| True | glob.Wins[winp].IsCheck == true | Break only if IsCheck is true |
+| False | glob.Wins[winp].IsCheck == false | Break only if IsCheck is false |
+
+**What Parameter:**
+
+| Value | Return Code | Immediate Effect | Propagation |
+|-------|-------------|------------------|-------------|
+| (none) | 2 | Stop actor matching | If named: -2 |
+| actor | 2 | Stop actor matching | If named: -2 |
+| loop | 1 | Exit iteration | If named: -1 |
+| cmds | 3 | Stop commands, continue actors | If named: -3 |
+| exit | -4 (if errors) | Terminate generation | No propagation |
+| exit | 0 (no errors) | Continue (current) | No propagation |
+
+**Actor Parameter:**
+
+| Value | Behavior |
+|-------|----------|
+| (none) | Break applies to immediate context |
+| . | Same as (none) |
+| name | Search Win stack backward for frame with Name == name<br>Set BrkAct flag on frames between current and target<br>Negate return code for propagation |
+
+**Return Code Propagation:**
+
+```go
+// In goCmds:
+ret := <break return code>
+if c.Kactor != "E_O_L" && c.Kactor != "." {
+    for i := winp - 1; i >= 0; i-- {
+        if glob.Wins[i].Name == c.Kactor {
+            glob.Wins[i+1].BrkAct = true
+            ret = -ret  // Negate for propagation
+            break
+        }
+    }
+}
+return ret
+
+// In GoAct:
+if ret < 0 && glob.Wins[glob.Winp].BrkAct {
+    nret = -ret  // Convert back to positive at target
+}
+```
+
+---
+
+**OUT COMMAND REFERENCE:**
+
+```
+Out [mode] [stream]
+```
+
+**Mode Parameter:**
+
+| Value | Effect | Win Frame State |
+|-------|--------|-----------------|
+| (none) | Immediate output | IsOn = false |
+| delay | Deferred output | IsOn = true<br>OnPos = current command index |
+
+**Stream Parameter:**
+
+| Value | Effect |
+|-------|--------|
+| (none) | Default output stream |
+| name | Named output destination |
+
+**Delay Mechanism:**
+
+```go
+// When Out delay is executed:
+glob.Wins[winp].IsOn = true
+glob.Wins[winp].OnPos = i  // Current command position
+
+// When C is executed in delayed context:
+if glob.Wins[winp].IsOn && !glob.Wins[winp].IsTrig {
+    continue  // Skip output, record command
+}
+trig(glob, winp)  // Trigger parent
+
+// Trigger function:
+func trig(glob *GlobT, winp int) {
+    if !glob.Wins[winp].IsPrev || winp == 0 {
+        return
+    }
+    prev := winp - 1
+    glob.Wins[prev].IsTrig = true
+    reGoCmds(glob, prev)  // Replay delayed commands
+}
+
+// Replay function:
+func reGoCmds(glob *GlobT, winp int) {
+    for i := glob.Wins[winp].OnPos; i < glob.Wins[winp].CurPos; i++ {
+        cmd := glob.Acts.ApActor[actId].Cmds[i]
+        switch c := cmd.(type) {
+        case *KpC, *KpCs, *KpNew:
+            // Execute output command now
+        // Other command types not replayed
+        }
+    }
+}
+```
+
+---
+
+**ADD COMMAND REFERENCE (affects Break check behavior):**
+
+```
+Add[.check] collection:${key} ${value}
+```
+
+**Flags:**
+
+| Flag | Behavior |
+|------|----------|
+| (none) | Add/update entry, no effect on IsCheck |
+| .check | Check if key exists:<br>- Exists → IsCheck = true<br>- New → IsCheck = false<br>Then add/update entry |
+
+**Typical Usage:**
+
+```
+Add.check _.collection:${key} ${value}
+Break True actor   # Skip if exists (IsCheck = true)
+Break False actor  # Skip if new (IsCheck = false)
+```
+
+---
+
+**INTERACTION MATRIX:**
+
+| Scenario | Behavior |
+|----------|----------|
+| Break before Out delay | Delay never reached, no deferred output |
+| Break after Out delay, before Its | Delay set but never triggered |
+| Break inside delayed Its | Partial trigger if break after first emit |
+| Named break through delayed frames | All delayed frames potentially triggered during unwind |
+| Break exit in delayed context | Terminates immediately, no replay |
+| Multiple Out delay nested | Each level triggers independently |
+| Out delay without child emission | Commands recorded but never replayed |
+| Break cmds in delayed context | Stops recording, continues to next actor |
+
+---
+
+**WIN FRAME STATE FIELDS:**
+
+```go
+type WinT struct {
+    IsOn     bool   // Out delay active
+    OnPos    int    // Command index where delay started
+    CurPos   int    // Current command index
+    IsTrig   bool   // This frame has been triggered
+    IsPrev   bool   // Previous actor succeeded
+    IsCheck  bool   // Check flag for Break True/False
+    BrkAct   bool   // This frame is propagating a named break
+    Name     string // Actor name for named break matching
+}
+```
+
+---
+
+**EXECUTION ORDER:**
+
+1. Actor matching and condition evaluation
+2. Break check evaluation (IsCheck flag)
+3. Break execution (if condition met)
+4. Out mode setting (delay or immediate)
+5. Command execution (C, Its, Du, etc.)
+6. Trigger evaluation (if C in delayed context)
+7. Trigger propagation (up Win stack)
+8. Replay of delayed commands (reGoCmds)
+9. Return code handling
+10. Named break propagation (if BrkAct set)
+
+---
+
+**PERFORMANCE CHARACTERISTICS:**
+
+| Operation | Complexity | Notes |
+|-----------|------------|-------|
+| Break immediate | O(1) | Return code only |
+| Break named | O(n) | Walk Win stack to find target |
+| Out delay set | O(1) | Record state |
+| Trigger single frame | O(m) | m = delayed commands |
+| Trigger chain | O(n*m) | n = frame depth, m = avg commands |
+| Add.check | O(1) | Hash table lookup |
+
+---
+
+**COMMON PITFALLS:**
+
+1. Break exit without errors → returns 0 (continues)
+2. Named break to non-existent actor → silently fails
+3. Out delay after Its → no effect
+4. Break after output → output already emitted
+5. Multiple breaks → only first executes
+6. Forgetting .check flag on Add → IsCheck never set
+7. Wrong check polarity → True/False inverted
+8. Delay without emission possibility → commands lost
+~~~
+}

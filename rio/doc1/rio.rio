@@ -1,0 +1,323 @@
+// ================================================================
+// RIO FORMAT CANONS
+// ================================================================
+
+Canon {
+  name = rio_format_philosophy
+  category = rio_format
+  topic_type = design_philosophy
+  overview = "Rio is a lightweight, human-writable format for hardware, models, and domains - readable, editable, auto-parsing JSON, safe code blocks."
+  doc = ~~~
+Rio Design Goals:
+
+**Human-First:**
+- Readable: Clear block structure
+- Editable: Text editor friendly
+- Commentable: // comments throughout
+
+**Machine-Friendly:**
+- Auto-parses JSON: "{"a":1}" → native types
+- Type inference: 1024 → int, 300.0 → float, true → bool
+- Structured data: """ """ for JSON, ~~~ ~~~ for code
+
+**Domain-Agnostic:**
+- Works for ML, quantum, thermodynamic, photonic
+- No assumptions about field names
+- Extensible to new domains
+
+**Safe:**
+- Code never inline in data
+- Code blocks (~~~) preserve exactly
+- No injection vulnerabilities
+
+**Single File:**
+Everything in one .rio file:
+- Domain definitions
+- Hardware specs
+- Model architecture
+- Checkpoints
+- Metrics
+
+**Pronunciation:** /ˈri.oʊ/ (like "Rio de Janeiro")
+~~~
+}
+
+Canon {
+  name = rio_block_structure
+  category = rio_format
+  topic_type = syntax
+  overview = "Rio files are sequences of typed blocks: BlockType { key-value pairs } with unique names and field assignments."
+  doc = ~~~
+Rio Block Syntax:
+
+**Basic Structure:**
+```rio
+BlockType {
+  field_name = value
+  another_field = "string value"
+  numeric_field = 42
+}
+```
+
+**Block Components:**
+- BlockType: Component type (Project, Model, Op, etc.)
+- Block name: Optional, usually the first field (key type)
+- Body: { ... } containing field assignments
+- Fields: name = value pairs
+
+**Example:**
+```rio
+Project {
+  project = MyProject
+  domain = tsu
+  desc = "A thermodynamic optimizer"
+}
+
+Model {
+  model = my_model
+  hardware = tsu_v1
+}
+```
+
+**Naming:**
+- Quoted names: "name with spaces"
+- Unquoted names: simple_name (no spaces)
+
+**Field Values:**
+Auto-parsed by type:
+- Numbers: 42, 3.14, 1e-5
+- Bools: true, false
+- Strings: "text", unquoted_word
+- Arrays: [item1, item2, item3]
+- Objects: {key: value, key2: value2}
+~~~
+}
+
+Canon {
+  name = rio_value_types
+  category = rio_format
+  topic_type = syntax
+  overview = "Rio auto-detects types: int, float, bool, string, JSON arrays, JSON objects - or falls back to raw string."
+  doc = ~~~
+Rio Type Inference:
+
+**Automatic Detection:**
+Parser attempts JSON unmarshaling for every value.
+If successful → native type; if fails → string.
+
+**Examples:**
+```rio
+Model {
+  // Integer
+  num_layers = 12
+
+  // Float
+  temperature = 300.0
+  learning_rate = 1e-4
+
+  // Boolean
+  training = true
+  frozen = false
+
+  // String (unquoted)
+  name = my_model
+
+  // String (quoted)
+  description = "A model with spaces"
+
+  // Array
+  shape = [224, 224, 3]
+  devices = [gpu0, gpu1, gpu2]
+
+  // Object
+  config = {batch_size: 32, precision: "fp16"}
+
+  // Complex nested
+  hyperparams = {
+    optimizer: "adam",
+    lr: 0.001,
+    betas: [0.9, 0.999]
+  }
+}
+```
+
+**Fallback:**
+If JSON parsing fails, value stored as raw string.
+Enables forwards compatibility with unknown formats.
+~~~
+}
+
+Canon {
+  name = rio_multiline_json
+  category = rio_format
+  topic_type = syntax
+  overview = "Triple-quote \"\"\" blocks for structured JSON that spans multiple lines - auto-parsed into native types."
+  doc = ~~~
+Structured Multi-line with """ """:
+
+**Purpose:**
+Complex JSON/YAML data that needs readability:
+
+**Syntax:**
+```rio
+Model {
+  model = complex_model
+  payload = """
+  {
+    "architecture": "transformer",
+    "num_layers": 12,
+    "hidden_size": 768,
+    "num_heads": 12,
+    "vocab_size": 50257,
+    "max_position_embeddings": 1024,
+    "layer_norm_epsilon": 1e-5,
+    "dropout": 0.1
+  }
+  """
+}
+```
+
+**Behavior:**
+- Content between """ """ → JSON parse attempt
+- Success → native map[string]any
+- Failure → raw string
+
+**Closing Delimiter Rules:**
+- Can be indented
+- Must be alone on line (after whitespace trim)
+- No content after """ on same line
+
+**Use Cases:**
+- Configuration objects
+- Metric definitions
+- Hardware specifications
+- Checkpoint metadata
+~~~
+}
+
+Canon {
+  name = rio_multiline_code
+  category = rio_format
+  topic_type = syntax
+  overview = "Triple-tilde ~~~ blocks for verbatim code preservation - CUDA, Python, shaders - never parsed, always exact text."
+  doc = ~~~
+Verbatim Multi-line with ~~~ ~~~:
+
+**Purpose:**
+Preserve code exactly: kernels, templates, documentation.
+
+**Syntax:**
+```rio
+Op {
+  op = custom_kernel
+  code = ~~~
+__global__ void my_kernel(float* data) {
+    int idx = blockIdx.x * blockDim.x + threadIdx.x;
+    printf("He said \"\"\"triple quotes work here\"\"\"");
+    data[idx] = data[idx] * 2.0;
+}
+~~~
+}
+```
+
+**Behavior:**
+- Content between ~~~ ~~~ → NEVER parsed
+- Always stored as raw string
+- Preserves indentation, newlines, everything
+- Can contain """, ''', ~~~, any characters
+
+**Closing Delimiter Rules:**
+- Can be indented
+- Must be alone on line
+- No content after ~~~ on same line
+
+**Use Cases:**
+- CUDA kernels
+- Python functions
+- Shader code
+- SQL queries
+- Prompt templates
+- Documentation blocks
+
+**Critical:**
+Use ~~~ for code. Use """ for structured data.
+Never mix them up.
+~~~
+}
+
+Canon {
+  name = rio_comments
+  category = rio_format
+  topic_type = syntax
+  overview = "// comments are stripped everywhere except inside ~~~ verbatim blocks - enables inline documentation."
+  doc = ~~~
+Rio Comment Syntax:
+
+**Comment Rules:**
+```rio
+// Full line comment
+
+Project {
+  project = MyProject  // trailing comment
+  // comment between fields
+  domain = tsu  // another trailing comment
+}
+```
+
+**Behavior:**
+- // starts comment
+- Comment continues to end of line
+- Comments stripped during parsing
+- Trailing comments removed
+
+**Exception:**
+Inside ~~~ blocks, // is preserved:
+```rio
+Op {
+  code = ~~~
+// This is a C++ comment, preserved exactly
+void my_function() {
+    // This too
+}
+~~~
+}
+```
+
+**Best Practices:**
+- Document block purposes
+- Explain non-obvious values
+- Mark TODOs and FIXMEs
+- Provide context for future readers
+
+Comments make Rio files self-documenting.
+~~~
+}
+
+Canon {
+  name = rio_file_organization
+  category = rio_format
+  topic_type = best_practice
+  overview = "Organize Rio files by domain, then hierarchy: Domain/Project/Hardware first, then Models, then Operations, then supporting components."
+  doc = ~~~
+Rio File Structure Best Practices:
+
+**Recommended Order:**
+```rio
+// 1. Domain definitions
+Domain { name = tsu }
+
+// 2. Hardware specifications
+Hardware { hardware = tsu_v1 }
+Hardware { hardware = gpu_a100 }
+
+// 3. Project declarations
+Project { 
+  project = MyOptimizer
+  domain = tsu
+  hardware = tsu_v1
+}
+
+// 4. Models
+Model { model = main_model }
+
+// 5. Layers (hierarchical)
