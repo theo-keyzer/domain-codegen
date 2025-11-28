@@ -203,7 +203,6 @@ C 		}
 
 ----------------------------------------------------------------
 Actor refs_ele . type = link
--Actor refs_ele . mw in F1,FS
 ----------------------------------------------------------------
 
 C //  ${._lno}
@@ -217,13 +216,24 @@ C 		}
 
 
 ----------------------------------------------------------------
-Actor refs_ele2 . type = ref_child
--Actor refs_ele2 . mw in L1,LS
+Actor refs_ele2 . type = ref_share
 ----------------------------------------------------------------
 
 C //  ${._lno}
 C
-C  
+C 	for i := st.Me - 1; i >= 0; i-- {
+C 		if st.Names["comp"] == act.Ap${.refs2.name:c}[i].Names["comp"] {
+C 			st.K${name:l}p = act.Ap${.refs2.name:c}[i].K${name:l}p
+C 			break;
+C 		}
+C 	}
+C
+----------------------------------------------------------------
+Actor refs_ele2 . type = ref_child
+----------------------------------------------------------------
+
+C //  ${._lno}
+C 
 C 	if st.K${previous.name:l}p < 0 {
 C 		if "${check}" != "*" {
 C 			fmt.Printf("ref_child:${.refs2.name:c}.${name:l} unresolved from ${previous.type}:${.refs2.name:c}.${previous.name:l}:${previous.comp:c} %s > ${._lno}", st.LineNo)
@@ -247,8 +257,8 @@ Actor refs_ele2 . type = ref_copy
 
 C //  ${._lno}
 C
-C 	t := st.K${previous.name:l}p
-C 	if t >= 0 {
+C 	if st.K${previous.name:l}p >= 0 {
+C 		t := st.K${previous.name:l}p
 C 		st.K${name:l}p = act.Ap${previous.comp.name:c}[t].K${name:l}p
 C 	} else if "${check}" != "*" {
 C 		fmt.Printf("ref_copy:${.refs2.name:c}.${name:l} unresolved from ${previous.type}:${.refs2.name:c}.${previous.name:l}:${previous.comp:c}.x %s (${check}) > ${._lno}\n", st.LineNo)

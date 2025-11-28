@@ -26,7 +26,7 @@ All Comp struct
 Actor struct Comp name = Actor
 ----------------------------------------------------------------
 
-D ${name:c} struct
+-D ${name:c} struct
 
 C type Kp${name:c} struct {
 C 	Kp
@@ -70,7 +70,7 @@ Break
 Actor struct Comp parent = Actor
 ----------------------------------------------------------------
 
-D ${name:c} struct
+-D ${name:c} struct
 
 C type Kp${name:c} struct {
 C 	Kp
@@ -468,8 +468,8 @@ C 	st.MyName = name
 Break loop
 
 ----------------------------------------------------------------
-Actor ele_act . type in key,word,ref,link,ref_child,tree
--Actor ele_act . mw in C1,R1,F1,L1 note: ref_copy not here, no input field
+Actor ele_act . type in key,word,ref,link,ref_child,tree,number
+-note: ref_copy not here, no input field
 ----------------------------------------------------------------
 
 C 	p,st.K${name:l} = getw(ln,p)
@@ -482,8 +482,8 @@ Actor ele_act . type = text
 C 	p,st.K${name:l} = getws(ln,p)
 
 ----------------------------------------------------------------
-Actor ele . type in key,word,ref,link,ref_child,type_of,tree
--note: up_copy,ref_copy not here, no input field
+Actor ele . type in key,word,ref,link,ref_child,type_of,tree,number
+-note: up_copy,ref_copy,ref_share not here, no input field
 ----------------------------------------------------------------
 
 C 	p,st.Names["${name:l}"] = getw(ln,p)
@@ -533,7 +533,6 @@ C 		}
 
 ----------------------------------------------------------------
 Actor ref_func Element type in ref,link,up_copy,ref_copy,ref_child
--Actor ref_func Ref
 ----------------------------------------------------------------
 
 C 	if va[0] == "${name:l}" {
@@ -591,7 +590,6 @@ C 	}
 
 ----------------------------------------------------------------
 Actor other_func Element type in ref,link,up_copy,ref_child,ref_copy
--Actor other_func Ref
 ----------------------------------------------------------------
 
 C 	if (va[0] == "${parent.name:c}_${name:l}") { // ${._lno}
@@ -641,31 +639,28 @@ C 	}
 Actor star Star
 ----------------------------------------------------------------
 
-D 	* ${doc}
+-D 	* ${doc}
 
 ----------------------------------------------------------------
 Actor val_inc_d Element
 ----------------------------------------------------------------
 
-D 	${name:l} * ${doc}
+-D 	${name:l} * ${doc}
 
 ----------------------------------------------------------------
-Actor val_inc Element type in key,word,text,type_of,ref,link,up_copy,ref_copy,ref_child,tree
--Actor val_inc Element mw in C1,CS,V1,R1,F1,L1,M1
+Actor val_inc Element type in key,word,text,type_of,ref,link,up_copy,ref_copy,ref_child,tree,number,ref_share,type_of
 ----------------------------------------------------------------
 
 C 	K${name:l} string
 
 ----------------------------------------------------------------
-Actor val_inc2 Element type in ref,link,up_copy,ref_copy,ref_child,type_of
--Actor val_inc2 Element mw in R1,F1,L1,M1,Q1,U0,RS,FS,LS,MS,QS
+Actor val_inc2 Element type in ref,link,up_copy,ref_copy,ref_child,type_of,ref_share
 ----------------------------------------------------------------
 
 C 	K${name:l}p int
 
 ----------------------------------------------------------------
-Actor val_inc2_init Element type in ref,link,up_copy,ref_copy,ref_child,type_of
--Actor val_inc2_init Element mw in R1,F1,L1,M1,Q1,U0,RS,FS,LS,MS,QS
+Actor val_inc2_init Element type in ref,link,up_copy,ref_copy,ref_child,type_of,ref_share
 ----------------------------------------------------------------
 
 C 	st.K${name:l}p = -1
@@ -706,7 +701,6 @@ C 	}
 
 ----------------------------------------------------------------
 Actor other_var Element type in ref,link,up_copy,ref_copy,ref_link
--Actor other_var Ref
 ----------------------------------------------------------------
 
 C 	if (va[0] == "${parent.name:c}_${name:l}" && len(va) > 1) { // ${._lno}

@@ -9,13 +9,14 @@
 // ----------------------------------------------------------------
 // SESSION: Container for Cognitive Work
 // ----------------------------------------------------------------
-Comp Session        parent .          Find
-    Element session_id    key     .       +   // e.g., "sess_2024_11_23_001"
-    Element agent_id      ref     Agent   +   // Which agent ran this session
-    Element parent_session link   Session *   // Previous session (continuity chain)
-    Element timestamp     number  .       +   // Session start (Unix ms)
-    Element status        word    .       +   // active | paused | completed | failed | abandoned
-    Element doc           text    .       *
+Comp Session  parent . Find
+    Element session_id     key       .       +   // e.g., "sess_2024_11_23_001"
+    Element agent_id       ref       Agent   +   // Which agent ran this session
+    Element agent_id2      ref_share Agent   -
+    Element parent_session ref       Session *   // Previous session (continuity chain)
+    Element timestamp      number    .       +   // Session start (Unix ms)
+    Element status         word      .       +   // active | paused | completed | failed | abandoned
+    Element doc            text      .       *
 
     Opt active            *   // Currently running
     Opt paused            *   // Suspended, can resume
@@ -27,13 +28,16 @@ Comp Session        parent .          Find
 // SNAPSHOT: Captures Session State at a Point in Time
 // ----------------------------------------------------------------
 Comp Snapshot       parent Session   FindIn
-    Element snapshot_id   key     .       +   // e.g., "snap_checkpoint_001"
-    Element timestamp     number  .       +   // When snapshot was taken
-    Element trigger       word    .       *   // manual | auto | error | milestone
-    Element objectives    ref     Objective *   // Active objectives at this time
-    Element memories      ref     Memory    *   // Working memory set
-    Element thoughts      ref     Thought   *   // Recent thought chain
-    Element doc           text    .       *
+    Element snapshot_id  key       .         +   // e.g., "snap_checkpoint_001"
+    Element timestamp    number    .         +   // When snapshot was taken
+    Element trigger      word      .         *   // manual | auto | error | milestone
+    Element session      up_copy   Session   -
+    Element agent_id     ref_copy  Agent     -
+    Element objectives   ref_child Objective *   // Active objectives at this time
+    Element thoughts     ref_child Thought   *   // Recent thought chain
+    Element agent_id2    ref_share Agent     -
+    Element memories     ref_child Memory    *   // Working memory set
+    Element doc          text      .         *
 
     Opt manual            *   // User-triggered save
     Opt auto              *   // Periodic checkpoint
@@ -43,13 +47,16 @@ Comp Snapshot       parent Session   FindIn
 // ----------------------------------------------------------------
 // RESTORATION: Tracks What Was Loaded from Previous Sessions
 // ----------------------------------------------------------------
-Comp Restoration    parent Session   FindIn
-    Element restoration_id key    .       +   // e.g., "restore_001"
-    Element source_session ref    Session +   // Which session data came from
-    Element source_memory  ref    Memory  +   // Original memory being restored
-    Element restored_as    ref    Memory  +   // New memory created in current session
-    Element relevance      number .       *   // 0.0–1.0 why this was selected
-    Element doc            text   .       *
+Comp Restoration parent Session FindIn
+    Element restoration_id key       .       +   // e.g., "restore_001"
+    Element source_session ref       Session +   // Which session data came from
+    Element agent_id       ref_copy  Agent   -
+    Element source_memory  ref_child Memory  +   // Original memory being restored
+    Element session        up_copy   Session -
+    Element agent_id2      ref_copy  Agent   -
+    Element restored_as    ref_child Memory  +   // New memory created in current session
+    Element relevance      number    .       *   // 0.0–1.0 why this was selected
+    Element doc            text      .       *
 
 // ----------------------------------------------------------------
 // CROSSREF: Bidirectional Cog ↔ External System Linking
@@ -75,15 +82,21 @@ Comp CrossRef       parent Session   FindIn
 // ----------------------------------------------------------------
 // CYCLE: Tracks Learning Through Iteration
 // ----------------------------------------------------------------
-Comp Cycle          parent Session   FindIn
-    Element cycle_id      key     .       +   // e.g., "cycle_error_recovery_001"
-    Element trigger       word    .       +   // error | optimization | requirement | feedback
-    Element hypothesis    ref     Thought *   // Hypothesis being tested (if any)
-    Element baseline      ref     Memory  *   // State before change
-    Element intervention  ref     Thought +   // What changed and why
-    Element outcome       ref     Memory  +   // Measured result after change
-    Element improvement   number  .       *   // Quantified delta (speedup, accuracy, etc.)
-    Element doc           text    .       *
+Comp Cycle  parent Session FindIn
+    Element cycle_id      key       .         + // e.g., "cycle_error_recovery_001"
+    Element trigger       word      .         + // error | optimization | requirement | feedback
+    Element session       up_copy   Session   -
+    Element agent_id      ref_copy  Agent     -
+    Element objective     ref_child Objective * // Objective of Thought
+    Element hypothesis    ref_child Thought   * // Hypothesis being tested (if any)
+    Element agent_id2     ref_share Agent     -
+    Element baseline      ref_child Memory    * // State before change
+    Element objective2    ref_share Objective - // Objective of Thought
+    Element intervention  ref_child Thought   + // What changed and why
+    Element agent_id3     ref_share Agent     -
+    Element outcome       ref_child Memory    + // Measured result after change
+    Element improvement   number  .           * // Quantified delta (speedup, accuracy, etc.)
+    Element doc           text    .           *
 
     Opt error             *   // Triggered by failure
     Opt optimization      *   // Performance improvement
@@ -91,24 +104,69 @@ Comp Cycle          parent Session   FindIn
     Opt feedback          *   // User or system feedback
     Opt exploration       *   // Proactive experiment
 
+Comp Recommendation parent Session FindIn
+----------------------------------------------------------------
+* AI suggests relevant Canons based on current context. 
+* Tracks acceptance and outcomes for learning. 
+----------------------------------------------------------------
+    Element rec_id        key       .         + // e.g., "rec_001" 
+    Element session       up_copy   Session   - // Current session 
+    Element agent_id      ref_copy  Agent     - // Current agent
+    Element outcome       ref_child Memory    * // Result after acceptance 
+    Element agent_id2     ref_share Agent     - // Current agent 
+    Element objective     ref_child Objective * // Current goal 
+    Element situation     text      .         * // Why recommended (pattern match) 
+    Element canon         ref       Canon     + // Recommended canonical documentation
+    Element confidence    number    .         * // 0.0–1.0 recommendation strength
+    Element reasoning     text      .         * // Why this Canon fits
+    Element accepted      word      .         * // yes | no | modified
+    Element impl          ref       Implementation * // If accepted, the instantiation
+    Element doc           text      .         *
+
+    Opt accepted_yes      * // User/agent accepted recommendation
+    Opt accepted_no       * // Rejected
+    Opt accepted_modified * // Adapted before use
+
+// ----------------------------------------------------------------
+// LEARNING CYCLE: Connects implementations to Canon evolution
+// ----------------------------------------------------------------
+Comp CanonCycle parent Cycle FindIn
+----------------------------------------------------------------
+* Specialized cycle tracking Canon-driven learning.
+* Links empirical evidence to documentation improvements.
+----------------------------------------------------------------
+    Element implementations   ref       Implementation * // Usage instances
+    Element baseline_canon    ref       Canon          + // Original version
+    Element new_version       ref_child CanonVersion   * // Resulting update
+    Element discovered_issues text      .              * // Problems found
+    Element proposed_changes  text      .              * // Suggested improvements
+    Element doc               text      .              *
+
+
+
 // ----------------------------------------------------------------
 // PATTERN: Extracted Reusable Knowledge
 // ----------------------------------------------------------------
-Comp Pattern        parent .          Find
-    Element pattern_id    key     .       +   // e.g., "pattern_tensor_ordering"
-    Element name          word    .       +   // Human-readable identifier
-    Element category      word    .       *   // bug_fix | optimization | design | constraint
-    Element discovered_in ref     Session *   // Which session found this
-    Element evidence      ref     Cycle   *   // Learning cycles supporting this
-    Element confidence    number  .       *   // 0.0–1.0 reliability
-    Element applicability text    .       *   // When/where to apply this pattern
-    Element doc           text    .       *
+Comp Pattern parent . Find
+    Element pattern_id    key       .       +   // e.g., "pattern_tensor_ordering"
+    Element name          word      .       +   // Human-readable identifier
+    Element category      word      .       *   // bug_fix | optimization | design | constraint
+    Element discovered_in ref       Session *   // Which session found this
+    Element evidence      ref_child Cycle   *   // Learning cycles supporting this
+    Element confidence    number    .       *   // 0.0–1.0 reliability
+    Element applicability text      .       *   // When/where to apply this pattern
+    Element doc           text      .       *
 
     Opt bug_fix           *   // Avoids errors
     Opt optimization      *   // Improves performance
     Opt design            *   // Architectural principle
     Opt constraint        *   // Boundary condition
     Opt heuristic         *   // Rule of thumb
+
+Comp PatternSource parent Pattern FindIn
+    Element impl          ref  Implementation  * // All implementations
+    Element canon         ref_copy  Canon      + // Original canonical documentation
+    Element doc           text .               *
 
 // ----------------------------------------------------------------
 // EVOLUTION: Schema/Domain Changes Over Time
@@ -131,7 +189,7 @@ Comp Evolution      parent .          Find
 // ----------------------------------------------------------------
 // METRIC: Quantitative Performance Tracking
 // ----------------------------------------------------------------
-Comp Metric         parent Session   FindIn
+Comp MetricS         parent Session   FindIn
     Element metric_id     key     .       +   // e.g., "metric_convergence_time"
     Element name          word    .       +   // Human-readable
     Element measurement   text    .       *   // How it's calculated
@@ -163,3 +221,100 @@ Comp Artifact       parent Session   FindIn
     Opt output            *   // Produced by session
     Opt intermediate      *   // Temporary working file
     Opt reference         *   // External documentation/context
+    
+// ----------------------------------------------------------------
+// GENEXECUTION: Tracks Actual Runs of a Program
+// Child of Session - connects generation to session context
+// This is where we measure REAL performance
+// ----------------------------------------------------------------
+Comp GenExecution parent Session FindIn
+    Element execution_id        key      .       +   // e.g. "exec_cuda_db_001"
+    Element program             ref      GenProgram + // Which program was run
+    Element session             up_copy  Session -    // Inherited from parent
+    Element agent_id            ref_copy Agent   -    // Copy from session
+    Element trigger_thought     word     Thought *    // Thought that requested this generation
+    Element input_data          word     Memory  *    // Input data used (e.g., DAML model)
+    Element output_artifacts    word     Artifact *   // Generated files/data
+    Element status              word     .       +    // pending | running | success | failed
+    Element start_time          number   .       *    // Unix ms
+    Element end_time            number   .       *    // Unix ms
+    Element duration_ms         number   .       *    // Calculated: end - start
+    Element error_message       text     .       *    // If failed
+    Element learned_from        word     .       *    // yes | no (did this create a Cycle?)
+    Element doc                 text     .       *
+
+    Opt pending             *   // Queued for execution
+    Opt running             *   // Currently generating
+    Opt success             *   // Completed successfully
+    Opt failed              *   // Generation failed
+    
+    Opt yes                 *   // Learning cycle created
+    Opt no                  *   // No learning occurred
+
+// ----------------------------------------------------------------
+// GENVALIDATION: Quality Checks on Generated Code
+// Child of GenExecution - validates generated output
+// Results feed back into learning via Cycle creation
+// ----------------------------------------------------------------
+Comp GenValidation parent GenExecution FindIn
+    Element validation_id       key      .       +   // e.g. "val_001"
+    Element check_type          word     .       +   // syntax | semantic | performance | correctness | safety
+    Element tool                word     .       *   // "valgrind" | "nvcc" | "pytest" | "benchmark"
+    Element passed              word     .       +   // yes | no | partial
+    Element score               number   .       *   // 0.0–1.0 quality score
+    Element result              text     .       *   // Detailed results
+    Element metrics             text     .       *   // JSON of measured metrics
+    Element timestamp           number   .       +   // When validation ran
+    Element creates_cycle       word     Cycle   *   // If this validation triggers learning
+    Element doc                 text     .       *
+
+    Opt syntax              *   // Syntactic correctness (compiles)
+    Opt semantic            *   // Semantic correctness (types, refs)
+    Opt performance         *   // Performance benchmarks
+    Opt correctness         *   // Functional correctness (tests pass)
+    Opt safety              *   // Memory safety, security checks
+    
+    Opt yes                 *   // Validation passed
+    Opt no                  *   // Validation failed
+    Opt partial             *   // Some checks passed
+
+// ----------------------------------------------------------------
+// GENLEARNING: Automatic Cycle Creation from Execution
+// Child of GenExecution - THE FEEDBACK LOOP
+// Automatically creates Cycle when validation completes
+// This is where autonomous improvement happens
+// ----------------------------------------------------------------
+Comp GenLearning parent GenExecution FindIn
+    Element learning_id         key      .       +   // e.g. "learn_001"
+    Element cycle               word     Cycle   +   // The Cycle created from this execution
+    Element session             up_copy   Session
+    Element baseline            ref_child GenExecution * // Previous execution to compare against
+    Element improvement         number   .       *   // Delta from baseline
+    Element pattern_candidate   word     .       *   // yes | no | maybe
+    Element confidence          number   .       *   // 0.0–1.0 how confident in this learning
+    Element applied_to_program  ref      GenProgram * // If pattern strong enough, which program updated
+    Element doc                 text     .       *
+
+    Opt yes                 *   // Strong pattern candidate
+    Opt no                  *   // Not generalizable
+    Opt maybe               *   // Need more evidence
+
+// ----------------------------------------------------------------
+// GENDEBUG: Debugging Information for Failed Generations
+// Child of GenExecution - helps diagnose failures
+// ----------------------------------------------------------------
+Comp GenDebug parent GenExecution FindIn
+    Element debug_id            key      .       +   // e.g. "debug_001"
+    Element error_category      word     .       *   // parse | type | runtime | resource | timeout
+    Element stack_trace         text     .       *   // Full stack trace
+    Element actor_trace         text     .       *   // Which actors were executing
+    Element input_snapshot      word     Memory  *   // Snapshot of input that caused failure
+    Element suggested_fix       text     .       *   // AI-generated suggestion
+    Element fixed_by            word     Thought *   // Thought that resolved this
+    Element doc                 text     .       *
+
+    Opt parse               *   // Failed to parse input
+    Opt type                *   // Type error in generation
+    Opt runtime             *   // Runtime execution error
+    Opt resource            *   // Out of memory, disk, etc.
+    Opt timeout             *   // Exceeded time limit

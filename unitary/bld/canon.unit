@@ -1,0 +1,132 @@
+// ================================================================
+// canon.unit — CANONICAL KNOWLEDGE AND COGNITIVE INTEGRATION SCHEMA
+// ================================================================
+// Philosophy: Provides the foundational CONTENT and EXECUTION tracking
+// This unified schema defines the authoritative knowledge (Canon) 
+// and how it is instantiated, tracked, and evolved in runtime.
+// This Canon serves as the system's bootstrap and recovery foundation.
+// ================================================================
+
+// ================================================================
+// LAYER 1: CANON DEFINITION (The Foundational Content)
+// ================================================================
+
+Comp Canon parent . Find
+----------------------------------------------------------------
+* Self-contained authoritative knowledge unit  that establishes the system's foundation.
+* Overrules derived schemas during bootstrap and recovery.
+* Typically 10-30 lines with single clear purpose, optimized for AI consumption. 
+----------------------------------------------------------------
+    Element name        key  .        + // Unique identifier 
+    Element category    word .        * // Optional category word 
+    Element topic_type  word .        * // Optional type word [cite: 48]
+    Element overview    text .        * // 1-3 sentence summary 
+    Element doc         text .        * // Not used in definition files 
+
+Comp Link parent Canon FindIn
+----------------------------------------------------------------
+* Typed relationship creating a validated knowledge graph between Canons. [cite: 49]
+----------------------------------------------------------------
+    Element concept     ref  Canon    + // Target Canon (must exist) [cite: 49]
+    Element relation    ref  Canon    + // Relationship type (must exist) [cite: 49]
+
+Comp Section parent Canon FindIn
+----------------------------------------------------------------
+* Optional structure for longer Canons. [cite: 50]
+----------------------------------------------------------------
+    Element name        word .        + // Section identifier [cite: 50]
+    Element level       tree .        + // Heading depth (2=h2, 3=h3, 4=h4) [cite: 51]
+    Element title       text .        * // Section heading text [cite: 52]
+    Element content     text .        * // Section content with markdown [cite: 53]
+
+// ================================================================
+// LAYER 2: CANON EXECUTION TRACKING (runtime instantiation)
+// ================================================================
+
+// Extension to Canon component for runtime metadata
+Comp CanonMeta parent Canon FindIn
+    Element executable    word   .        * // yes | no | partial 
+    Element maturity      word   .        * // draft | stable | deprecated [cite: 2]
+    Element usage_count   number .        * // How many implementations [cite: 3]
+    Element avg_effectiveness number .    * // Average measured effectiveness [cite: 4]
+    Element doc           text   .        *
+
+    Opt executable_yes    * // Can be directly instantiated 
+    Opt executable_no     * // Pure documentation only 
+    Opt executable_partial * // Requires interpretation 
+
+    Opt draft             * // Work in progress 
+    Opt stable            * // Battle-tested 
+    Opt deprecated        * // Use newer version instead 
+
+Comp Implementation parent . Find
+----------------------------------------------------------------
+* Records when a Canon gets instantiated in cognitive runtime. [cite: 6]
+* Bridge between foundational knowledge (Canon) and execution (cog.unit).
+----------------------------------------------------------------
+    Element impl_id       key       .         + // e.g., "impl_cot_session_123" [cite: 7]
+    Element canon         ref       Canon     + // WHAT authoritative rule is being implemented
+    Element cog_type      word      .         + // Thought | Memory | Pattern | Action [cite: 8]
+    Element cog_id        text      .         + // ID in cognitive domain [cite: 9]
+    Element session       ref       Session   * // Where it was instantiated [cite: 10]
+    Element context       text      .         * // Why/how it was applied [cite: 10]
+    Element effectiveness number    .         * // 0.0–1.0 measured outcome [cite: 11]
+    Element adherence     number    .         * // 0.0–1.0 fidelity to Canon [cite: 12]
+    Element timestamp     number    .         + // When instantiated [cite: 12]
+    Element doc           text      .         *
+
+    // What cognitive component type was created [cite: 13]
+    Opt as_thought        * // Instantiated as reasoning step
+    Opt as_memory         * // Stored as knowledge
+    Opt as_pattern        * // Extracted as reusable pattern
+    Opt as_action         * // Executed as tool call
+    Opt as_constraint     * // Applied as boundary condition
+
+
+// ================================================================
+// LAYER 3: EMPIRICAL EVOLUTION (learning feedback loop)
+// ================================================================
+
+Comp CanonVersion parent Canon FindIn
+----------------------------------------------------------------
+* Tracks how Canon documentation evolves based on usage data. [cite: 18]
+* Each version is a revision of the parent Canon. [cite: 18]
+----------------------------------------------------------------
+    Element version         key       .         + // e.g., "v2", "v3_refactored" [cite: 18]
+    Element canon           up_copy   Canon     - // Parent Canon [cite: 18]
+    Element previous        ref_child CanonVersion * // Version chain [cite: 18]
+    Element change_type     word      .         * // clarification | bugfix | enhancement | refactor [cite: 19]
+    Element motivation      text      .         * // Why this version exists [cite: 20]
+    Element canon2          up_share  Canon     - // Parent Canon [cite: 18]
+    Element implementations ref  Implementation * // Usage before/after [cite: 20]
+    Element session         ref_copy  Session   * // Where it was instantiated [cite: 10]
+    Element evidence        ref_child Cycle     * // Empirical data supporting change [cite: 20]
+    Element improvement   number    .         * // Measured delta vs previous [cite: 21]
+    Element timestamp     number    .         + // When version created [cite: 22]
+    Element doc           text      .         *
+
+    Opt clarification     * // Made explanation clearer [cite: 23]
+    Opt bugfix            * // Fixed incorrect information [cite: 23]
+    Opt enhancement       * // Added new information [cite: 23]
+    Opt refactor          * // Restructured for better understanding [cite: 23]
+
+
+// ================================================================
+// LAYER 4: INTELLIGENT RECOMMENDATION (context-aware suggestions)
+// ================================================================
+
+Comp Library parent . Find
+----------------------------------------------------------------
+* Curated collection of Canons organized by domain/purpose. [cite: 28]
+* Can be loaded at session start or queried dynamically. [cite: 28]
+----------------------------------------------------------------
+    Element lib_id        key       .         + // e.g., "reasoning_patterns_v1" [cite: 29]
+    Element name          word      .         + // Human-readable name [cite: 30]
+    Element domain        word      .         * // reasoning | memory | planning | debugging [cite: 31]
+    Element purpose       text      .         * // What this library is for [cite: 32]
+    Element canons        ref Canon .        * // Contents (formerly artifacts)
+    Element maintainer    word      .         * // Who curates this [cite: 33]
+    Element version       word      .         * // Library version [cite: 34]
+    Element doc           text      .         *
+
+

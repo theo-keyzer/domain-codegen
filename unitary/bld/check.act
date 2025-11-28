@@ -1,0 +1,165 @@
+----------------------------------------------------------------
+Actor main_check .
+----------------------------------------------------------------
+
+Out delay
+
+C // ================================================================
+C // SCHEMA VALIDATION REPORT
+C // Run: check.act ${1}
+C // ================================================================
+C
+C 
+C **Note:** This documentation was generated from the schema.
+C For validation results, run the check.act actor on your schema.
+C
+C Expected validation checks:
+C - Reference integrity (ref, link, ref_child, ref_copy, up_copy)
+C - Component searchability (Find/FindIn matching)
+C - Parent-child relationship consistency
+C - Key field uniqueness
+C - Check marker validity (+, 1, *, .)
+C
+
+C Artifact error-list error guide
+
+All Comp comp-list
+
+----------------------------------------------------------------
+Actor comp-list Comp
+----------------------------------------------------------------
+
+Its Element element-list
+
+----------------------------------------------------------------
+Actor element-list Element type = ref
+----------------------------------------------------------------
+
+Out delay
+
+C
+C Section ref 2 Error in ref
+
+Its comp ref-check
+
+----------------------------------------------------------------
+Actor element-list Element type = link
+----------------------------------------------------------------
+
+Out delay
+
+C
+C Section link 2 Error in link
+
+Its comp link-check
+
+----------------------------------------------------------------
+Actor element-list Element type = ref_child
+----------------------------------------------------------------
+
+Out delay
+
+C
+C Section ref_child 2 Error in ref_child
+
+Du ref_child-check
+
+----------------------------------------------------------------
+Actor element-list Element type = ref_copy
+----------------------------------------------------------------
+
+Out delay
+
+C
+C Section ref_copy 2 Error in ref_copy
+
+Du ref_copy-check
+
+----------------------------------------------------------------
+Actor ref-check Comp parent != .
+----------------------------------------------------------------
+
+C D - ${.comp-list.name}.${.element-list.name}, ${name}. Not a root node (.)
+
+----------------------------------------------------------------
+Actor ref-check Comp find != Find
+----------------------------------------------------------------
+
+C D - ${.comp-list.name}.${.element-list.name}, ${name}. Not a find-able node (Find)
+
+----------------------------------------------------------------
+Actor link-check Comp parent.name != ${.comp-list.parent}
+----------------------------------------------------------------
+
+C D - ${.comp-list.name}.${.element-list.name}, ${name}. Not a sibling
+Break
+
+----------------------------------------------------------------
+Actor link-check Comp find != FindIn
+----------------------------------------------------------------
+
+C D - ${.comp-list.name}.${.element-list.name}, ${name}. Not a find-able node (FindIn)
+Break
+
+----------------------------------------------------------------
+Actor ref_child-check Element previous.comp ??
+----------------------------------------------------------------
+
+C D - ${.comp-list.name}.${.element-list.name}. Has no previous element
+Break
+
+----------------------------------------------------------------
+Actor ref_child-check Element previous.comp != ${.element-list.comp.parent}
+----------------------------------------------------------------
+
+C D - ${.comp-list.name}.${.element-list.name}. Previous element reference (${previous.comp}) not a parent of (${.element-list.comp})
+-Break
+
+----------------------------------------------------------------
+Actor ref_child-check Element comp.find != FindIn
+----------------------------------------------------------------
+
+C D - ${.comp-list.name}.${.element-list.name}, ${comp}. Not a find-able node (FindIn)
+Break
+
+----------------------------------------------------------------
+Actor ref_copy-check Element previous.comp ??
+----------------------------------------------------------------
+
+C D - ${.comp-list.name}.${.element-list.name}. Has no previous element
+Break
+
+----------------------------------------------------------------
+Actor ref_copy-check Element
+----------------------------------------------------------------
+
+Add.map.clear _:ref_copy
+Add _.ref_copy:comp none
+All Comp ref_copy-prev
+Du ref_copy-verify
+
+----------------------------------------------------------------
+Actor ref_copy-prev Comp name = ${.ref_copy-check.previous.comp}
+----------------------------------------------------------------
+
+Its Element ref_copy-ele
+
+----------------------------------------------------------------
+Actor ref_copy-ele Element name = ${.ref_copy-check.name}
+----------------------------------------------------------------
+
+Add _.ref_copy:comp ${comp}
+
+----------------------------------------------------------------
+Actor ref_copy-verify Element _.ref_copy.comp = none
+----------------------------------------------------------------
+
+C D - ${.comp-list.name}.${.element-list.name}. The ${previous.comp} has no ${name} element
+Break
+
+----------------------------------------------------------------
+Actor ref_copy-verify Element comp != ${_.ref_copy.comp}
+----------------------------------------------------------------
+
+C D - ${.comp-list.name}.${.element-list.name}. The ${comp} != ${_.ref_copy.comp}
+

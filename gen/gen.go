@@ -28,7 +28,6 @@ type GlobT struct {
 type WinT struct {
 	Name     string
 	Cnt      int
-	PrevCnt  int
 	Dat      interface{}
 	Arg      string
 	Flno     string
@@ -56,7 +55,6 @@ func NewAct(glob *GlobT, actn, arg, flno string) {
 	glob.Wins[winp].DataKey = ""
 	glob.Wins[winp].DataType = ""
 	glob.Wins[winp].Cnt = -1
-	glob.Wins[winp].PrevCnt = 0
 	glob.Wins[winp].Arg = arg
 	glob.Wins[winp].Flno = flno
 	glob.Wins[winp].BrkAct = false
@@ -99,7 +97,6 @@ func GoAct(glob *GlobT, dat interface{}) (int) {
 		}
 		
 		prev = true
-		if len(act.Childs) == 0 { continue }
 		glob.Wins[winp].CurAct = i
 		if incCnt {
 			incCnt = false
@@ -198,7 +195,6 @@ func goCmds(glob *GlobT, ca, winp int) (int) {
 			_, what := strs(glob, winp, c.Kwhat, c.LineNo, true, true)
 			va := strings.Split(what, ".")
 			ret := DoAll(glob, va, c.LineNo)
-			glob.Wins[winp].PrevCnt = glob.Wins[winp+1].Cnt + 1
 			if  ret > 1 || ret < 0 {
 				return ret
 			}
@@ -207,7 +203,6 @@ func goCmds(glob *GlobT, ca, winp int) (int) {
 			_, args := strs(glob, winp, c.Kargs, c.LineNo, true, true)
 			NewAct(glob, c.Kactor, args, c.LineNo)
 			ret := thisCmd(glob, winp, c, c.LineNo)
-			glob.Wins[winp].PrevCnt = glob.Wins[winp+1].Cnt + 1
 			if  ret > 1 || ret < 0 {
 				return ret
 			}
@@ -240,7 +235,6 @@ func goCmds(glob *GlobT, ca, winp int) (int) {
 			_, args := strs(glob, winp, c.Kargs, c.LineNo, true, true)
 			NewAct(glob, c.Kactor, args, c.LineNo)
 			glob.Wins[winp+1].Cnt = glob.Wins[winp].Cnt
-			glob.Wins[winp+1].PrevCnt = glob.Wins[winp].PrevCnt
 			glob.Wins[winp+1].DataKey = glob.Wins[winp].DataKey
 			glob.Wins[winp+1].DataType = glob.Wins[winp].DataType
 			glob.Wins[winp+1].DataKeys = glob.Wins[winp].DataKeys
@@ -259,8 +253,6 @@ func goCmds(glob *GlobT, ca, winp int) (int) {
 					if glob.Wins[i].Name == va[1] {
 						if kp, ok := glob.Wins[i].Dat.(Kp); ok {
 							ret := kp.DoIts(glob, va[2:], c.LineNo)
-							glob.Wins[winp].PrevCnt = glob.Wins[winp+1].Cnt + 1
-
 							if  ret > 1 || ret < 0 {
 								return ret
 							}
@@ -273,7 +265,6 @@ func goCmds(glob *GlobT, ca, winp int) (int) {
 			
 			if kp, ok := glob.Wins[winp].Dat.(Kp); ok {
 				ret := kp.DoIts(glob, va, c.LineNo)
-				glob.Wins[winp].PrevCnt = glob.Wins[winp+1].Cnt + 1
 				if  ret > 1 || ret < 0 {
 					return ret
 				}
@@ -446,21 +437,16 @@ func cmdVar(glob *GlobT, sc []string, varv interface{}, lcnt int) (bool, string)
 		}
 		
 		if str, ok := dat.(string); ok {
-			if idx, err := strconv.Atoi(sc[i]); err == nil {
-				slice := strings.Split(str, ",")
-				if idx < 0 {
-					idx = idx + len(slice)
-				}
-				if idx >= 0 && idx < len(slice) {
-					dat = slice[idx]
-				}
-			}
 			switch sc[i] {
 			case "u":
 				dat = strings.ToUpper(str)
 			case "l":
 				dat = strings.ToLower(str)
 			case "c":
+				if len(str) > 0 {
+					dat = strings.ToUpper(str[:1]) + str[1:]
+				}
+			case "C":
 				if len(str) > 0 {
 					dat = strings.ToUpper(str[:1]) + strings.ToLower(str[1:])
 				}
@@ -476,13 +462,6 @@ func cmdVar(glob *GlobT, sc []string, varv interface{}, lcnt int) (bool, string)
 }
 
 func sGetVar(glob *GlobT, winp int, sc []string, va []string, lno string) (bool, string) {
-/*
-	chkerr := false
-	if len(va) > 0 && len( va[0] ) > 0 && va[0][0] == '?' {
-		va[0] = va[0][1:]
-		chkerr = true
-	}
-*/
 	path := va
 	rec := getPath(glob, winp, path, lno)
 	if !rec.Ok {
@@ -490,19 +469,13 @@ func sGetVar(glob *GlobT, winp int, sc []string, va []string, lno string) (bool,
 	}
 	
 	dat := rec.Dat
-	//fmt.Print(dat.(Kp))
 	if _, ok := dat.(Kp); !ok && len(rec.Path) > 0 && rec.Path[0] != "." && rec.Path[0] != "" {
 		return false, fmt.Sprintf("?%s?%s?", rec.Path[0], lno)
 	}
+	
 	if kp, ok := dat.(Kp); ok && len(rec.Path) > 0 && rec.Path[0] != "." {
 		resOk, res := kp.GetVar(glob, rec.Path, lno)
 		if !resOk {
-//			if chkerr == true {
-				if len(sc) > 2 {
-					return true, sc[2]
-				}
-//				return true, ""
-//			}
 			return resOk, res
 		}
 		dat = res

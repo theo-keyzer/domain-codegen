@@ -26,25 +26,19 @@ type ActT struct {
 	ApAdd [] *KpAdd
 	ApThis [] *KpThis
 	ApReplace [] *KpReplace
-	ApArtifact [] *KpArtifact
-	ApLink [] *KpLink
-	ApO [] *KpO
-	ApSection [] *KpSection
-	ApD [] *KpD
 }
 
 func refs(act *ActT) int {
 	errs := 0
 	v := ""
-	//p := -1
 	res := 0
 	err := false
 	for _, st := range act.ApComp {
 
-//  unit.unit:8, g_run.act:169
+//  unit.unit:8, g_run.act:168
 
 		v, _ = st.Names["parent"]
-		err, res = fnd3(act, "Comp_" + v, v, "ref:Comp.parent:Comp." + v,  ".", st.LineNo, "unit.unit:8, g_run.act:173" );
+		err, res = fnd2(act, "Comp_" + v, v,  ".", st.LineNo, "unit.unit:8, g_run.act:171" );
 		st.Kparentp = res
 		if (err == false) {
 			errs += 1
@@ -52,10 +46,10 @@ func refs(act *ActT) int {
 	}
 	for _, st := range act.ApElement {
 
-//  unit.unit:35, g_run.act:169
+//  unit.unit:32, g_run.act:168
 
 		v, _ = st.Names["comp"]
-		err, res = fnd3(act, "Comp_" + v, v, "ref:Element.comp:Comp." + v,  ".", st.LineNo, "unit.unit:35, g_run.act:173" );
+		err, res = fnd2(act, "Comp_" + v, v,  ".", st.LineNo, "unit.unit:32, g_run.act:171" );
 		st.Kcompp = res
 		if (err == false) {
 			errs += 1
@@ -63,7 +57,7 @@ func refs(act *ActT) int {
 	}
 	for _, st := range act.ApAll {
 
-		err, res = fnd2(act, "Actor_" + st.Kactor, st.Kactor,  ".", st.LineNo, "act.unit:34, g_run.act:159" );
+		err, res = fnd2(act, "Actor_" + st.Kactor, st.Kactor,  ".", st.LineNo, "act.unit:34, g_run.act:158" );
 		st.Kactorp = res
 		if (err == false) {
 			errs += 1
@@ -71,7 +65,7 @@ func refs(act *ActT) int {
 	}
 	for _, st := range act.ApDu {
 
-		err, res = fnd2(act, "Actor_" + st.Kactor, st.Kactor,  ".", st.LineNo, "act.unit:46, g_run.act:159" );
+		err, res = fnd2(act, "Actor_" + st.Kactor, st.Kactor,  ".", st.LineNo, "act.unit:46, g_run.act:158" );
 		st.Kactorp = res
 		if (err == false) {
 			errs += 1
@@ -79,7 +73,7 @@ func refs(act *ActT) int {
 	}
 	for _, st := range act.ApIts {
 
-		err, res = fnd2(act, "Actor_" + st.Kactor, st.Kactor,  ".", st.LineNo, "act.unit:87, g_run.act:159" );
+		err, res = fnd2(act, "Actor_" + st.Kactor, st.Kactor,  ".", st.LineNo, "act.unit:87, g_run.act:158" );
 		st.Kactorp = res
 		if (err == false) {
 			errs += 1
@@ -87,27 +81,8 @@ func refs(act *ActT) int {
 	}
 	for _, st := range act.ApThis {
 
-		err, res = fnd2(act, "Actor_" + st.Kactor, st.Kactor,  ".", st.LineNo, "act.unit:186, g_run.act:159" );
+		err, res = fnd2(act, "Actor_" + st.Kactor, st.Kactor,  ".", st.LineNo, "act.unit:186, g_run.act:158" );
 		st.Kactorp = res
-		if (err == false) {
-			errs += 1
-		}
-	}
-	for _, st := range act.ApLink {
-
-//  artifact.unit:21, g_run.act:169
-
-		v, _ = st.Names["concept"]
-		err, res = fnd3(act, "Artifact_" + v, v, "ref:Link.concept:Artifact." + v,  "+", st.LineNo, "artifact.unit:21, g_run.act:173" );
-		st.Kconceptp = res
-		if (err == false) {
-			errs += 1
-		}
-//  artifact.unit:22, g_run.act:169
-
-		v, _ = st.Names["relation"]
-		err, res = fnd3(act, "Artifact_" + v, v, "ref:Link.relation:Artifact." + v,  "+", st.LineNo, "artifact.unit:22, g_run.act:173" );
-		st.Krelationp = res
 		if (err == false) {
 			errs += 1
 		}
@@ -220,137 +195,7 @@ func DoAll(glob *GlobT, va []string, lno string) int {
 		}
 		return(0)
 	}
-	if va[0] == "Artifact" {
-		if (len(va) > 1 && len(va[1]) > 0) {
-			en, er := glob.Dats.index["Artifact_" + va[1] ];
-			if !er {
-				if len(va) > 2 {
-					return( glob.Dats.ApArtifact[en].DoIts(glob, va[2:], lno) )
-				}
-				return( GoAct(glob, glob.Dats.ApArtifact[en]) )
-			}
-			return(0)
-		}
-		for _, st := range glob.Dats.ApArtifact {
-			if len(va) > 2 {
-				ret := st.DoIts(glob, va[2:], lno)
-				if ret != 0 {
-					return(ret)
-				}
-				continue
-			}
-			ret := GoAct(glob, st)
-			if ret != 0 {
-				return(ret)
-			}
-		}
-		return(0)
-	}
-	if va[0] == "Link" {
-		if (len(va) > 1 && len(va[1]) > 0) {
-			en, er := glob.Dats.index["Link_" + va[1] ];
-			if !er {
-				if len(va) > 2 {
-					return( glob.Dats.ApLink[en].DoIts(glob, va[2:], lno) )
-				}
-				return( GoAct(glob, glob.Dats.ApLink[en]) )
-			}
-			return(0)
-		}
-		for _, st := range glob.Dats.ApLink {
-			if len(va) > 2 {
-				ret := st.DoIts(glob, va[2:], lno)
-				if ret != 0 {
-					return(ret)
-				}
-				continue
-			}
-			ret := GoAct(glob, st)
-			if ret != 0 {
-				return(ret)
-			}
-		}
-		return(0)
-	}
-	if va[0] == "O" {
-		if (len(va) > 1 && len(va[1]) > 0) {
-			en, er := glob.Dats.index["O_" + va[1] ];
-			if !er {
-				if len(va) > 2 {
-					return( glob.Dats.ApO[en].DoIts(glob, va[2:], lno) )
-				}
-				return( GoAct(glob, glob.Dats.ApO[en]) )
-			}
-			return(0)
-		}
-		for _, st := range glob.Dats.ApO {
-			if len(va) > 2 {
-				ret := st.DoIts(glob, va[2:], lno)
-				if ret != 0 {
-					return(ret)
-				}
-				continue
-			}
-			ret := GoAct(glob, st)
-			if ret != 0 {
-				return(ret)
-			}
-		}
-		return(0)
-	}
-	if va[0] == "Section" {
-		if (len(va) > 1 && len(va[1]) > 0) {
-			en, er := glob.Dats.index["Section_" + va[1] ];
-			if !er {
-				if len(va) > 2 {
-					return( glob.Dats.ApSection[en].DoIts(glob, va[2:], lno) )
-				}
-				return( GoAct(glob, glob.Dats.ApSection[en]) )
-			}
-			return(0)
-		}
-		for _, st := range glob.Dats.ApSection {
-			if len(va) > 2 {
-				ret := st.DoIts(glob, va[2:], lno)
-				if ret != 0 {
-					return(ret)
-				}
-				continue
-			}
-			ret := GoAct(glob, st)
-			if ret != 0 {
-				return(ret)
-			}
-		}
-		return(0)
-	}
-	if va[0] == "D" {
-		if (len(va) > 1 && len(va[1]) > 0) {
-			en, er := glob.Dats.index["D_" + va[1] ];
-			if !er {
-				if len(va) > 2 {
-					return( glob.Dats.ApD[en].DoIts(glob, va[2:], lno) )
-				}
-				return( GoAct(glob, glob.Dats.ApD[en]) )
-			}
-			return(0)
-		}
-		for _, st := range glob.Dats.ApD {
-			if len(va) > 2 {
-				ret := st.DoIts(glob, va[2:], lno)
-				if ret != 0 {
-					return(ret)
-				}
-				continue
-			}
-			ret := GoAct(glob, st)
-			if ret != 0 {
-				return(ret)
-			}
-		}
-		return(0)
-	}
-	fmt.Printf("?No all %s cmd ?%s? > g_run.act:54", va[0], lno);
+	fmt.Printf("?No all %s cmd ?%s? > g_run.act:53", va[0], lno);
 	return 0;
 }
 
@@ -377,11 +222,6 @@ func Load(act *ActT, toks string, ln string, pos int, lno string) int {
 	if tok == "Add" { errs += loadAdd(act,ln,pos,lno,flag) }
 	if tok == "This" { errs += loadThis(act,ln,pos,lno,flag) }
 	if tok == "Replace" { errs += loadReplace(act,ln,pos,lno,flag) }
-	if tok == "Artifact" { errs += loadArtifact(act,ln,pos,lno,flag) }
-	if tok == "Link" { errs += loadLink(act,ln,pos,lno,flag) }
-	if tok == "O" { errs += loadO(act,ln,pos,lno,flag) }
-	if tok == "Section" { errs += loadSection(act,ln,pos,lno,flag) }
-	if tok == "D" { errs += loadD(act,ln,pos,lno,flag) }
 	return errs
 }
 
