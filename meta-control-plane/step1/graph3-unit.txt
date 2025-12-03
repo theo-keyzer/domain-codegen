@@ -1,0 +1,403 @@
+// control-plane.unit – Meta-Control Plane Configuration Schema
+// Version: 1.0 - Bootstrap schema for hierarchical optimization control systems
+
+// ================================================================
+// SYSTEM CONFIGURATION - Core Control Plane Settings
+// ================================================================
+
+Comp ControlPlane parent . Find
+----------------------------------------------------------------
+* Top-level control plane instance configuration.
+* Defines version, deployment context, and catastrophe response protocols.
+----------------------------------------------------------------
+    Element plane_id            key    .        +     // Unique deployment identifier
+    Element version             text   .        +     // e.g., "2035.12", "2027.12"
+    Element status              word   .        +     // production_ubiquitous | production_critical | experimental
+    Element evolution_lineage   text   .        *     // Version ancestry chain
+    Element embedding_model     text   .        *     // e.g., "OptimaFormer-350M-2029"
+    Element embedding_dim       number .        *     // Z-space dimensionality (2048)
+    Element catastrophe_mode    word   .        *     // normal | isolation | emergency_brake
+    Element doc                 text   .        *
+
+    Opt production_ubiquitous   *   // Deployed everywhere (2035)
+    Opt production_critical     *   // Production at major labs (2027)
+    Opt experimental            *   // Research/testing only
+    Opt normal                  *   // Standard operation
+    Opt isolation               *   // Byzantine/poison detected
+    Opt emergency_brake         *   // Time-scale violation triggered
+
+// ================================================================
+// HIERARCHICAL CONTROL LEVELS - Time-Scale Separated Controllers
+// ================================================================
+
+Comp ControlLevel parent ControlPlane FindIn
+----------------------------------------------------------------
+* Defines a hierarchical control level with strict time-scale separation.
+* Each level operates at well-separated frequency (≥5× minimum, ≥10× recommended).
+----------------------------------------------------------------
+    Element level_id            key    .        +     // 0 (micro) | 1 (meso) | 2 (macro) | 3 (meta)
+    Element time_constant       number .        +     // τᵢ in steps (1, 100-500, 10k-100k, campaign)
+    Element min_separation      number .        +     // Minimum τᵢ₊₁/τᵢ ratio (5.0 or 10.0)
+    Element max_command_rate    number .        +     // 1/(8·τ_lower) - hard frequency cap
+    Element responsibilities    text   .        *     // What this level controls
+    Element emergency_isolation word   .        *     // yes | no - can operate isolated
+    Element human_approval      word   .        *     // yes | no | for_modifications
+    Element doc                 text   .        *
+
+    Opt yes                     *   // Requires human approval
+    Opt no                      *   // Automated decisions
+    Opt for_modifications       *   // Only for self-modifications
+
+Comp TimeScaleConstraint parent ControlLevel FindIn
+----------------------------------------------------------------
+* Enforces time-scale separation between controller levels.
+* Violations trigger emergency brake protocols.
+----------------------------------------------------------------
+    Element constraint_id       key    .        +     // Unique constraint identifier
+    Element forbidden_zone_min  number .        +     // 2.0×τᵢ - start of forbidden zone
+    Element forbidden_zone_max  number .        +     // 4.9×τᵢ - end of forbidden zone
+    Element violation_action    word   .        +     // reject | isolate | alert_human
+    Element escalation_count    number .        *     // Violations before escalation (default: 3)
+    Element escalation_window   number .        *     // Time window in hours (default: 24)
+    Element doc                 text   .        *
+
+    Opt reject                  *   // Reject command, log violation
+    Opt isolate                 *   // Isolate controller for timeout period
+    Opt alert_human             *   // Escalate to human operators
+
+// ================================================================
+// UNIVERSAL EMBEDDING - Landscape Feature Space
+// ================================================================
+
+Comp EmbeddingSpace parent ControlPlane FindIn
+----------------------------------------------------------------
+* Universal landscape embedding configuration (Z-space).
+* Maps all optimization problems to shared 2048-dim representation.
+----------------------------------------------------------------
+    Element embedding_id        key    .        +     // e.g., "Z_space_2029"
+    Element encoder_checkpoint  text   .        +     // Model checkpoint path
+    Element dimensionality      number .        +     // Embedding dimensions (2048)
+    Element training_problems   number .        *     // Count of training problems (8.7×10¹³)
+    Element zero_shot_success   number .        *     // Success rate without adaptation (0.78)
+    Element few_shot_success    number .        *     // Success rate with 8 examples (0.96)
+    Element uncertainty_method  word   .        *     // mc_dropout | deep_ensemble | none
+    Element ood_detector        word   .        *     // mahalanobis | isolation_forest | none
+    Element doc                 text   .        *
+
+    Opt mc_dropout              *   // Monte Carlo dropout for uncertainty
+    Opt deep_ensemble           *   // Ensemble-based uncertainty
+    Opt none                    *   // No uncertainty estimation
+    Opt mahalanobis             *   // Mahalanobis distance OOD detection
+    Opt isolation_forest        *   // Isolation forest OOD detection
+
+Comp CanaryProblem parent EmbeddingSpace FindIn
+----------------------------------------------------------------
+* Sentinel problems with known Z-space placement for validation.
+* System must solve these correctly at startup to verify embedding integrity.
+----------------------------------------------------------------
+    Element canary_id           key    .        +     // Unique canary identifier
+    Element problem_type        text   .        +     // Description of problem
+    Element known_z_location    text   .        *     // Expected Z-space coordinates (serialized)
+    Element tolerance           number .        *     // Maximum distance from expected location
+    Element validation_required word   .        +     // startup | continuous | on_demand
+    Element doc                 text   .        *
+
+    Opt startup                 *   // Validate before system starts
+    Opt continuous              *   // Validate periodically during operation
+    Opt on_demand               *   // Validate when requested
+
+// ================================================================
+// FEATURE MORPHISMS - Cross-Domain Transfer Functions
+// ================================================================
+
+Comp FeatureMorphism parent ControlPlane FindIn
+----------------------------------------------------------------
+* Learned transformations between substrate feature spaces.
+* Enables policy transfer across modalities (dense→graph, etc.).
+----------------------------------------------------------------
+    Element morphism_id         key    .        +     // e.g., "curvature_to_spectral"
+    Element source_domain       text   .        +     // Source substrate type
+    Element target_domain       text   .        +     // Target substrate type
+    Element learned             word   .        +     // yes | hand_crafted
+    Element version             text   .        *     // Version identifier with certificate
+    Element breakage_detection  word   .        +     // enabled | disabled
+    Element test_suite_size     number .        *     // Number of validation transitions (2000+)
+    Element auto_rollback       word   .        +     // yes | no
+    Element doc                 text   .        *
+
+    Opt yes                     *   // Learned from data
+    Opt hand_crafted            *   // Manually designed
+    Opt enabled                 *   // Active breakage monitoring
+    Opt disabled                *   // No monitoring
+
+// ================================================================
+// POLICY PRIMITIVES - Compositional Control Building Blocks
+// ================================================================
+
+Comp PolicyPrimitive parent ControlPlane FindIn
+----------------------------------------------------------------
+* Atomic control policy that can be composed with others.
+* Each primitive has safety certification and operating range.
+----------------------------------------------------------------
+    Element primitive_id        key    .        +     // e.g., "warmup_linear", "cosine_decay"
+    Element category            word   .        +     // schedule | detection | escape | coordination
+    Element safe_operating_range text  .        *     // Validated parameter bounds
+    Element known_failure_modes text   .        *     // Documented failure conditions
+    Element time_scale_compat   number .        *     // Which control levels can use (bitmask: 0,1,2,3)
+    Element validation_status   word   .        +     // certified | experimental | deprecated
+    Element doc                 text   .        *
+
+    Opt schedule                *   // Learning rate schedules
+    Opt detection               *   // Anomaly/plateau detection
+    Opt escape                  *   // Local minima escape mechanisms
+    Opt coordination            *   // Multi-agent coordination
+    Opt certified               *   // Passed catastrophe regression suite
+    Opt experimental            *   // Under validation
+    Opt deprecated              *   // No longer recommended
+
+Comp ComposedPolicy parent ControlPlane FindIn
+----------------------------------------------------------------
+* Policy synthesized by composing primitives.
+* Must pass validation before deployment.
+----------------------------------------------------------------
+    Element policy_id           key    .        +     // Unique policy identifier
+    Element primitive_count     number .        +     // Number of composed primitives
+    Element composition_expr    text   .        +     // DSL expression or serialized graph
+    Element validation_cert     text   .        *     // Cryptographic certificate hash
+    Element performance_profile text   .        *     // Measured effectiveness data
+    Element safety_margin       number .        *     // Distance from unsafe boundary
+    Element human_reviewed      word   .        *     // yes | no | pending
+    Element doc                 text   .        *
+
+    Opt yes                     *   // Human reviewed and approved
+    Opt no                      *   // Automated composition only
+    Opt pending                 *   // Awaiting human review
+
+// ================================================================
+// SAFETY INFRASTRUCTURE - Catastrophe Prevention and Response
+// ================================================================
+
+Comp CatastrophePlaybook parent ControlPlane FindIn
+----------------------------------------------------------------
+* Step-by-step emergency response procedures for known failure modes.
+* Each playbook learned from historical incidents.
+----------------------------------------------------------------
+    Element playbook_id         key    .        +     // e.g., "TIME_SCALE_VIOLATION", "EMBEDDING_COLLAPSE"
+    Element failure_mode        text   .        +     // Description of catastrophic failure
+    Element trigger_conditions  text   .        +     // How to detect this failure
+    Element response_steps      text   .        +     // Ordered list of containment actions
+    Element last_incident_date  number .        *     // Unix timestamp of last occurrence
+    Element drill_frequency     text   .        *     // How often to practice (e.g., "quarterly")
+    Element doc                 text   .        *
+
+Comp IncidentRecord parent CatastrophePlaybook FindIn
+----------------------------------------------------------------
+* Historical record of actual catastrophic failure.
+* Memorialized for institutional learning.
+----------------------------------------------------------------
+    Element incident_id         key    .        +     // e.g., "Phoenix-2027", "Llama5-2029"
+    Element timestamp           number .        +     // Unix timestamp of incident
+    Element trigger             text   .        +     // What caused the failure
+    Element impact              text   .        +     // Damage assessment (GPUs lost, downtime, etc.)
+    Element containment_time    number .        *     // Minutes to containment
+    Element root_cause          text   .        *     // Post-mortem analysis
+    Element permanent_fixes     text   .        *     // Architectural changes made
+    Element lessons_learned     text   .        *     // Key takeaways
+    Element doc                 text   .        *
+
+// ================================================================
+// MESA-OPTIMIZATION CONTAINMENT - Self-Modification Safety
+// ================================================================
+
+Comp MesaContainment parent ControlPlane FindIn
+----------------------------------------------------------------
+* Safety protocols for self-modifying controllers (Level 3).
+* Prevents development of misaligned internal objectives.
+----------------------------------------------------------------
+    Element containment_id      key    .        +     // Unique containment protocol ID
+    Element validation_suite    text   .        +     // Path to diverse validation problems
+    Element suite_size          number .        +     // Number of problems with known optima (≥1000)
+    Element interpretability    word   .        +     // required | optional | disabled
+    Element max_param_change    number .        +     // Maximum fraction per campaign (0.10 = 10%)
+    Element human_in_loop       word   .        +     // all_deployments | modifications_only | none
+    Element audit_frequency     text   .        *     // How often to audit (e.g., "weekly")
+    Element doc                 text   .        *
+
+    Opt required                *   // Must explain decisions in human-readable form
+    Opt optional                *   // Interpretability helpful but not mandatory
+    Opt disabled                *   // No interpretability requirement
+    Opt all_deployments         *   // Human approval for ALL Level 3 deployments
+    Opt modifications_only      *   // Human approval only for self-modifications
+    Opt none                    *   // Fully automated
+
+Comp SandboxConfig parent MesaContainment FindIn
+----------------------------------------------------------------
+* Isolated environment for Level 3 controller development.
+* Modifications must pass through airlock before production.
+----------------------------------------------------------------
+    Element sandbox_id          key    .        +     // Unique sandbox identifier
+    Element isolation_level     word   .        +     // full | partial | none
+    Element airlock_stages      number .        +     // Number of validation stages (default: 4)
+    Element canary_validation   word   .        +     // required | optional
+    Element regression_suite    text   .        *     // Path to historical test cases
+    Element multi_sig_required  number .        *     // Number of human approvals (e.g., 3 of 5)
+    Element rollout_strategy    word   .        *     // gradual | immediate | manual
+    Element kill_switch         word   .        +     // enabled | disabled
+    Element doc                 text   .        *
+
+    Opt full                    *   // Complete network isolation
+    Opt partial                 *   // Limited external access
+    Opt none                    *   // No isolation (dangerous)
+    Opt required                *   // Must pass canary tests
+    Opt optional                *   // Canary tests recommended
+    Opt gradual                 *   // Slow rollout with monitoring
+    Opt immediate               *   // Deploy everywhere at once
+    Opt manual                  *   // Human-controlled deployment
+    Opt enabled                 *   // Emergency kill switch available
+    Opt disabled                *   // No kill switch (not recommended)
+
+// ================================================================
+// DISTRIBUTED CONTROL - Gossip and Byzantine Resilience
+// ================================================================
+
+Comp DistributedProtocol parent ControlPlane FindIn
+----------------------------------------------------------------
+* Configuration for distributed control coordination.
+* Enables scale to arbitrary cluster size with constant per-node overhead.
+----------------------------------------------------------------
+    Element protocol_id         key    .        +     // e.g., "GossipControl_v3.1"
+    Element protocol_type       word   .        +     // gossip | centralized | hierarchical
+    Element convergence_rounds  number .        *     // O(log n) rounds for ε-consensus
+    Element byzantine_tolerance number .        *     // Max fraction of malicious nodes (0.33)
+    Element compression_enabled word   .        +     // yes | no
+    Element compression_ratio   number .        *     // Typical compression (10-50x)
+    Element poison_detection    word   .        +     // enabled | disabled
+    Element doc                 text   .        *
+
+    Opt gossip                  *   // Peer-to-peer gossip protocol
+    Opt centralized             *   // Single coordinator (SPOF risk)
+    Opt hierarchical            *   // Multi-level coordination
+    Opt yes                     *   // Compression active
+    Opt no                      *   // No compression
+    Opt enabled                 *   // Poison signature checking active
+    Opt disabled                *   // No poison detection
+
+Comp ReputationSystem parent DistributedProtocol FindIn
+----------------------------------------------------------------
+* Tracks node reliability for Byzantine isolation.
+* Nodes below threshold isolated for minimum timeout period.
+----------------------------------------------------------------
+    Element reputation_id       key    .        +     // Unique reputation tracker ID
+    Element isolation_threshold number .        +     // Reputation score triggering isolation (0.3)
+    Element isolation_timeout   number .        +     // Minimum isolation duration in hours (24)
+    Element scoring_method      word   .        +     // continuous | discrete | hybrid
+    Element propagation_method  word   .        +     // authenticated_gossip | signed_broadcast
+    Element doc                 text   .        *
+
+    Opt continuous              *   // Real-time reputation updates
+    Opt discrete                *   // Periodic reputation snapshots
+    Opt hybrid                  *   // Combination of both
+    Opt authenticated_gossip    *   // Cryptographically signed gossip messages
+    Opt signed_broadcast        *   // Broadcast with digital signatures
+
+// ================================================================
+// OBSERVABILITY AND MONITORING
+// ================================================================
+
+Comp MonitoringConfig parent ControlPlane FindIn
+----------------------------------------------------------------
+* Real-time monitoring and anomaly detection configuration.
+* Enables early detection of catastrophic failure modes.
+----------------------------------------------------------------
+    Element monitor_id          key    .        +     // Unique monitor identifier
+    Element z_space_monitoring  word   .        +     // enabled | disabled
+    Element drift_detection     word   .        +     // enabled | disabled
+    Element anomaly_detector    text   .        *     // Model name (e.g., "AnomalyDetector-2029")
+    Element audit_trail         word   .        +     // enabled | disabled
+    Element alert_latency_ms    number .        *     // Target alert latency (<100ms)
+    Element escalation_config   text   .        *     // Path to escalation rules
+    Element doc                 text   .        *
+
+    Opt enabled                 *   // Monitoring active
+    Opt disabled                *   // Monitoring inactive
+
+// ================================================================
+// MEMORY SYSTEMS - Institutional Knowledge Stores
+// ================================================================
+
+Comp KnowledgeStore parent ControlPlane FindIn
+----------------------------------------------------------------
+* Persistent storage for control plane learning and institutional memory.
+* Enables system to remember and learn from failures.
+----------------------------------------------------------------
+    Element store_id            key    .        +     // e.g., "catastrophe_archive", "policy_library"
+    Element store_type          word   .        +     // semantic | episodic | audit | vector
+    Element capacity            text   .        *     // Storage capacity description
+    Element retention_policy    word   .        +     // permanent | time_limited | rolling
+    Element update_frequency    word   .        *     // continuous | periodic | manual
+    Element access_control      word   .        +     // read_only | write_only | read_write | append_only
+    Element doc                 text   .        *
+
+    Opt semantic                *   // Structured knowledge graph
+    Opt episodic                *   // Historical event records
+    Opt audit                   *   // Immutable audit trail
+    Opt vector                  *   // Vector database for embeddings
+    Opt permanent               *   // Never delete
+    Opt time_limited            *   // Delete after retention period
+    Opt rolling                 *   // Keep last N entries
+    Opt continuous              *   // Real-time updates
+    Opt periodic                *   // Scheduled updates
+    Opt manual                  *   // Human-initiated updates
+    Opt read_only               *   // Query only
+    Opt write_only              *   // Insert only
+    Opt read_write              *   // Full access
+    Opt append_only             *   // Can add but not modify
+
+// ================================================================
+// ENERGY MINIMIZATION - Universal Optimization Principle
+// ================================================================
+
+Comp EnergyFormulation parent ControlPlane FindIn
+----------------------------------------------------------------
+* Free energy ℱ = ⟨E⟩ - T·S configuration.
+* The universal objective function underlying all optimization.
+----------------------------------------------------------------
+    Element formulation_id      key    .        +     // Unique formulation identifier
+    Element energy_term         text   .        *     // How ⟨E⟩ is computed
+    Element temperature_param   number .        *     // Exploration parameter T
+    Element entropy_term        text   .        *     // How S is computed (policy diversity)
+    Element proven_substrates   text   .        *     // Comma-separated list of validated substrates
+    Element ultimate_reduction  word   .        *     // yes | no - is this the final theory?
+    Element doc                 text   .        *
+
+    Opt yes                     *   // Proven universal principle
+    Opt no                      *   // Still under investigation
+
+// ================================================================
+// BOOTSTRAP AND RECOVERY
+// ================================================================
+
+Comp BootstrapConfig parent ControlPlane FindIn
+----------------------------------------------------------------
+* Configuration for system initialization and recovery from catastrophic failure.
+* Defines minimal viable system that can rebuild full capability.
+----------------------------------------------------------------
+    Element bootstrap_id        key    .        +     // Unique bootstrap configuration ID
+    Element minimal_primitives  text   .        +     // Core primitives needed for bootstrap
+    Element fallback_features   text   .        +     // Hand-coded features when embedding unavailable
+    Element recovery_playbook   ref    CatastrophePlaybook * // Default recovery procedure
+    Element validation_required word   .        +     // yes | no - validate before full operation
+    Element doc                 text   .        *
+
+    Opt yes                     *   // Validation mandatory
+    Opt no                      *   // Skip validation (dangerous)
+
+// ================================================================
+// SCHEMA DOCUMENTATION
+// ================================================================
+
+Canon control_plane_schema_purpose
+    category = schema
+    topic_type = meta
+    overview = "Bootstrap schema for hierarchical meta-control plane configuration"
+    doc = "This schema captures the minimal configuration and architectural constraints needed to initialize and operate a production meta-control plane for optimization. It encodes lessons from catastrophic failures (2025-2035) as structural constraints: time-scale separation enforcement, embedding validation requirements, Byzantine resilience protocols, mesa-optimization containment, and catastrophe response playbooks. The schema itself is a memorial to failures that actually happened, ensuring institutional memory survives beyond individual engineers."
