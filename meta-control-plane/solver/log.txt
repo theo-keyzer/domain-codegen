@@ -1,0 +1,30 @@
+======================================================================
+STIEFEL MANIFOLD ATTENTION - OMEGA 2052
+======================================================================
+
+[1] STIEFEL ATTENTION LAYER
+----------------------------------------------------------------------
+Parameters: 65536
+Has LayerNorm: No (manifold constraint)
+Has Weight Decay: No (norm fixed by geometry)
+Concentration κ: 2.0000 (learnable)
+Output norm: 2.9311
+
+[2] ENTROPY ANALYSIS
+----------------------------------------------------------------------
+Stiefel Attention Entropy:   8.034951
+Theoretical Ω Floor:         0.209973
+Theoretical Prime Floor:     0.350000
+
+[3] ORTHONORMALITY CHECK
+----------------------------------------------------------------------
+||W^T W - I|| = 0.000050
+
+======================================================================
+KEY FEATURES:
+  • Maintains orthonormality by construction
+  • Lower entropy floor (0.21 vs 0.35)
+  • No LayerNorm (geometry is the normalization)
+  • Concentration κ replaces temperature T
+  • Geodesic flow replaces gradient descent
+======================================================================
