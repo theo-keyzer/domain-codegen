@@ -1,0 +1,394 @@
+=== UNIFIED OMEGA: JOINT PROTEIN + QUANTUM TRAINING ===
+Step     0 | EntP 3.047 | EntQ 1.233 | Bonus 125.931 | Score 58.686 ★
+Step     1 | EntP 3.037 | EntQ 1.185 | Bonus 134.646 | Score 63.101 ★
+Step   194 | EntP 3.038 | EntQ 1.175 | Bonus 135.268 | Score 63.421 ★
+Step   615 | EntP 3.015 | EntQ 1.163 | Bonus 138.084 | Score 64.865 ★
+Step  4871 | EntP 2.923 | EntQ 1.149 | Bonus 140.577 | Score 66.217 ★
+Step 24400 | EntP 2.484 | EntQ 0.982 | Bonus 140.342 | Score 66.705 ★
+Step 25536 | EntP 2.456 | EntQ 0.947 | Bonus 144.443 | Score 68.819 ★
+Step 33062 | EntP 2.304 | EntQ 0.856 | Bonus 144.593 | Score 69.137 ★
+Step 34102 | EntP 2.299 | EntQ 0.828 | Bonus 145.418 | Score 69.582 ★
+Step 35396 | EntP 2.254 | EntQ 0.812 | Bonus 145.354 | Score 69.611 ★
+Step 36403 | EntP 2.249 | EntQ 0.769 | Bonus 145.780 | Score 69.872 ★
+Step 36693 | EntP 2.240 | EntQ 0.799 | Bonus 146.817 | Score 70.369 ★
+Step 37044 | EntP 2.239 | EntQ 0.809 | Bonus 148.485 | Score 71.194 ★
+Step 38866 | EntP 2.192 | EntQ 0.760 | Bonus 149.532 | Score 71.814 ★
+Step 39291 | EntP 2.198 | EntQ 0.785 | Bonus 150.843 | Score 72.438 ★
+Step 40427 | EntP 2.162 | EntQ 0.741 | Bonus 150.969 | Score 72.581 ★
+Step 41136 | EntP 2.151 | EntQ 0.703 | Bonus 151.364 | Score 72.828 ★
+Step 41288 | EntP 2.148 | EntQ 0.710 | Bonus 152.366 | Score 73.325 ★
+Step 41305 | EntP 2.158 | EntQ 0.707 | Bonus 153.579 | Score 73.925 ★
+Step 41819 | EntP 2.144 | EntQ 0.704 | Bonus 155.264 | Score 74.784 ★
+Step 41987 | EntP 2.144 | EntQ 0.702 | Bonus 155.754 | Score 75.031 ★
+Step 42074 | EntP 2.150 | EntQ 0.651 | Bonus 160.052 | Score 77.224 ★
+Step 42901 | EntP 2.141 | EntQ 0.641 | Bonus 160.232 | Score 77.335 ★
+Step 42947 | EntP 2.125 | EntQ 0.648 | Bonus 161.440 | Score 77.946 ★
+Step 43399 | EntP 2.119 | EntQ 0.661 | Bonus 162.816 | Score 78.628 ★
+Step 43512 | EntP 2.105 | EntQ 0.658 | Bonus 162.836 | Score 78.655 ★
+Step 43617 | EntP 2.109 | EntQ 0.678 | Bonus 162.920 | Score 78.674 ★
+Step 43811 | EntP 2.106 | EntQ 0.674 | Bonus 166.580 | Score 80.509 ★
+Step 44277 | EntP 2.089 | EntQ 0.634 | Bonus 167.224 | Score 80.890 ★
+Step 44577 | EntP 2.085 | EntQ 0.617 | Bonus 167.562 | Score 81.079 ★
+Step 45118 | EntP 2.073 | EntQ 0.632 | Bonus 169.584 | Score 82.087 ★
+Step 45133 | EntP 2.073 | EntQ 0.616 | Bonus 169.641 | Score 82.132 ★
+Step 45141 | EntP 2.075 | EntQ 0.607 | Bonus 170.342 | Score 82.489 ★
+Step 45430 | EntP 2.067 | EntQ 0.602 | Bonus 170.967 | Score 82.814 ★
+Step 45431 | EntP 2.079 | EntQ 0.586 | Bonus 171.570 | Score 83.120 ★
+Step 45529 | EntP 2.084 | EntQ 0.597 | Bonus 172.272 | Score 83.455 ★
+Step 45537 | EntP 2.092 | EntQ 0.599 | Bonus 172.388 | Score 83.503 ★
+Step 45846 | EntP 2.074 | EntQ 0.583 | Bonus 173.073 | Score 83.880 ★
+Step 45968 | EntP 2.069 | EntQ 0.588 | Bonus 173.540 | Score 84.113 ★
+Step 46274 | EntP 2.060 | EntQ 0.565 | Bonus 174.347 | Score 84.548 ★
+Step 46278 | EntP 2.058 | EntQ 0.552 | Bonus 175.067 | Score 84.923 ★
+Step 46326 | EntP 2.057 | EntQ 0.554 | Bonus 175.087 | Score 84.933 ★
+Step 46462 | EntP 2.063 | EntQ 0.549 | Bonus 175.419 | Score 85.098 ★
+Step 46549 | EntP 2.058 | EntQ 0.530 | Bonus 176.253 | Score 85.538 ★
+Step 46569 | EntP 2.060 | EntQ 0.529 | Bonus 177.580 | Score 86.200 ★
+Step 46775 | EntP 2.044 | EntQ 0.534 | Bonus 178.447 | Score 86.645 ★
+Step 46848 | EntP 2.040 | EntQ 0.530 | Bonus 178.688 | Score 86.774 ★
+Step 47015 | EntP 2.047 | EntQ 0.537 | Bonus 179.213 | Score 87.022 ★
+Step 47041 | EntP 2.044 | EntQ 0.515 | Bonus 180.470 | Score 87.675 ★
+Step 47099 | EntP 2.046 | EntQ 0.519 | Bonus 180.494 | Score 87.681 ★
+Step 47282 | EntP 2.046 | EntQ 0.526 | Bonus 180.514 | Score 87.686 ★
+Step 47288 | EntP 2.045 | EntQ 0.529 | Bonus 180.859 | Score 87.855 ★
+Step 47361 | EntP 2.052 | EntQ 0.521 | Bonus 181.233 | Score 88.042 ★
+Step 47400 | EntP 2.054 | EntQ 0.505 | Bonus 181.760 | Score 88.321 ★
+Step 47452 | EntP 2.047 | EntQ 0.505 | Bonus 182.087 | Score 88.492 ★
+Step 47497 | EntP 2.048 | EntQ 0.503 | Bonus 182.443 | Score 88.670 ★
+Step 47589 | EntP 2.051 | EntQ 0.506 | Bonus 183.402 | Score 89.144 ★
+Step 47639 | EntP 2.046 | EntQ 0.508 | Bonus 183.608 | Score 89.250 ★
+Step 47698 | EntP 2.042 | EntQ 0.500 | Bonus 184.426 | Score 89.671 ★
+Step 47720 | EntP 2.038 | EntQ 0.496 | Bonus 184.502 | Score 89.717 ★
+Step 47782 | EntP 2.036 | EntQ 0.499 | Bonus 184.905 | Score 89.918 ★
+Step 47823 | EntP 2.034 | EntQ 0.501 | Bonus 185.124 | Score 90.027 ★
+Step 47838 | EntP 2.036 | EntQ 0.493 | Bonus 185.180 | Score 90.061 ★
+Step 47990 | EntP 2.039 | EntQ 0.494 | Bonus 185.500 | Score 90.216 ★
+Step 48006 | EntP 2.038 | EntQ 0.478 | Bonus 186.383 | Score 90.676 ★
+Step 48020 | EntP 2.039 | EntQ 0.476 | Bonus 186.453 | Score 90.712 ★
+Step 48033 | EntP 2.044 | EntQ 0.485 | Bonus 186.510 | Score 90.726 ★
+Step 48037 | EntP 2.040 | EntQ 0.478 | Bonus 186.810 | Score 90.887 ★
+Step 48103 | EntP 2.041 | EntQ 0.480 | Bonus 186.916 | Score 90.937 ★
+Step 48114 | EntP 2.041 | EntQ 0.487 | Bonus 187.053 | Score 90.998 ★
+Step 48135 | EntP 2.035 | EntQ 0.480 | Bonus 187.309 | Score 91.139 ★
+Step 48137 | EntP 2.036 | EntQ 0.475 | Bonus 187.382 | Score 91.180 ★
+Step 48170 | EntP 2.032 | EntQ 0.471 | Bonus 187.816 | Score 91.406 ★
+Step 48189 | EntP 2.032 | EntQ 0.475 | Bonus 188.056 | Score 91.520 ★
+Step 48212 | EntP 2.032 | EntQ 0.477 | Bonus 188.232 | Score 91.606 ★
+Step 48216 | EntP 2.033 | EntQ 0.475 | Bonus 188.389 | Score 91.686 ★
+Step 48225 | EntP 2.034 | EntQ 0.471 | Bonus 188.547 | Score 91.769 ★
+Step 48230 | EntP 2.039 | EntQ 0.484 | Bonus 188.616 | Score 91.786 ★
+Step 48246 | EntP 2.036 | EntQ 0.483 | Bonus 188.617 | Score 91.790 ★
+Step 48287 | EntP 2.037 | EntQ 0.472 | Bonus 188.875 | Score 91.929 ★
+Step 48314 | EntP 2.033 | EntQ 0.470 | Bonus 188.991 | Score 91.992 ★
+Step 48381 | EntP 2.034 | EntQ 0.467 | Bonus 189.111 | Score 92.055 ★
+Step 48393 | EntP 2.033 | EntQ 0.465 | Bonus 189.487 | Score 92.246 ★
+Step 48403 | EntP 2.034 | EntQ 0.465 | Bonus 190.543 | Score 92.773 ★
+Step 48414 | EntP 2.033 | EntQ 0.453 | Bonus 190.670 | Score 92.849 ★
+Step 48445 | EntP 2.032 | EntQ 0.456 | Bonus 190.820 | Score 92.922 ★
+Step 48450 | EntP 2.028 | EntQ 0.438 | Bonus 192.195 | Score 93.631 ★
+Step 48498 | EntP 2.030 | EntQ 0.440 | Bonus 192.706 | Score 93.884 ★
+Step 48520 | EntP 2.032 | EntQ 0.437 | Bonus 192.808 | Score 93.935 ★
+Step 48526 | EntP 2.032 | EntQ 0.437 | Bonus 193.032 | Score 94.047 ★
+Step 48559 | EntP 2.035 | EntQ 0.440 | Bonus 193.125 | Score 94.088 ★
+Step 48579 | EntP 2.036 | EntQ 0.444 | Bonus 193.256 | Score 94.148 ★
+Step 48596 | EntP 2.032 | EntQ 0.455 | Bonus 193.480 | Score 94.253 ★
+Step 48612 | EntP 2.030 | EntQ 0.448 | Bonus 193.639 | Score 94.342 ★
+Step 48637 | EntP 2.033 | EntQ 0.451 | Bonus 193.726 | Score 94.379 ★
+Step 48704 | EntP 2.031 | EntQ 0.447 | Bonus 194.264 | Score 94.654 ★
+Step 48705 | EntP 2.027 | EntQ 0.450 | Bonus 194.323 | Score 94.685 ★
+Step 48718 | EntP 2.030 | EntQ 0.442 | Bonus 194.409 | Score 94.733 ★
+Step 48732 | EntP 2.030 | EntQ 0.436 | Bonus 194.725 | Score 94.896 ★
+Step 48756 | EntP 2.031 | EntQ 0.443 | Bonus 194.813 | Score 94.933 ★
+Step 48781 | EntP 2.028 | EntQ 0.441 | Bonus 195.159 | Score 95.111 ★
+Step 48787 | EntP 2.029 | EntQ 0.430 | Bonus 195.611 | Score 95.346 ★
+Step 48814 | EntP 2.029 | EntQ 0.428 | Bonus 195.786 | Score 95.436 ★
+Step 48842 | EntP 2.029 | EntQ 0.426 | Bonus 196.346 | Score 95.718 ★
+Step 48880 | EntP 2.031 | EntQ 0.426 | Bonus 196.414 | Score 95.749 ★
+Step 48890 | EntP 2.032 | EntQ 0.422 | Bonus 196.483 | Score 95.788 ★
+Step 48902 | EntP 2.028 | EntQ 0.411 | Bonus 196.863 | Score 95.993 ★
+Step 48905 | EntP 2.026 | EntQ 0.406 | Bonus 197.320 | Score 96.228 ★
+Step 48931 | EntP 2.025 | EntQ 0.403 | Bonus 197.515 | Score 96.329 ★
+Step 48937 | EntP 2.028 | EntQ 0.401 | Bonus 197.904 | Score 96.523 ★
+Step 48948 | EntP 2.027 | EntQ 0.402 | Bonus 197.922 | Score 96.532 ★
+Step 49008 | EntP 2.024 | EntQ 0.396 | Bonus 198.036 | Score 96.598 ★
+Step 49023 | EntP 2.022 | EntQ 0.395 | Bonus 198.173 | Score 96.670 ★
+Step 49056 | EntP 2.022 | EntQ 0.401 | Bonus 198.188 | Score 96.672 ★
+Step 49059 | EntP 2.027 | EntQ 0.398 | Bonus 198.589 | Score 96.869 ★
+Step 49109 | EntP 2.027 | EntQ 0.390 | Bonus 198.978 | Score 97.072 ★
+Step 49150 | EntP 2.026 | EntQ 0.386 | Bonus 199.119 | Score 97.148 ★
+Step 49173 | EntP 2.028 | EntQ 0.387 | Bonus 199.297 | Score 97.233 ★
+Step 49188 | EntP 2.029 | EntQ 0.394 | Bonus 199.378 | Score 97.265 ★
+Step 49191 | EntP 2.027 | EntQ 0.393 | Bonus 199.550 | Score 97.355 ★
+Step 49192 | EntP 2.024 | EntQ 0.394 | Bonus 199.709 | Score 97.436 ★
+Step 49198 | EntP 2.021 | EntQ 0.394 | Bonus 199.950 | Score 97.560 ★
+Step 49222 | EntP 2.015 | EntQ 0.389 | Bonus 200.052 | Score 97.622 ★
+Step 49231 | EntP 2.015 | EntQ 0.384 | Bonus 200.223 | Score 97.712 ★
+Step 49259 | EntP 2.014 | EntQ 0.385 | Bonus 200.539 | Score 97.871 ★
+Step 49274 | EntP 2.015 | EntQ 0.383 | Bonus 200.579 | Score 97.891 ★
+Step 49282 | EntP 2.016 | EntQ 0.382 | Bonus 200.650 | Score 97.927 ★
+Step 49286 | EntP 2.014 | EntQ 0.376 | Bonus 200.793 | Score 98.007 ★
+Step 49291 | EntP 2.011 | EntQ 0.372 | Bonus 200.833 | Score 98.033 ★
+Step 49324 | EntP 2.014 | EntQ 0.371 | Bonus 200.850 | Score 98.040 ★
+Step 49326 | EntP 2.014 | EntQ 0.369 | Bonus 200.956 | Score 98.095 ★
+Step 49328 | EntP 2.017 | EntQ 0.369 | Bonus 201.200 | Score 98.214 ★
+Step 49330 | EntP 2.018 | EntQ 0.367 | Bonus 201.248 | Score 98.240 ★
+Step 49380 | EntP 2.015 | EntQ 0.367 | Bonus 201.269 | Score 98.253 ★
+Step 49413 | EntP 2.018 | EntQ 0.365 | Bonus 201.318 | Score 98.275 ★
+Step 49430 | EntP 2.020 | EntQ 0.368 | Bonus 201.342 | Score 98.283 ★
+Step 49432 | EntP 2.020 | EntQ 0.371 | Bonus 201.374 | Score 98.296 ★
+Step 49468 | EntP 2.022 | EntQ 0.368 | Bonus 201.393 | Score 98.307 ★
+Step 49469 | EntP 2.023 | EntQ 0.364 | Bonus 201.643 | Score 98.434 ★
+Step 49472 | EntP 2.023 | EntQ 0.362 | Bonus 201.663 | Score 98.446 ★
+Step 49483 | EntP 2.024 | EntQ 0.358 | Bonus 201.766 | Score 98.500 ★
+Step 49490 | EntP 2.023 | EntQ 0.357 | Bonus 201.985 | Score 98.613 ★
+Step 49505 | EntP 2.016 | EntQ 0.355 | Bonus 202.054 | Score 98.656 ★
+Step 49514 | EntP 2.016 | EntQ 0.355 | Bonus 202.142 | Score 98.699 ★
+Step 49543 | EntP 2.015 | EntQ 0.356 | Bonus 202.170 | Score 98.714 ★
+Step 49555 | EntP 2.014 | EntQ 0.360 | Bonus 202.226 | Score 98.739 ★
+Step 49562 | EntP 2.015 | EntQ 0.355 | Bonus 202.420 | Score 98.840 ★
+Step 49566 | EntP 2.016 | EntQ 0.353 | Bonus 202.601 | Score 98.931 ★
+Step 49584 | EntP 2.013 | EntQ 0.354 | Bonus 202.665 | Score 98.965 ★
+Step 49590 | EntP 2.013 | EntQ 0.353 | Bonus 202.727 | Score 98.998 ★
+Step 49607 | EntP 2.013 | EntQ 0.349 | Bonus 203.045 | Score 99.161 ★
+Step 49641 | EntP 2.012 | EntQ 0.346 | Bonus 203.218 | Score 99.251 ★
+Step 49665 | EntP 2.011 | EntQ 0.346 | Bonus 203.236 | Score 99.261 ★
+Step 49669 | EntP 2.011 | EntQ 0.346 | Bonus 203.376 | Score 99.331 ★
+Step 49679 | EntP 2.012 | EntQ 0.345 | Bonus 203.390 | Score 99.337 ★
+Step 49695 | EntP 2.012 | EntQ 0.340 | Bonus 203.623 | Score 99.460 ★
+Step 49704 | EntP 2.012 | EntQ 0.337 | Bonus 203.679 | Score 99.490 ★
+Step 49709 | EntP 2.010 | EntQ 0.334 | Bonus 203.778 | Score 99.545 ★
+Step 49710 | EntP 2.008 | EntQ 0.333 | Bonus 203.833 | Score 99.575 ★
+Step 49721 | EntP 2.009 | EntQ 0.331 | Bonus 204.022 | Score 99.671 ★
+Step 49725 | EntP 2.010 | EntQ 0.330 | Bonus 204.084 | Score 99.702 ★
+Step 49732 | EntP 2.011 | EntQ 0.324 | Bonus 204.393 | Score 99.861 ★
+Step 49734 | EntP 2.011 | EntQ 0.323 | Bonus 204.400 | Score 99.866 ★
+Step 49736 | EntP 2.011 | EntQ 0.322 | Bonus 204.508 | Score 99.920 ★
+Step 49739 | EntP 2.012 | EntQ 0.321 | Bonus 204.568 | Score 99.951 ★
+Step 49749 | EntP 2.013 | EntQ 0.321 | Bonus 204.635 | Score 99.983 ★
+Step 49761 | EntP 2.014 | EntQ 0.315 | Bonus 204.889 | Score 100.116 ★
+Step 49790 | EntP 2.016 | EntQ 0.314 | Bonus 204.935 | Score 100.138 ★
+Step 49791 | EntP 2.017 | EntQ 0.313 | Bonus 204.967 | Score 100.153 ★
+Step 49793 | EntP 2.016 | EntQ 0.310 | Bonus 204.987 | Score 100.167 ★
+Step 49801 | EntP 2.012 | EntQ 0.310 | Bonus 205.009 | Score 100.183 ★
+Step 49803 | EntP 2.012 | EntQ 0.309 | Bonus 205.118 | Score 100.239 ★
+Step 49816 | EntP 2.013 | EntQ 0.308 | Bonus 205.194 | Score 100.276 ★
+Step 49820 | EntP 2.012 | EntQ 0.308 | Bonus 205.203 | Score 100.281 ★
+Step 49844 | EntP 2.010 | EntQ 0.308 | Bonus 205.256 | Score 100.310 ★
+Step 49850 | EntP 2.012 | EntQ 0.307 | Bonus 205.332 | Score 100.347 ★
+Step 49853 | EntP 2.011 | EntQ 0.307 | Bonus 205.343 | Score 100.353 ★
+Step 49880 | EntP 2.012 | EntQ 0.306 | Bonus 205.399 | Score 100.381 ★
+Step 49887 | EntP 2.012 | EntQ 0.306 | Bonus 205.413 | Score 100.388 ★
+Step 49895 | EntP 2.012 | EntQ 0.302 | Bonus 205.599 | Score 100.485 ★
+Step 49902 | EntP 2.011 | EntQ 0.302 | Bonus 205.614 | Score 100.493 ★
+Step 49906 | EntP 2.010 | EntQ 0.301 | Bonus 205.617 | Score 100.497 ★
+Step 49919 | EntP 2.011 | EntQ 0.301 | Bonus 205.618 | Score 100.497 ★
+Step 49929 | EntP 2.010 | EntQ 0.300 | Bonus 205.701 | Score 100.541 ★
+Step 49931 | EntP 2.010 | EntQ 0.301 | Bonus 205.728 | Score 100.553 ★
+Step 49948 | EntP 2.009 | EntQ 0.300 | Bonus 205.774 | Score 100.578 ★
+Step 49950 | EntP 2.008 | EntQ 0.300 | Bonus 205.778 | Score 100.581 ★
+Step 49959 | EntP 2.008 | EntQ 0.298 | Bonus 205.862 | Score 100.625 ★
+Step 49961 | EntP 2.008 | EntQ 0.298 | Bonus 205.897 | Score 100.642 ★
+Step 49964 | EntP 2.008 | EntQ 0.297 | Bonus 205.933 | Score 100.662 ★
+Step 49997 | EntP 2.008 | EntQ 0.294 | Bonus 205.992 | Score 100.694 ★
+
+Joint training finished. Best score: 100.6939
+
+=== QUERY: Protein Folding Specialization ===
+Final protein entropy: 2.0300
+
+=== QUERY: Quantum Clustering / Energy Focus ===
+Final quantum entropy: 0.5196
+
+Model successfully trained jointly and can now be queried from either domain!
+
+Running full post-training analysis...
+
+
+=== PROTEIN FOLDING HEAD SPECIALIZATION ANALYSIS ===
+Head | Helix Score  | Sheet Score     | Mixed Score     | Role
+--------------------------------------------------------------------
+ #0  |   0.174      |   0.403        |   0.743        | SHEET SPECIALIST 📄
+
+[Head 0] Beta-Sheet Pattern (anti-diagonal pairing)
+
+--- SHEET Attention Heatmap (↓ query position, → key position) ---
+          0       8      16      24      32      40
+ 0 ·······················o
+ 2 ······················o·
+ 4 ························
+ 6 ····················o···
+ 8 ························
+10 ··················.·····
+12 ························
+14 ················o·······
+16 ························
+18 ··············o·········
+20 ·············o··········
+22 ·············.··········
+24 ··········.·············
+26 ··········o·············
+28 ·········o··············
+30 ························
+32 ·······.················
+34 ························
+36 ·····.··················
+38 ························
+40 ···o····················
+42 ························
+44 ·o······················
+46 o·······················
+
+ #1  |   0.208      |   0.463        |   0.734        | SHEET SPECIALIST 📄
+ #2  |   0.171      |   0.316        |   0.732        | SHEET SPECIALIST 📄
+ #3  |   0.156      |   0.452        |   0.741        | SHEET SPECIALIST 📄
+ #4  |   0.171      |   0.398        |   0.698        | SHEET SPECIALIST 📄
+ #5  |   0.162      |   0.348        |   0.738        | SHEET SPECIALIST 📄
+ #6  |   0.177      |   0.275        |   0.657        | MIXED REGIME 🌪️
+ #7  |   0.173      |   0.408        |   0.729        | SHEET SPECIALIST 📄
+ #8  |   0.161      |   0.395        |   0.708        | SHEET SPECIALIST 📄
+ #9  |   0.173      |   0.261        |   0.692        | MIXED REGIME 🌪️
+ #10  |   0.182      |   0.348        |   0.724        | SHEET SPECIALIST 📄
+ #11  |   0.178      |   0.327        |   0.743        | SHEET SPECIALIST 📄
+ #12  |   0.188      |   0.417        |   0.757        | SHEET SPECIALIST 📄
+ #13  |   0.204      |   0.401        |   0.737        | SHEET SPECIALIST 📄
+ #14  |   0.199      |   0.421        |   0.733        | SHEET SPECIALIST 📄
+ #15  |   0.183      |   0.346        |   0.683        | SHEET SPECIALIST 📄
+ #16  |   0.166      |   0.379        |   0.746        | SHEET SPECIALIST 📄
+ #17  |   0.181      |   0.432        |   0.733        | SHEET SPECIALIST 📄
+ #18  |   0.191      |   0.406        |   0.728        | SHEET SPECIALIST 📄
+ #19  |   0.171      |   0.405        |   0.741        | SHEET SPECIALIST 📄
+ #20  |   0.174      |   0.384        |   0.744        | SHEET SPECIALIST 📄
+ #21  |   0.165      |   0.430        |   0.741        | SHEET SPECIALIST 📄
+ #22  |   0.203      |   0.448        |   0.743        | SHEET SPECIALIST 📄
+ #23  |   0.178      |   0.387        |   0.724        | SHEET SPECIALIST 📄
+ #24  |   0.148      |   0.358        |   0.745        | SHEET SPECIALIST 📄
+ #25  |   0.189      |   0.436        |   0.750        | SHEET SPECIALIST 📄
+ #26  |   0.182      |   0.473        |   0.729        | SHEET SPECIALIST 📄
+ #27  |   0.183      |   0.452        |   0.754        | SHEET SPECIALIST 📄
+ #28  |   0.182      |   0.228        |   0.709        | MIXED REGIME 🌪️
+ #29  |   0.179      |   0.493        |   0.732        | SHEET SPECIALIST 📄
+ #30  |   0.157      |   0.373        |   0.738        | SHEET SPECIALIST 📄
+ #31  |   0.171      |   0.364        |   0.720        | SHEET SPECIALIST 📄
+
+Summary: 0 Helix heads | 29 Sheet heads | 3 Mixed/Unspecialized
+NOTE: Further training or higher capacity may be needed for full bifurcation.
+
+=== QUANTUM OPERATOR CLUSTERING ANALYSIS ===
+
+Hamiltonian Batch 1 (5 operators):
+Head | Avg Entropy  | Purity     | Energy Focus | Interpretation
+------------------------------------------------------------
+ #0  |   0.720      |   0.319    |   3.279    | ENERGY-FOCUSED
+ #1  |   0.112      |   0.015    |   2.518    | ENERGY-FOCUSED
+ #2  |   0.774      |   0.531    |   4.050    | ENERGY-FOCUSED
+ #3  |   0.267      |   0.040    |   1.937    | ENERGY-FOCUSED
+ #4  |   0.680      |   0.602    |   4.219    | STRONG COMMUTING CLUSTER
+
+[Head 4] Sharp Commuting Cluster Attention Matrix:
+           II       ZZ       XX       ZI       XY 
+  II        █       ·       ·       ·       ·  (coeff=-1.00)
+  ZZ        o       ·       ·       ·       ·  (coeff=0.10)
+  XX        █       ·       ·       ·       ·  (coeff=0.18)
+  ZI        █       ·       ·       ·       ·  (coeff=0.39)
+  XY        o       ·       ·       ·       ·  (coeff=0.25)
+
+ #5  |   0.934      |   0.479    |   3.766    | SHARPENED
+ #6  |   0.751      |   0.562    |   4.063    | ENERGY-FOCUSED
+ #7  |   0.752      |   0.588    |   4.188    | ENERGY-FOCUSED
+ #8  |   1.005      |   0.439    |   3.614    | Diffuse
+ #9  |   0.608      |   0.582    |   4.205    | ENERGY-FOCUSED
+ #10  |   0.690      |   0.565    |   4.111    | ENERGY-FOCUSED
+ #11  |   0.128      |   0.094    |   2.120    | ENERGY-FOCUSED
+ #12  |   0.584      |   0.615    |   4.339    | STRONG COMMUTING CLUSTER
+
+[Head 12] Sharp Commuting Cluster Attention Matrix:
+           II       ZZ       XX       ZI       XY 
+  II        █       ·       ·       ·       ·  (coeff=-1.00)
+  ZZ        █       ·       ·       ·       ·  (coeff=0.10)
+  XX        █       ·       ·       ·       ·  (coeff=0.18)
+  ZI        o       ·       ·       .       ·  (coeff=0.39)
+  XY        █       ·       ·       ·       ·  (coeff=0.25)
+
+ #13  |   0.533      |   0.477    |   1.494    | SHARPENED
+ #14  |   0.987      |   0.364    |   3.358    | SHARPENED
+ #15  |   0.853      |   0.493    |   3.842    | ENERGY-FOCUSED
+ #16  |   0.685      |   0.576    |   4.163    | ENERGY-FOCUSED
+ #17  |   0.569      |   0.642    |   4.440    | STRONG COMMUTING CLUSTER
+
+[Head 17] Sharp Commuting Cluster Attention Matrix:
+           II       ZZ       XX       ZI       XY 
+  II        █       ·       ·       ·       ·  (coeff=-1.00)
+  ZZ        o       ·       ·       ·       ·  (coeff=0.10)
+  XX        █       ·       ·       ·       ·  (coeff=0.18)
+  ZI        █       ·       ·       ·       ·  (coeff=0.39)
+  XY        █       ·       ·       ·       ·  (coeff=0.25)
+
+ #18  |   0.665      |   0.618    |   4.290    | STRONG COMMUTING CLUSTER
+
+[Head 18] Sharp Commuting Cluster Attention Matrix:
+           II       ZZ       XX       ZI       XY 
+  II        █       ·       ·       ·       ·  (coeff=-1.00)
+  ZZ        o       ·       ·       ·       ·  (coeff=0.10)
+  XX        █       ·       ·       ·       ·  (coeff=0.18)
+  ZI        █       ·       ·       ·       ·  (coeff=0.39)
+  XY        o       ·       ·       ·       ·  (coeff=0.25)
+
+ #19  |   0.009      |   0.001    |   2.557    | ENERGY-FOCUSED
+ #20  |   0.406      |   0.492    |   3.969    | ENERGY-FOCUSED
+ #21  |   0.360      |   0.172    |   2.308    | ENERGY-FOCUSED
+ #22  |   0.426      |   0.075    |   2.042    | ENERGY-FOCUSED
+ #23  |   0.686      |   0.595    |   4.194    | ENERGY-FOCUSED
+ #24  |   0.685      |   0.573    |   4.157    | ENERGY-FOCUSED
+ #25  |   0.697      |   0.595    |   4.220    | ENERGY-FOCUSED
+ #26  |   0.437      |   0.229    |   1.821    | ENERGY-FOCUSED
+ #27  |   0.444      |   0.056    |   2.355    | ENERGY-FOCUSED
+ #28  |   0.152      |   0.020    |   2.503    | ENERGY-FOCUSED
+ #29  |   0.724      |   0.578    |   4.145    | ENERGY-FOCUSED
+ #30  |   0.751      |   0.542    |   4.023    | ENERGY-FOCUSED
+ #31  |   0.562      |   0.645    |   4.397    | STRONG COMMUTING CLUSTER
+
+[Head 31] Sharp Commuting Cluster Attention Matrix:
+           II       ZZ       XX       ZI       XY 
+  II        █       ·       ·       ·       ·  (coeff=-1.00)
+  ZZ        o       ·       ·       ·       ·  (coeff=0.10)
+  XX        █       ·       ·       ·       ·  (coeff=0.18)
+  ZI        o       ·       ·       ·       ·  (coeff=0.39)
+  XY        █       ·       ·       ·       ·  (coeff=0.25)
+
+
+Hamiltonian Batch 2 (4 operators):
+Head | Avg Entropy  | Purity     | Energy Focus | Interpretation
+------------------------------------------------------------
+ #0  |   0.142      |   0.468    |   1.980    | ENERGY-FOCUSED
+ #1  |   0.033      |   0.495    |   1.996    | ENERGY-FOCUSED
+ #2  |   0.639      |   0.537    |   2.812    | ENERGY-FOCUSED
+ #3  |   0.439      |   0.012    |   1.486    | SHARPENED
+ #4  |   0.496      |   0.614    |   2.923    | STRONG COMMUTING CLUSTER
+ #5  |   0.591      |   0.294    |   1.847    | ENERGY-FOCUSED
+ #6  |   0.439      |   0.621    |   2.957    | STRONG COMMUTING CLUSTER
+ #7  |   0.581      |   0.590    |   2.876    | ENERGY-FOCUSED
+ #8  |   0.892      |   0.404    |   2.529    | ENERGY-FOCUSED
+ #9  |   0.396      |   0.609    |   2.946    | STRONG COMMUTING CLUSTER
+ #10  |   0.527      |   0.595    |   2.896    | ENERGY-FOCUSED
+ #11  |   0.313      |   -0.109    |   1.621    | ENERGY-FOCUSED
+ #12  |   0.439      |   0.633    |   2.960    | STRONG COMMUTING CLUSTER
+ #13  |   0.439      |   0.048    |   1.478    | SHARPENED
+ #14  |   0.420      |   0.366    |   1.908    | ENERGY-FOCUSED
+ #15  |   0.413      |   0.644    |   2.988    | STRONG COMMUTING CLUSTER
+ #16  |   0.676      |   0.522    |   2.720    | ENERGY-FOCUSED
+ #17  |   0.305      |   0.681    |   3.066    | STRONG COMMUTING CLUSTER
+ #18  |   0.695      |   0.497    |   2.722    | ENERGY-FOCUSED
+ #19  |   0.162      |   0.476    |   1.976    | ENERGY-FOCUSED
+ #20  |   0.529      |   0.480    |   2.701    | ENERGY-FOCUSED
+ #21  |   0.027      |   0.497    |   1.997    | ENERGY-FOCUSED
+ #22  |   0.477      |   -0.114    |   1.708    | ENERGY-FOCUSED
+ #23  |   0.440      |   0.631    |   2.963    | STRONG COMMUTING CLUSTER
+ #24  |   0.461      |   0.624    |   2.947    | STRONG COMMUTING CLUSTER
+ #25  |   0.401      |   0.647    |   2.989    | STRONG COMMUTING CLUSTER
+ #26  |   0.264      |   0.066    |   1.438    | SHARPENED
+ #27  |   0.148      |   0.471    |   1.977    | ENERGY-FOCUSED
+ #28  |   0.588      |   0.316    |   1.837    | ENERGY-FOCUSED
+ #29  |   0.533      |   0.582    |   2.867    | ENERGY-FOCUSED
+ #30  |   0.646      |   0.556    |   2.770    | ENERGY-FOCUSED
+ #31  |   0.562      |   0.557    |   2.805    | ENERGY-FOCUSED
+
