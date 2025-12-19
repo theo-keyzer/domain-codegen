@@ -559,7 +559,7 @@ func strs(glob *GlobT, winp int, ss interface{}, lno string, prErr, isErr bool) 
 					if isErr {
 						glob.RunErrs++
 					}
-					res = "" // or keep original ${...} if preferred
+					//res = "" // or keep original ${...} if preferred
 				}
 
 				out.WriteString(res)
