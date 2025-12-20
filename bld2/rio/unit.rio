@@ -1,0 +1,70 @@
+Comp { name = Comp parent = . find = Find 
+desc = "This component defines a class or entity its name its parent and its searchability." }
+
+Element { name = name type = word comp = . check = "+" parent = Comp 
+desc = "The unique name of the component (e.g. 'Project')." }
+
+Element { name = nop type = word comp = . check = . parent = Comp 
+desc = "Ignored place holder for readability " }
+
+Element { name = parent type = ref comp = Comp check = . parent = Comp 
+desc = "The parent component or '.' for a top-level component." }
+
+Element { name = find type = word comp = . check = . parent = Comp 
+desc = "How the component can be found: 'Find' for top-level 'FindIn' for nested." }
+
+Opt { name = Find doc = "For top-level components searchable by name or or key type." }
+
+Opt { name = FindIn doc = "For nested components searchable within parent context." }
+
+Opt { name = . doc = "Has no name field or key type no index." }
+
+Element { name = doc type = text comp = . check = . parent = Comp 
+desc = "Documentation string for the component." }
+
+Comp { name = Element parent = Comp find = FindIn }
+
+Element { name = name type = word comp = . check = . parent = Element 
+desc = "The name of the element (field)." }
+
+Element { name = type type = word comp = . check = . parent = Element 
+desc = "The storage and data type." }
+
+Opt { name = key doc = "The find key index" }
+Opt { name = word doc = "Single word value" }
+Opt { name = text doc = "String to end of line" }
+Opt { name = number doc = "Numeric value or index for ordering" }
+Opt { name = tree doc = "Numeric enables tree navigation" }
+Opt { name = ref doc = "Direct reference to top-level Comp" }
+Opt { name = link doc = "Reference to sibling Comp" }
+Opt { name = type_of doc = "Reference by type name to child Comp of specific type" }
+Opt { name = up_copy doc = "Use id of Comp upwards from parent for ref_ to use" }
+Opt { name = ref_copy doc = "Derived reference that copies the reference value from a field in the previous ref/link element." }
+Opt { name = ref_child doc = "Derived reference that looks up a child component within the component referenced by the previous element." }
+
+Element { name = comp type = ref comp = Comp check = . parent = Element 
+desc = "Component this links to. Use (dot) here for non ref types." }
+
+Element { name = check type = word comp = . check = . parent = Element 
+desc = "How to check target found for refs and end of line for word" }
+
+Opt { name = "." doc = "Error if target not found if target is not dot." }
+Opt { name = "+" doc = "Error if target not found" }
+Opt { name = "1" doc = "Error if target not found or more targets found" }
+Opt { name = "*" doc = "No error check for target" }
+
+Element { name = doc type = text comp = . check = . parent = Element 
+desc = "Documentation string." }
+
+Comp { name = Opt parent = Element find = FindIn 
+desc = "Select options for element.
+* Add meaning to documentation" }
+
+Element { name = name type = word comp = . check = . parent = Opt 
+desc = "name of value option" }
+
+Element { name = pad type = word comp = . check = . parent = Opt 
+desc = "Ignored separator for alignment" }
+
+Element { name = doc type = text comp = . check = . parent = Opt 
+desc = "documentation string" }

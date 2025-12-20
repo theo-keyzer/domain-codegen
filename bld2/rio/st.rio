@@ -1,0 +1,72 @@
+Actor { name = main }
+
+C { desc = ~~~
+package main
+
+import (
+	"fmt"
+ 	"strconv"
+ 	"encoding/json"
+ 	"maps"
+)
+
+type Kp interface {
+	DoIts(glob *GlobT, va []string, lno string) int
+	GetVar(glob *GlobT, va []string, lno string) (bool, string)
+	GetLineNo() string
+	TypeName() string
+}
+~~~ 
+}
+
+All { what = Comp actor = struct }
+
+Actor { name = struct comp = Comp attr = name eq = "=" value = Actor }
+
+
+C { desc = ~~~
+type Kp${name:c} struct {
+	Kp
+	Me int
+	MyName string
+	Parent string
+	LineNo string
+	Comp string
+	Flags [] string
+	Names map[string]any
+~~~ 
+}
+
+Its { what = parent actor = parent_field }
+Its { what = Element actor = val_inc }
+Its { what = Element actor = val_inc2 }
+
+C { desc = ~~~
+	Childs [] Kp
+}
+
+func load${name:c}(act *ActT, ln string, pos int, lno string, flag []string, names map[string]any) int {
+	st := new(Kp${name:c})
+	st.Names = names
+	st.MyName = ""
+	st.Parent = ""
+	st.Me = len(act.Ap${name:c})
+	st.LineNo = lno
+	st.Comp = "${name:c}";
+	st.Flags = flag;
+~~~ 
+}
+
+Its { what = Element actor = ele_act }
+Its { what = Element actor = val_inc2_init }
+Its { what = parent actor = parent_field_p }
+Du { actor = index_act }
+
+C { desc = ~~~
+	act.Ap${name:c} = append(act.Ap${name:c}, st)
+	return 0
+}
+~~~ 
+}
+
+Break { what = actor }
