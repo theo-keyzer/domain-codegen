@@ -139,7 +139,7 @@ func unquote(s string) string {
 	return s
 }
 
-func main() {
+func test_main() {
 	if len(os.Args) < 2 {
 		log.Fatal("Usage: go run main.go <file.rio>")
 	}

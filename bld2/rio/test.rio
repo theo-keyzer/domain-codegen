@@ -1,0 +1,32 @@
+// Test various list and value types
+TestComponent {
+    key = "test_1"
+    
+    // 1. Simple comma-separated identifiers
+    tags = one, two, three, four_five
+    
+    // 2. Mixed JSON-eligible strings (single quotes)
+    mixed_list = '{"id": 1}', '{"id": 2}', plain_text
+    
+    // 3. Raw/Literal blocks in a list
+    raw_list = ~short~, ~~~
+multi-line
+block
+~~~, "standard quote"
+
+    // 4. Single values (should NOT be arrays in output)
+    single_id = simple_val
+    single_quote = "quoted val"
+    
+    // 5. Complex Identifiers (dots and colons)
+    api_endpoint = v1:user.profile
+    
+    // 6. JSON Arrays (legacy style)
+    legacy_array = '["a", "b", "c"]'
+}
+
+ParentComponent {
+    key = "child_1"
+    parent = "test_1"
+    status = active, pending
+}

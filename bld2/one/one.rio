@@ -1,0 +1,6 @@
+Canon { name = me doc = a,b,c }
+
+Ops { ops_id = func data = a,b,c }
+
+Ops { ops_id = func data = '{"internal": true}', '{"level": 5}' }
+

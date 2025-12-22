@@ -39,9 +39,7 @@ C func DoAll(glob *GlobT, va []string, lno string) int {
 
 All Comp do_all
 
--C // ${._lno}
 C 	fmt.Printf("?No all %s cmd ?%s? > ${._lno}", va[0], lno);
--C 	fmt.Printf("?No all %s cmd ?%s? ", va[0], lno);
 C 	return 0;
 C }
 C
@@ -312,7 +310,8 @@ C 		return( [false, "?" + va[0] + "=" + va[1] + "?" + lno + "?"] );
 C 	}
 	
 ----------------------------------------------------------------
-Actor do_all Comp parent != Actor
+-Actor do_all Comp parent != Actor
+Actor do_all Comp
 ----------------------------------------------------------------
 
 C 	if va[0] == "${name:c}" {

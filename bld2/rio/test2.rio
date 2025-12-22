@@ -1,0 +1,13 @@
+// This should parse correctly with the stateful lexer
+UserComponent {
+    key = admin_user
+    roles = admin, editor, viewer
+    metadata = '{"internal": true}', '{"level": 5}'
+    flags = ~beta~, ~experimental~
+}
+
+// Notice how the state resets for the next component
+Settings {
+    key = site_settings
+    themes = dark, light
+}
