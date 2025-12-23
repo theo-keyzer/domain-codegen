@@ -1,19 +1,4 @@
 ----------------------------------------------------------------
-Comp Func parent . Find
-----------------------------------------------------------------
-* Loader definition for actors.
-* These are like routines the generator calls
-* for generating code.
-* Actors group on name
-----------------------------------------------------------------
-
-	Element name   word .    * of actor
-	Element comp   word .    * what it belongs to
-	Element attr   word .    * what to check
-	Element eq     word .    * to equal
-	Element value  text .    * this
-
-----------------------------------------------------------------
 Comp Actor parent . Find
 ----------------------------------------------------------------
 * Loader definition for actors.
@@ -22,7 +7,7 @@ Comp Actor parent . Find
 * Actors group on name
 ----------------------------------------------------------------
 
-	Element name   word .    * of actor
+	Element name   word .    + of actor
 	Element comp   word .    * what it belongs to
 	Element attr   word .    * what to check
 	Element eq     word .    * to equal
@@ -45,9 +30,12 @@ Comp All parent Actor
 * For each component call this actor.
 ----------------------------------------------------------------
 
-	Element what    word .        * what to look for
-	Element actor   ref Actor check what actor to run for it
-	Element args    text .        * arg data value
+	Element what    word .    + what to look for
+	Element actor   ref Actor + what actor to run for it
+	Element attr    word .    * what to check
+	Element eq      word .    * to equal
+	Element value   text .    * this
+	Element args    text .    * arg data value
 
 -Ref actor Actor check
 
@@ -58,8 +46,11 @@ Comp Du parent Actor
 * Coditional call to actor
 ----------------------------------------------------------------
 
-	Element actor  ref Actor check what actor to run for it
-	Element args   text .        * arg data value
+	Element actor  ref Actor + what actor to run for it
+	Element attr   word .    * what to check
+	Element eq     word .    * to equal
+	Element value  text .    * this
+	Element args   text .    * arg data value
 	
 -Ref actor Actor check
 
@@ -98,9 +89,12 @@ Comp Its parent Actor
 * For each child or reference of this def
 ----------------------------------------------------------------
 
-	Element what    word .        * to look for
-	Element actor   ref Actor check what to do
-	Element args    text .        * arg data value
+	Element what    word .     + to look for
+	Element actor   ref  Actor + what to do
+	Element attr    word .     * what to check
+	Element eq      word .     * to equal
+	Element value   text .     * this
+	Element args    text .     * arg data value
 	
 Ref actor Actor check
 	
@@ -129,12 +123,11 @@ Comp Out parent Actor
 * off: cascade all output  off
 ----------------------------------------------------------------
 
-	Element what   word .      * to look for.
-	    Opt delay               * output is off until first C in next actor.
-	    Opt normal              * back to normal.
-	    Opt of                  * output is off.
-	    Opt on                  * output is on.
-	Element pad    word .      * to look for
+	Element what   word . * to look for.
+	    Opt delay         * output is off until first C in next actor.
+	    Opt normal        * back to normal.
+	    Opt of            * output is off.
+	    Opt on            * output is on.
 	Element desc   text . * code to buffer.
 
 ----------------------------------------------------------------
@@ -152,12 +145,11 @@ Comp Break parent Actor
 * To not do the default one
 ----------------------------------------------------------------
 
-	Element what   word .     * what to break
+	Element what   word .     * what to break - default actor
 	    Opt actor             * continue with calling actor - break actor case.
 	    Opt loop              * continue after calling All, Its cmd - break loop chain.
 	    Opt cmds              * continue with actor case - break cmd list.
 	    Opt exit              * exit script.
-	Element pad    word .     * padding (of)
 	Element actor  word Actor . which actor to break
 	Element check  word .     * only if not unique
 	    Opt actor             * continue with calling actor - break actor case.
@@ -186,7 +178,6 @@ Comp Add parent Actor . Cmd
 * execute database sql
 ----------------------------------------------------------------
 	
-	Element flags    word . * option flags
 	Element path     word . * node path where to add
 	Element data     text . * data to add
 
@@ -198,9 +189,12 @@ Comp This parent Actor
 * Works the same as the Its command with added navigation for map and lists.
 ----------------------------------------------------------------
 
-	Element path    word .        * node path
-	Element actor   ref Actor check what to do
-	Element args    text .        * arg data value
+	Element path    word .     + node path
+	Element actor   ref  Actor + what to do
+	Element attr    word .     * what to check
+	Element eq      word .     * to equal
+	Element value   text .     * this
+	Element args    text .     * arg data value
 	
 -Ref actor Actor check
 
@@ -214,9 +208,7 @@ Comp Replace parent Actor
 ----------------------------------------------------------------
 	
 	Element path     word . * node path where to add
-	Element pad      word . * padding (with)
 	Element with     word . * what to replace with
-	Element pad2     word . * padding (match)
 	Element match    text . * string match pattern
 
 

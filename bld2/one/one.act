@@ -8,7 +8,7 @@ Actor { name = all }
 
 C { desc = "hi ${ops_id} x ${data}" }
 
-Its { what = data actor = try }
+Its { what = data actor = try attr = ._type eq = "=" value = List }
 
 // -----------------------------
 Actor { name = try }
@@ -20,12 +20,18 @@ This { path = . actor = try2 }
 // -----------------------------
 Actor { name = try2 }
 
-C { desc = "${._type} ${._key} ${.}" }
+C { desc = "${._type} ${._key} ${.} z" }
 
-This { path = . actor = try3 }
+This { path = . actor = try3_float attr = ._type eq = "=" value = float64  }
+This { path = . actor = try3_bool attr = ._type eq = "=" value = bool }
 
 // -----------------------------
-Actor { name = try3 }
+Actor { name = try3_bool }
 
-C { desc = "${._type} ${._key} ${.}" }
+C { desc = "${._type} ${._key} ${.} - bool" }
+
+// -----------------------------
+Actor { name = try3_float }
+
+C { desc = "${._type} ${._key} ${.} - float" }
 

@@ -2007,76 +2007,6 @@ func (me KpOpt) DoIts(glob *GlobT, va []string, lno string) int {
 	return(0)
 }
 
-type KpFunc struct {
-	Kp
-	Me int
-	MyName string
-	Parent string
-	LineNo string
-	Comp string
-	Flags [] string
-	Names map[string]any
-}
-
-func (me KpFunc) TypeName() string {
-    return me.Comp
-}
-func (me KpFunc) GetLineNo() string {
-	return me.LineNo
-}
-
-func loadFunc(act *ActT, ln string, pos int, lno string, flag []string, names map[string]any) int {
-	st := new(KpFunc)
-	st.Names = names
-	st.MyName = ""
-	st.Parent = ""
-	st.Me = len(act.ApFunc)
-	st.LineNo = lno
-	st.Comp = "Func";
-	st.Flags = flag;
-	st.Names["kComp"] = st.Comp
-	st.Names["kMe"] = strconv.Itoa(st.Me)
-	st.Names["_lno"] = lno
-	name,_ := st.Names["name"].(string)
-	st.Names["_key"] = "name"
-	act.index["Func_" + name] = st.Me;
-	st.MyName = name
-	act.ApFunc = append(act.ApFunc, st)
-	return 0
-}
-
-func (me KpFunc) GetVar(glob *GlobT, va []string, lno string) (bool, interface{}) {
-	if va[0] == "previous" { // act.unit:2, go-struct-rio.act:228
-		if (me.Me > 0 && len(va) > 1) {
-			return( glob.Dats.ApFunc[ me.Me - 1 ].GetVar(glob, va[1:], lno) )
-		}
-	}
-	if len(va) > 1 {
-		msg := fmt.Sprintf("?%s.?:%s,%s,Func > act.unit:2, go-struct-rio.act:235?", va[0], lno, me.LineNo)
-		return false, msg
-	}
-	if va[0] == "payload" {
-		tmp := maps.Clone(me.Names)
-		delete(tmp, "kMe")
-		delete(tmp, "kComp")
-		jsonData, _ := json.MarshalIndent(tmp, "   ", "  ")
-		return true, string(jsonData)
-	}
-	r := me.Names[va[0]]
-	if r == nil { 
-		rr := fmt.Sprintf("?%s?:%s,%s,Func > act.unit:2, go-struct-rio.act:247?", va[0], lno, me.LineNo) 
-		return false,rr
-	}
-	rr := me.Names[va[0]]
-	return true,rr
-}
-
-func (me KpFunc) DoIts(glob *GlobT, va []string, lno string) int {
-	        fmt.Printf("?No its %s for Func %s,%s > act.unit:2, go-struct-rio.act:273?", va[0], lno, me.LineNo)
-		glob.RunErrs += 1
-	return(0)
-}
-
 type KpActor struct {
 	Kp
 	Me int
@@ -2123,7 +2053,7 @@ func loadActor(act *ActT, ln string, pos int, lno string, flag []string, names m
 func (me KpActor) GetVar(glob *GlobT, va []string, lno string) (bool, interface{}) {
 	r := me.Names[va[0]]
 	if r == nil { 
-		rr := fmt.Sprintf("?%s?:%s,%s,Actor > act.unit:17, go-struct-rio.act:77?", va[0], lno, me.LineNo) 
+		rr := fmt.Sprintf("?%s?:%s,%s,Actor > act.unit:2, go-struct-rio.act:77?", va[0], lno, me.LineNo) 
 		return false,rr
 	}
 	rr := cnv( me.Names[va[0]] )
@@ -2155,6 +2085,9 @@ type KpAll struct {
 	Kparentp int
 	Kwhat string
 	Kactor string
+	Kattr string
+	Keq string
+	Kvalue string
 	Kargs string
 	Kactorp int
 }
@@ -2177,6 +2110,9 @@ func loadAll(act *ActT, ln string, pos int, lno string, flag []string, names map
 	st.Flags = flag;
 	st.Kwhat = cnv( st.Names["what"] )
 	st.Kactor = cnv( st.Names["actor"] )
+	st.Kattr = cnv( st.Names["attr"] )
+	st.Keq = cnv( st.Names["eq"] )
+	st.Kvalue = cnv( st.Names["value"] )
 	st.Kargs = cnv( st.Names["args"] )
 	st.Kactorp = -1
 	st.Kparentp = len(act.ApActor)-1;
@@ -2193,7 +2129,7 @@ func loadAll(act *ActT, ln string, pos int, lno string, flag []string, names map
 func (me KpAll) GetVar(glob *GlobT, va []string, lno string) (bool, interface{}) {
 	r := me.Names[va[0]]
 	if r == nil { 
-		rr := fmt.Sprintf("?%s?:%s,%s,All > act.unit:42, go-struct-rio.act:152?", va[0], lno, me.LineNo) 
+		rr := fmt.Sprintf("?%s?:%s,%s,All > act.unit:27, go-struct-rio.act:152?", va[0], lno, me.LineNo) 
 		return false,rr
 	}
 	rr := cnv( me.Names[va[0]] )
@@ -2213,6 +2149,9 @@ type KpDu struct {
 	Names map[string]any
 	Kparentp int
 	Kactor string
+	Kattr string
+	Keq string
+	Kvalue string
 	Kargs string
 	Kactorp int
 }
@@ -2234,6 +2173,9 @@ func loadDu(act *ActT, ln string, pos int, lno string, flag []string, names map[
 	st.Comp = "Du";
 	st.Flags = flag;
 	st.Kactor = cnv( st.Names["actor"] )
+	st.Kattr = cnv( st.Names["attr"] )
+	st.Keq = cnv( st.Names["eq"] )
+	st.Kvalue = cnv( st.Names["value"] )
 	st.Kargs = cnv( st.Names["args"] )
 	st.Kactorp = -1
 	st.Kparentp = len(act.ApActor)-1;
@@ -2250,7 +2192,7 @@ func loadDu(act *ActT, ln string, pos int, lno string, flag []string, names map[
 func (me KpDu) GetVar(glob *GlobT, va []string, lno string) (bool, interface{}) {
 	r := me.Names[va[0]]
 	if r == nil { 
-		rr := fmt.Sprintf("?%s?:%s,%s,Du > act.unit:55, go-struct-rio.act:152?", va[0], lno, me.LineNo) 
+		rr := fmt.Sprintf("?%s?:%s,%s,Du > act.unit:43, go-struct-rio.act:152?", va[0], lno, me.LineNo) 
 		return false,rr
 	}
 	rr := cnv( me.Names[va[0]] )
@@ -2307,7 +2249,7 @@ func loadNew(act *ActT, ln string, pos int, lno string, flag []string, names map
 func (me KpNew) GetVar(glob *GlobT, va []string, lno string) (bool, interface{}) {
 	r := me.Names[va[0]]
 	if r == nil { 
-		rr := fmt.Sprintf("?%s?:%s,%s,New > act.unit:67, go-struct-rio.act:152?", va[0], lno, me.LineNo) 
+		rr := fmt.Sprintf("?%s?:%s,%s,New > act.unit:58, go-struct-rio.act:152?", va[0], lno, me.LineNo) 
 		return false,rr
 	}
 	rr := cnv( me.Names[va[0]] )
@@ -2360,7 +2302,7 @@ func loadRefs(act *ActT, ln string, pos int, lno string, flag []string, names ma
 func (me KpRefs) GetVar(glob *GlobT, va []string, lno string) (bool, interface{}) {
 	r := me.Names[va[0]]
 	if r == nil { 
-		rr := fmt.Sprintf("?%s?:%s,%s,Refs > act.unit:77, go-struct-rio.act:152?", va[0], lno, me.LineNo) 
+		rr := fmt.Sprintf("?%s?:%s,%s,Refs > act.unit:68, go-struct-rio.act:152?", va[0], lno, me.LineNo) 
 		return false,rr
 	}
 	rr := cnv( me.Names[va[0]] )
@@ -2417,7 +2359,7 @@ func loadVar(act *ActT, ln string, pos int, lno string, flag []string, names map
 func (me KpVar) GetVar(glob *GlobT, va []string, lno string) (bool, interface{}) {
 	r := me.Names[va[0]]
 	if r == nil { 
-		rr := fmt.Sprintf("?%s?:%s,%s,Var > act.unit:85, go-struct-rio.act:152?", va[0], lno, me.LineNo) 
+		rr := fmt.Sprintf("?%s?:%s,%s,Var > act.unit:76, go-struct-rio.act:152?", va[0], lno, me.LineNo) 
 		return false,rr
 	}
 	rr := cnv( me.Names[va[0]] )
@@ -2438,6 +2380,9 @@ type KpIts struct {
 	Kparentp int
 	Kwhat string
 	Kactor string
+	Kattr string
+	Keq string
+	Kvalue string
 	Kargs string
 	Kactorp int
 }
@@ -2460,6 +2405,9 @@ func loadIts(act *ActT, ln string, pos int, lno string, flag []string, names map
 	st.Flags = flag;
 	st.Kwhat = cnv( st.Names["what"] )
 	st.Kactor = cnv( st.Names["actor"] )
+	st.Kattr = cnv( st.Names["attr"] )
+	st.Keq = cnv( st.Names["eq"] )
+	st.Kvalue = cnv( st.Names["value"] )
 	st.Kargs = cnv( st.Names["args"] )
 	st.Kactorp = -1
 	st.Kparentp = len(act.ApActor)-1;
@@ -2476,7 +2424,7 @@ func loadIts(act *ActT, ln string, pos int, lno string, flag []string, names map
 func (me KpIts) GetVar(glob *GlobT, va []string, lno string) (bool, interface{}) {
 	r := me.Names[va[0]]
 	if r == nil { 
-		rr := fmt.Sprintf("?%s?:%s,%s,Its > act.unit:95, go-struct-rio.act:152?", va[0], lno, me.LineNo) 
+		rr := fmt.Sprintf("?%s?:%s,%s,Its > act.unit:86, go-struct-rio.act:152?", va[0], lno, me.LineNo) 
 		return false,rr
 	}
 	rr := cnv( me.Names[va[0]] )
@@ -2529,7 +2477,7 @@ func loadC(act *ActT, ln string, pos int, lno string, flag []string, names map[s
 func (me KpC) GetVar(glob *GlobT, va []string, lno string) (bool, interface{}) {
 	r := me.Names[va[0]]
 	if r == nil { 
-		rr := fmt.Sprintf("?%s?:%s,%s,C > act.unit:108, go-struct-rio.act:152?", va[0], lno, me.LineNo) 
+		rr := fmt.Sprintf("?%s?:%s,%s,C > act.unit:102, go-struct-rio.act:152?", va[0], lno, me.LineNo) 
 		return false,rr
 	}
 	rr := cnv( me.Names[va[0]] )
@@ -2582,7 +2530,7 @@ func loadCs(act *ActT, ln string, pos int, lno string, flag []string, names map[
 func (me KpCs) GetVar(glob *GlobT, va []string, lno string) (bool, interface{}) {
 	r := me.Names[va[0]]
 	if r == nil { 
-		rr := fmt.Sprintf("?%s?:%s,%s,Cs > act.unit:116, go-struct-rio.act:152?", va[0], lno, me.LineNo) 
+		rr := fmt.Sprintf("?%s?:%s,%s,Cs > act.unit:110, go-struct-rio.act:152?", va[0], lno, me.LineNo) 
 		return false,rr
 	}
 	rr := cnv( me.Names[va[0]] )
@@ -2602,7 +2550,6 @@ type KpOut struct {
 	Names map[string]any
 	Kparentp int
 	Kwhat string
-	Kpad string
 	Kdesc string
 }
 
@@ -2623,7 +2570,6 @@ func loadOut(act *ActT, ln string, pos int, lno string, flag []string, names map
 	st.Comp = "Out";
 	st.Flags = flag;
 	st.Kwhat = cnv( st.Names["what"] )
-	st.Kpad = cnv( st.Names["pad"] )
 	st.Kdesc = cnv( st.Names["desc"] )
 	st.Kparentp = len(act.ApActor)-1;
 	if (st.Kparentp < 0 ) { 
@@ -2639,7 +2585,7 @@ func loadOut(act *ActT, ln string, pos int, lno string, flag []string, names map
 func (me KpOut) GetVar(glob *GlobT, va []string, lno string) (bool, interface{}) {
 	r := me.Names[va[0]]
 	if r == nil { 
-		rr := fmt.Sprintf("?%s?:%s,%s,Out > act.unit:124, go-struct-rio.act:152?", va[0], lno, me.LineNo) 
+		rr := fmt.Sprintf("?%s?:%s,%s,Out > act.unit:118, go-struct-rio.act:152?", va[0], lno, me.LineNo) 
 		return false,rr
 	}
 	rr := cnv( me.Names[va[0]] )
@@ -2692,7 +2638,7 @@ func loadIn(act *ActT, ln string, pos int, lno string, flag []string, names map[
 func (me KpIn) GetVar(glob *GlobT, va []string, lno string) (bool, interface{}) {
 	r := me.Names[va[0]]
 	if r == nil { 
-		rr := fmt.Sprintf("?%s?:%s,%s,In > act.unit:141, go-struct-rio.act:152?", va[0], lno, me.LineNo) 
+		rr := fmt.Sprintf("?%s?:%s,%s,In > act.unit:134, go-struct-rio.act:152?", va[0], lno, me.LineNo) 
 		return false,rr
 	}
 	rr := cnv( me.Names[va[0]] )
@@ -2712,7 +2658,6 @@ type KpBreak struct {
 	Names map[string]any
 	Kparentp int
 	Kwhat string
-	Kpad string
 	Kactor string
 	Kcheck string
 }
@@ -2734,7 +2679,6 @@ func loadBreak(act *ActT, ln string, pos int, lno string, flag []string, names m
 	st.Comp = "Break";
 	st.Flags = flag;
 	st.Kwhat = cnv( st.Names["what"] )
-	st.Kpad = cnv( st.Names["pad"] )
 	st.Kactor = cnv( st.Names["actor"] )
 	st.Kcheck = cnv( st.Names["check"] )
 	st.Kparentp = len(act.ApActor)-1;
@@ -2751,7 +2695,7 @@ func loadBreak(act *ActT, ln string, pos int, lno string, flag []string, names m
 func (me KpBreak) GetVar(glob *GlobT, va []string, lno string) (bool, interface{}) {
 	r := me.Names[va[0]]
 	if r == nil { 
-		rr := fmt.Sprintf("?%s?:%s,%s,Break > act.unit:149, go-struct-rio.act:152?", va[0], lno, me.LineNo) 
+		rr := fmt.Sprintf("?%s?:%s,%s,Break > act.unit:142, go-struct-rio.act:152?", va[0], lno, me.LineNo) 
 		return false,rr
 	}
 	rr := cnv( me.Names[va[0]] )
@@ -2770,7 +2714,6 @@ type KpAdd struct {
 	Flags [] string
 	Names map[string]any
 	Kparentp int
-	Kflags string
 	Kpath string
 	Kdata string
 }
@@ -2791,7 +2734,6 @@ func loadAdd(act *ActT, ln string, pos int, lno string, flag []string, names map
 	st.LineNo = lno
 	st.Comp = "Add";
 	st.Flags = flag;
-	st.Kflags = cnv( st.Names["flags"] )
 	st.Kpath = cnv( st.Names["path"] )
 	st.Kdata = cnv( st.Names["data"] )
 	st.Kparentp = len(act.ApActor)-1;
@@ -2808,7 +2750,7 @@ func loadAdd(act *ActT, ln string, pos int, lno string, flag []string, names map
 func (me KpAdd) GetVar(glob *GlobT, va []string, lno string) (bool, interface{}) {
 	r := me.Names[va[0]]
 	if r == nil { 
-		rr := fmt.Sprintf("?%s?:%s,%s,Add > act.unit:166, go-struct-rio.act:152?", va[0], lno, me.LineNo) 
+		rr := fmt.Sprintf("?%s?:%s,%s,Add > act.unit:158, go-struct-rio.act:152?", va[0], lno, me.LineNo) 
 		return false,rr
 	}
 	rr := cnv( me.Names[va[0]] )
@@ -2829,6 +2771,9 @@ type KpThis struct {
 	Kparentp int
 	Kpath string
 	Kactor string
+	Kattr string
+	Keq string
+	Kvalue string
 	Kargs string
 	Kactorp int
 }
@@ -2851,6 +2796,9 @@ func loadThis(act *ActT, ln string, pos int, lno string, flag []string, names ma
 	st.Flags = flag;
 	st.Kpath = cnv( st.Names["path"] )
 	st.Kactor = cnv( st.Names["actor"] )
+	st.Kattr = cnv( st.Names["attr"] )
+	st.Keq = cnv( st.Names["eq"] )
+	st.Kvalue = cnv( st.Names["value"] )
 	st.Kargs = cnv( st.Names["args"] )
 	st.Kactorp = -1
 	st.Kparentp = len(act.ApActor)-1;
@@ -2867,7 +2815,7 @@ func loadThis(act *ActT, ln string, pos int, lno string, flag []string, names ma
 func (me KpThis) GetVar(glob *GlobT, va []string, lno string) (bool, interface{}) {
 	r := me.Names[va[0]]
 	if r == nil { 
-		rr := fmt.Sprintf("?%s?:%s,%s,This > act.unit:194, go-struct-rio.act:152?", va[0], lno, me.LineNo) 
+		rr := fmt.Sprintf("?%s?:%s,%s,This > act.unit:185, go-struct-rio.act:152?", va[0], lno, me.LineNo) 
 		return false,rr
 	}
 	rr := cnv( me.Names[va[0]] )
@@ -2887,9 +2835,7 @@ type KpReplace struct {
 	Names map[string]any
 	Kparentp int
 	Kpath string
-	Kpad string
 	Kwith string
-	Kpad2 string
 	Kmatch string
 }
 
@@ -2910,9 +2856,7 @@ func loadReplace(act *ActT, ln string, pos int, lno string, flag []string, names
 	st.Comp = "Replace";
 	st.Flags = flag;
 	st.Kpath = cnv( st.Names["path"] )
-	st.Kpad = cnv( st.Names["pad"] )
 	st.Kwith = cnv( st.Names["with"] )
-	st.Kpad2 = cnv( st.Names["pad2"] )
 	st.Kmatch = cnv( st.Names["match"] )
 	st.Kparentp = len(act.ApActor)-1;
 	if (st.Kparentp < 0 ) { 
@@ -2928,7 +2872,7 @@ func loadReplace(act *ActT, ln string, pos int, lno string, flag []string, names
 func (me KpReplace) GetVar(glob *GlobT, va []string, lno string) (bool, interface{}) {
 	r := me.Names[va[0]]
 	if r == nil { 
-		rr := fmt.Sprintf("?%s?:%s,%s,Replace > act.unit:208, go-struct-rio.act:152?", va[0], lno, me.LineNo) 
+		rr := fmt.Sprintf("?%s?:%s,%s,Replace > act.unit:202, go-struct-rio.act:152?", va[0], lno, me.LineNo) 
 		return false,rr
 	}
 	rr := cnv( me.Names[va[0]] )

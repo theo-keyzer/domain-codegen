@@ -35,6 +35,10 @@ type WinT struct {
 	DataKeys []string
 	DataKey  string
 	DataType string
+	Attr     string
+	Eq       string
+	Val      string
+	ValOk    bool
 	CurAct   int
 	CurPos   int
 	OnPos    int
@@ -45,11 +49,15 @@ type WinT struct {
 	IsCheck  bool
 }
 
-func NewAct(glob *GlobT, actn, arg, flno string) {
+func NewAct(glob *GlobT, actn, arg, flno string, attr string, eq string, val string, valOk bool) {
 	winp := glob.Winp + 1
 	if len(glob.Wins) <= winp {
 		glob.Wins = append(glob.Wins, WinT{})
 	}
+	glob.Wins[winp].Attr = attr
+	glob.Wins[winp].Eq = eq
+	glob.Wins[winp].Val = val
+	glob.Wins[winp].ValOk = valOk
 	
 	glob.Wins[winp].Name = actn
 	glob.Wins[winp].DataKeys = []string{}
@@ -79,6 +87,20 @@ func GoAct(glob *GlobT, dat interface{}) (int) {
 	name := glob.Wins[winp].Name
 	prev := false
 	incCnt := true
+
+	if glob.Wins[winp].Attr != "" {
+		val := glob.Wins[winp].Val
+		valOk := glob.Wins[winp].ValOk
+		sc := strings.Split(glob.Wins[winp].Attr, ":")
+		va := strings.Split(sc[0], ".")
+		varOk, varv := sGetVar(glob, winp, sc, va, glob.Wins[winp].Flno)
+			
+		if !chk(glob, glob.Wins[winp].Eq, varv, val, prev, varOk, valOk, glob.Wins[winp].Flno) {
+			glob.Winp = winp - 1
+			return 0
+		}
+	}
+
 	
 	for i := 0; i < len(glob.Acts.ApActor); i++ {
 		if glob.Acts.ApActor[i].Kname != name {
@@ -193,7 +215,8 @@ func goCmds(glob *GlobT, ca, winp int) (int) {
 			
 		case *KpAll:
 			_, args := strs(glob, winp, c.Kargs, c.LineNo, true, true)
-			NewAct(glob, c.Kactor, args, c.LineNo)
+			valOk, val := strs(glob, winp, c.Kvalue, c.LineNo, true, true)
+			NewAct(glob, c.Kactor, args, c.LineNo, c.Kattr, c.Keq, val, valOk)
 			
 			_, what := strs(glob, winp, c.Kwhat, c.LineNo, true, true)
 			va := strings.Split(what, ".")
@@ -205,7 +228,8 @@ func goCmds(glob *GlobT, ca, winp int) (int) {
 			
 		case *KpThis:
 			_, args := strs(glob, winp, c.Kargs, c.LineNo, true, true)
-			NewAct(glob, c.Kactor, args, c.LineNo)
+			valOk, val := strs(glob, winp, c.Kvalue, c.LineNo, true, true)
+			NewAct(glob, c.Kactor, args, c.LineNo, c.Kattr, c.Keq, val, valOk)
 			ret := thisCmd(glob, winp, c, c.LineNo)
 			glob.Wins[winp].PrevCnt = glob.Wins[winp+1].Cnt + 1
 			if  ret > 1 || ret < 0 {
@@ -238,7 +262,8 @@ func goCmds(glob *GlobT, ca, winp int) (int) {
 			
 		case *KpDu:
 			_, args := strs(glob, winp, c.Kargs, c.LineNo, true, true)
-			NewAct(glob, c.Kactor, args, c.LineNo)
+			valOk, val := strs(glob, winp, c.Kvalue, c.LineNo, true, true)
+			NewAct(glob, c.Kactor, args, c.LineNo, c.Kattr, c.Keq, val, valOk)
 			glob.Wins[winp+1].Cnt = glob.Wins[winp].Cnt
 			glob.Wins[winp+1].PrevCnt = glob.Wins[winp].PrevCnt
 			glob.Wins[winp+1].DataKey = glob.Wins[winp].DataKey
@@ -251,7 +276,8 @@ func goCmds(glob *GlobT, ca, winp int) (int) {
 			
 		case *KpIts:
 			_, args := strs(glob, winp, c.Kargs, c.LineNo, true, true)
-			NewAct(glob, c.Kactor, args, c.LineNo)
+			valOk, val := strs(glob, winp, c.Kvalue, c.LineNo, true, true)
+			NewAct(glob, c.Kactor, args, c.LineNo, c.Kattr, c.Keq, val, valOk)
 			va := strings.Split(c.Kwhat, ".")
 			
 			if len(va[0]) == 0 && len(va) > 1 {

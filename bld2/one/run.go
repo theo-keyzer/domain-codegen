@@ -19,7 +19,6 @@ type ActT struct {
 	ApComp [] *KpComp
 	ApElement [] *KpElement
 	ApOpt [] *KpOpt
-	ApFunc [] *KpFunc
 	ApActor [] *KpActor
 	ApAll [] *KpAll
 	ApDu [] *KpDu
@@ -146,7 +145,7 @@ func refs(act *ActT) int {
 	}
 	for _, st := range act.ApAll {
 
-		err, res = fnd2(act, "Actor_" + st.Kactor, st.Kactor,  ".", st.LineNo, "act.unit:49, go-run-rio.act:169" );
+		err, res = fnd2(act, "Actor_" + st.Kactor, st.Kactor,  ".", st.LineNo, "act.unit:34, go-run-rio.act:169" );
 		st.Kactorp = res
 		if (err == false) {
 			errs += 1
@@ -154,7 +153,7 @@ func refs(act *ActT) int {
 	}
 	for _, st := range act.ApDu {
 
-		err, res = fnd2(act, "Actor_" + st.Kactor, st.Kactor,  ".", st.LineNo, "act.unit:61, go-run-rio.act:169" );
+		err, res = fnd2(act, "Actor_" + st.Kactor, st.Kactor,  ".", st.LineNo, "act.unit:49, go-run-rio.act:169" );
 		st.Kactorp = res
 		if (err == false) {
 			errs += 1
@@ -162,7 +161,7 @@ func refs(act *ActT) int {
 	}
 	for _, st := range act.ApIts {
 
-		err, res = fnd2(act, "Actor_" + st.Kactor, st.Kactor,  ".", st.LineNo, "act.unit:102, go-run-rio.act:169" );
+		err, res = fnd2(act, "Actor_" + st.Kactor, st.Kactor,  ".", st.LineNo, "act.unit:93, go-run-rio.act:169" );
 		st.Kactorp = res
 		if (err == false) {
 			errs += 1
@@ -170,7 +169,7 @@ func refs(act *ActT) int {
 	}
 	for _, st := range act.ApThis {
 
-		err, res = fnd2(act, "Actor_" + st.Kactor, st.Kactor,  ".", st.LineNo, "act.unit:202, go-run-rio.act:169" );
+		err, res = fnd2(act, "Actor_" + st.Kactor, st.Kactor,  ".", st.LineNo, "act.unit:193, go-run-rio.act:169" );
 		st.Kactorp = res
 		if (err == false) {
 			errs += 1
@@ -481,32 +480,6 @@ func DoAll(glob *GlobT, va []string, lno string) int {
 			return(0)
 		}
 		for _, st := range glob.Dats.ApOpt {
-			if len(va) > 2 {
-				ret := st.DoIts(glob, va[2:], lno)
-				if ret != 0 {
-					return(ret)
-				}
-				continue
-			}
-			ret := GoAct(glob, st)
-			if ret != 0 {
-				return(ret)
-			}
-		}
-		return(0)
-	}
-	if va[0] == "Func" {
-		if (len(va) > 1 && len(va[1]) > 0) {
-			en, er := glob.Dats.index["Func_" + va[1] ];
-			if !er {
-				if len(va) > 2 {
-					return( glob.Dats.ApFunc[en].DoIts(glob, va[2:], lno) )
-				}
-				return( GoAct(glob, glob.Dats.ApFunc[en]) )
-			}
-			return(0)
-		}
-		for _, st := range glob.Dats.ApFunc {
 			if len(va) > 2 {
 				ret := st.DoIts(glob, va[2:], lno)
 				if ret != 0 {
@@ -936,7 +909,6 @@ func Loadh(act *ActT, toks string, ln string, pos int, lno string, nm map[string
 	if tok == "Comp" { errs += loadComp(act,ln,pos,lno,flag,nm) }
 	if tok == "Element" { errs += loadElement(act,ln,pos,lno,flag,nm) }
 	if tok == "Opt" { errs += loadOpt(act,ln,pos,lno,flag,nm) }
-	if tok == "Func" { errs += loadFunc(act,ln,pos,lno,flag,nm) }
 	if tok == "Actor" { errs += loadActor(act,ln,pos,lno,flag,nm) }
 	if tok == "All" { errs += loadAll(act,ln,pos,lno,flag,nm) }
 	if tok == "Du" { errs += loadDu(act,ln,pos,lno,flag,nm) }

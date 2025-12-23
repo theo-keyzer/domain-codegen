@@ -65,7 +65,7 @@ func main() {
 		for i, arg := range args {
 			kp.Names[fmt.Sprint(i)] = arg
 		}
-		NewAct(glob, glob.Acts.ApActor[0].Kname, "", "run:1")
+		NewAct(glob, glob.Acts.ApActor[0].Kname, "", "run:1", "", "", "", true)
 		GoAct(glob, kp)
 	}
 
