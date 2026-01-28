@@ -1,0 +1,136 @@
+# MRL Test Examples
+
+## Important: Enter each line separately in the REPL
+
+The interpreter evaluates each line as a complete program. Variables persist across lines.
+
+## Basic Binding and Output
+
+```
+(@b ?x ← 5)
+```
+Then:
+```
+(@o ?x)
+```
+
+## Working with Lists
+
+```
+(@b ?nums ← [1 2 3 4 5])
+```
+Then:
+```
+(@filter ?nums (> ?it 2))
+```
+
+## Defining Functions
+
+```
+(@def add [?a ?b] (+ ?a ?b))
+```
+Then:
+```
+(add 3 4)
+```
+
+## Complete Example Session
+
+```
+mrl> (@b ?x ← 5)
+→ 5
+
+mrl> (@b ?y ← 10)
+→ 10
+
+mrl> (@o (+ ?x ?y))
+OUTPUT: 15
+→ 15
+
+mrl> (@b ?nums ← [1 2 3 4 5])
+→ [1 2 3 4 5]
+
+mrl> (@filter ?nums (> ?it 2))
+→ [3 4 5]
+
+mrl> (@def double [?x] (* ?x 2))
+→ <fn:double([?x])>
+
+mrl> (double 7)
+→ 14
+
+mrl> (@def greet [?name] (@o (+ "Hello, " ?name)))
+→ <fn:greet([?name])>
+
+mrl> (greet "Alice")
+OUTPUT: Hello, Alice
+→ Hello, Alice
+```
+
+## Dictionary Examples
+
+```
+mrl> (@b ?user ← {name: "Bob" age: 30})
+→ {name:Bob age:30}
+
+mrl> (@g ?user "name")
+→ Bob
+```
+
+## Conditional Logic
+
+```
+mrl> (@b ?score ← 85)
+→ 85
+
+mrl> (@i (> ?score 80) (@o "Pass") (@o "Fail"))
+OUTPUT: Pass
+→ Pass
+```
+
+## Map and Filter
+
+```
+mrl> (@b ?data ← [1 2 3 4 5])
+→ [1 2 3 4 5]
+
+mrl> (@map ?data (* ?it 2))
+→ [2 4 6 8 10]
+
+mrl> (@filter ?data (> ?it 3))
+→ [4 5]
+```
+
+## Error Handling
+
+```
+mrl> (@t (/ 10 0) "Error occurred")
+ERROR: division by zero
+
+mrl> (@b ?result ← (@t (/ 10 2) "Error"))
+→ 5
+```
+
+## Web Search (stub)
+
+```
+mrl> (@w "quantum computing")
+→ [web: searching for 'quantum computing']
+```
+
+## Multiple Expressions on One Line
+
+You can write multiple expressions on one line, and they'll all execute, but only the last result is shown:
+
+```
+mrl> (@b ?x ← 5) (@b ?y ← 10) (@o (+ ?x ?y))
+OUTPUT: 15
+→ 15
+```
+
+However, if any expression fails, execution stops:
+
+```
+mrl> (@b ?x ← 5) (@b ?bad ← ?undefined) (@o ?x)
+ERROR: unbound variable: ?undefined
+```
