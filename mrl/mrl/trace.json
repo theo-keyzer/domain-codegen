@@ -1,0 +1,643 @@
+{
+  "trace_id": "ep_buoy_001",
+  "spec_version": "mrl-trace-1.0",
+  "created_at": "2026-02-01T12:44:33Z",
+  "task": {
+    "domain": "classical_physics_fluids",
+    "type": "derived_quantity_calculation",
+    "risk_level": "medium"
+  },
+  "outcome": "accepted",
+  "summary": {
+    "final_answer": "9.8 N upward",
+    "confidence": 0.79
+  },
+  "steps": [
+    {
+      "step": 1,
+      "op": "@trace",
+      "args": [
+        "@trace begin"
+      ],
+      "scope": 0,
+      "effects": [
+        "trace:lifecycle"
+      ],
+      "tags": [
+        "control_flow"
+      ]
+    },
+    {
+      "step": 2,
+      "op": "@coh",
+      "args": [
+        "@coh update",
+        "initial setup: cube parameters known"
+      ],
+      "scope": 0,
+      "effects": [
+        "coherence:update"
+      ],
+      "tags": [
+        "coherence"
+      ]
+    },
+    {
+      "step": 3,
+      "op": "@b",
+      "args": [
+        "@b ?goal"
+      ],
+      "scope": 0,
+      "effects": [
+        "bind:?goal"
+      ],
+      "tags": [
+        "binding"
+      ]
+    },
+    {
+      "step": 4,
+      "op": "@b",
+      "args": [
+        "@b ?side"
+      ],
+      "scope": 0,
+      "effects": [
+        "bind:?side"
+      ],
+      "tags": [
+        "binding"
+      ]
+    },
+    {
+      "step": 5,
+      "op": "@scope",
+      "args": [
+        "@scope enter"
+      ],
+      "scope": 1,
+      "effects": [
+        "scope:push"
+      ],
+      "tags": [
+        "scoping"
+      ]
+    },
+    {
+      "step": 6,
+      "op": "@b",
+      "args": [
+        "@b ?side"
+      ],
+      "scope": 1,
+      "effects": [
+        "bind:?side"
+      ],
+      "tags": [
+        "binding"
+      ]
+    },
+    {
+      "step": 7,
+      "op": "@scope_exit",
+      "args": [
+        "@scope exit"
+      ],
+      "scope": 1,
+      "effects": [
+        "scope:pop"
+      ],
+      "tags": [
+        "scoping"
+      ]
+    },
+    {
+      "step": 8,
+      "op": "@call",
+      "args": [
+        "log"
+      ],
+      "scope": 0,
+      "effects": [
+        "tool:invoke"
+      ],
+      "tags": [
+        "tool_use"
+      ]
+    },
+    {
+      "step": 9,
+      "op": "@result",
+      "args": [
+        "log"
+      ],
+      "scope": 0,
+      "effects": [
+        "tool:resolve"
+      ],
+      "tags": [
+        "tool_use"
+      ]
+    },
+    {
+      "step": 10,
+      "op": "@b",
+      "args": [
+        "@b ?archimedes"
+      ],
+      "scope": 0,
+      "effects": [
+        "bind:?archimedes"
+      ],
+      "tags": [
+        "binding"
+      ]
+    },
+    {
+      "step": 11,
+      "op": "@coh",
+      "args": [
+        "@coh update",
+        "Canonical principle retrieved"
+      ],
+      "scope": 0,
+      "effects": [
+        "coherence:update"
+      ],
+      "tags": [
+        "coherence"
+      ]
+    },
+    {
+      "step": 12,
+      "op": "@call",
+      "args": [
+        "math:pow"
+      ],
+      "scope": 0,
+      "effects": [
+        "tool:invoke"
+      ],
+      "tags": [
+        "tool_use"
+      ]
+    },
+    {
+      "step": 13,
+      "op": "@result",
+      "args": [
+        "math:pow"
+      ],
+      "scope": 0,
+      "effects": [
+        "tool:resolve"
+      ],
+      "tags": [
+        "tool_use"
+      ]
+    },
+    {
+      "step": 14,
+      "op": "@b",
+      "args": [
+        "@b ?volume"
+      ],
+      "scope": 0,
+      "effects": [
+        "bind:?volume"
+      ],
+      "tags": [
+        "binding"
+      ]
+    },
+    {
+      "step": 15,
+      "op": "@coh",
+      "args": [
+        "@coh update",
+        "Concrete geometric quantity added"
+      ],
+      "scope": 0,
+      "effects": [
+        "coherence:update"
+      ],
+      "tags": [
+        "coherence"
+      ]
+    },
+    {
+      "step": 16,
+      "op": "@i",
+      "args": [
+        "@i evaluating condition"
+      ],
+      "scope": 0,
+      "effects": [
+        "eval"
+      ],
+      "tags": [
+        "control_flow"
+      ]
+    },
+    {
+      "step": 17,
+      "op": "@refl",
+      "args": [
+        "@refl",
+        "incomplete_parameters",
+        "Retrieve fluid density before computing force"
+      ],
+      "scope": 0,
+      "effects": [
+        "strategy:pivot"
+      ],
+      "tags": [
+        "completeness_guard"
+      ]
+    },
+    {
+      "step": 18,
+      "op": "@b",
+      "args": [
+        "@b ?rho"
+      ],
+      "scope": 0,
+      "effects": [
+        "bind:?rho"
+      ],
+      "tags": [
+        "binding"
+      ]
+    },
+    {
+      "step": 19,
+      "op": "@coh",
+      "args": [
+        "@coh update",
+        "Missing constant supplied (completeness guard)"
+      ],
+      "scope": 0,
+      "effects": [
+        "coherence:update"
+      ],
+      "tags": [
+        "coherence"
+      ]
+    },
+    {
+      "step": 20,
+      "op": "@b",
+      "args": [
+        "@b ?g"
+      ],
+      "scope": 0,
+      "effects": [
+        "bind:?g"
+      ],
+      "tags": [
+        "binding"
+      ]
+    },
+    {
+      "step": 21,
+      "op": "@call",
+      "args": [
+        "math:multiply"
+      ],
+      "scope": 0,
+      "effects": [
+        "tool:invoke"
+      ],
+      "tags": [
+        "tool_use"
+      ]
+    },
+    {
+      "step": 22,
+      "op": "@result",
+      "args": [
+        "math:multiply"
+      ],
+      "scope": 0,
+      "effects": [
+        "tool:resolve"
+      ],
+      "tags": [
+        "tool_use"
+      ]
+    },
+    {
+      "step": 23,
+      "op": "@call",
+      "args": [
+        "math:round"
+      ],
+      "scope": 0,
+      "effects": [
+        "tool:invoke"
+      ],
+      "tags": [
+        "tool_use"
+      ]
+    },
+    {
+      "step": 24,
+      "op": "@result",
+      "args": [
+        "math:round"
+      ],
+      "scope": 0,
+      "effects": [
+        "tool:resolve"
+      ],
+      "tags": [
+        "tool_use"
+      ]
+    },
+    {
+      "step": 25,
+      "op": "@b",
+      "args": [
+        "@b ?F_b"
+      ],
+      "scope": 0,
+      "effects": [
+        "bind:?F_b"
+      ],
+      "tags": [
+        "binding"
+      ]
+    },
+    {
+      "step": 26,
+      "op": "@coh",
+      "args": [
+        "@coh update",
+        "Dimensional consistency verified — final value reached"
+      ],
+      "scope": 0,
+      "effects": [
+        "coherence:update"
+      ],
+      "tags": [
+        "coherence"
+      ]
+    },
+    {
+      "step": 27,
+      "op": "@call",
+      "args": [
+        "math:multiply"
+      ],
+      "scope": 0,
+      "effects": [
+        "tool:invoke"
+      ],
+      "tags": [
+        "tool_use"
+      ]
+    },
+    {
+      "step": 28,
+      "op": "@result",
+      "args": [
+        "math:multiply"
+      ],
+      "scope": 0,
+      "effects": [
+        "tool:resolve"
+      ],
+      "tags": [
+        "tool_use"
+      ]
+    },
+    {
+      "step": 29,
+      "op": "@call",
+      "args": [
+        "math:multiply"
+      ],
+      "scope": 0,
+      "effects": [
+        "tool:invoke"
+      ],
+      "tags": [
+        "tool_use"
+      ]
+    },
+    {
+      "step": 30,
+      "op": "@result",
+      "args": [
+        "math:multiply"
+      ],
+      "scope": 0,
+      "effects": [
+        "tool:resolve"
+      ],
+      "tags": [
+        "tool_use"
+      ]
+    },
+    {
+      "step": 31,
+      "op": "@i",
+      "args": [
+        "@i evaluating condition"
+      ],
+      "scope": 0,
+      "effects": [
+        "eval"
+      ],
+      "tags": [
+        "control_flow"
+      ]
+    },
+    {
+      "step": 32,
+      "op": "@coh",
+      "args": [
+        "@coh update",
+        "Cross-validation: two independent calculations agree"
+      ],
+      "scope": 0,
+      "effects": [
+        "coherence:update"
+      ],
+      "tags": [
+        "coherence"
+      ]
+    },
+    {
+      "step": 33,
+      "op": "@o",
+      "args": [
+        "@o final answer produced"
+      ],
+      "scope": 0,
+      "effects": [
+        "output:seal"
+      ],
+      "tags": [
+        "final_output"
+      ]
+    },
+    {
+      "step": 34,
+      "op": "@trace",
+      "args": [
+        "@trace sealed"
+      ],
+      "scope": 0,
+      "effects": [
+        "trace:lifecycle"
+      ],
+      "tags": [
+        "control_flow"
+      ]
+    },
+    {
+      "step": 35,
+      "op": "@meta:distill",
+      "args": [
+        "@meta:distill enter"
+      ],
+      "scope": 0,
+      "effects": [
+        "meta:distill"
+      ],
+      "tags": [
+        "meta_reasoning"
+      ]
+    },
+    {
+      "step": 36,
+      "op": "@meta:distill",
+      "args": [
+        "@meta:distill complete"
+      ],
+      "scope": 0,
+      "effects": [
+        "meta:distill"
+      ],
+      "tags": [
+        "meta_reasoning"
+      ]
+    }
+  ],
+  "coherence_trajectory": {
+    "initial": {
+      "l": 0.75,
+      "p": 0.15,
+      "c": 0.3
+    },
+    "updates": [
+      {
+        "step": 1,
+        "delta": {
+          "l": 0.25,
+          "p": 0.15,
+          "c": 0.3
+        },
+        "reason": "initial setup: cube parameters known",
+        "evidence": [
+          "problem_parameters"
+        ]
+      },
+      {
+        "step": 10,
+        "delta": {
+          "l": 0.07000000000000006,
+          "p": 0.15,
+          "c": 0.14999999999999997
+        },
+        "reason": "Canonical principle retrieved",
+        "evidence": [
+          "archimedes_principle"
+        ]
+      },
+      {
+        "step": 14,
+        "delta": {
+          "l": 0.030000000000000027,
+          "p": 0.14999999999999997
+        },
+        "reason": "Concrete geometric quantity added",
+        "evidence": [
+          "volume_calculation"
+        ]
+      },
+      {
+        "step": 18,
+        "delta": {
+          "l": 0.030000000000000027,
+          "c": 0.25
+        },
+        "reason": "Missing constant supplied (completeness guard)",
+        "evidence": [
+          "water_density",
+          "completeness_guard"
+        ]
+      },
+      {
+        "step": 25,
+        "delta": {
+          "l": 0.040000000000000036,
+          "p": 0.19999999999999996
+        },
+        "reason": "Dimensional consistency verified — final value reached",
+        "evidence": [
+          "unit_check"
+        ]
+      },
+      {
+        "step": 31,
+        "delta": {
+          "c": 0.09999999999999998
+        },
+        "reason": "Cross-validation: two independent calculations agree",
+        "evidence": [
+          "cross_validation"
+        ]
+      }
+    ],
+    "final": {
+      "l": 0.9200000000000002,
+      "p": 0.6499999999999999,
+      "c": 0.7999999999999999
+    }
+  },
+  "meta": {
+    "distillation": {
+      "attempted": true,
+      "mode": "success",
+      "depth": 1,
+      "produced": [
+        "completeness_guard",
+        "constant_retrieval",
+        "dimensional_calc"
+      ]
+    },
+    "budgets": {
+      "meta_depth_used": 1,
+      "meta_depth_max": 3,
+      "meta_token_ratio": 0.029411764705882353
+    }
+  },
+  "signatures": {
+    "certificate": {
+      "trace_id": "ep_buoy_001",
+      "verdict": "valid",
+      "certificate_version": "cc-1.0",
+      "checks": {
+        "coherence_sanity": "pass",
+        "meta_budget": "pass",
+        "outcome_gate": "pass",
+        "scope_integrity": "pass"
+      },
+      "flags": [],
+      "risk_score": 0
+    }
+  }
+}
